@@ -18,6 +18,8 @@ var notesInQueue = [];      // the notes that have been put into the web audio,
                             // and may or may not have played yet. {note, time}
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
+var mainGainNode; // testing
+var mainGain = 0.5; // init
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){
@@ -54,7 +56,10 @@ function scheduleNote( beatNumber, time ) {
 
     // create an oscillator
     var osc = audioContext.createOscillator();
-    osc.connect( audioContext.destination );
+//     osc.connect( audioContext.destination );
+    
+    osc.connect( mainGainNode );
+    
     if (beatNumber % 16 === 0)    // beat 0 == low pitch
         osc.frequency.value = 880.0;
     else if (beatNumber % 4 === 0 )    // quarter notes = medium pitch
@@ -123,6 +128,12 @@ function draw() {
     requestAnimFrame(draw);
 }
 
+
+function setMainGain(val){
+    mainGainNode.gain.value = val;
+}
+
+
 function init(){
     var container = document.createElement( 'div' );
 
@@ -146,6 +157,10 @@ function init(){
     audioContext = new AudioContext();
 
     // if we wanted to load audio files, etc., this is where we should do it.
+    
+    mainGainNode = audioContext.createGain();
+    setMainGain(mainGain); // init
+    mainGainNode.connect( audioContext.destination );
 
     window.onorientationchange = resetCanvas;
     window.onresize = resetCanvas;
