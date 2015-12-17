@@ -140,6 +140,8 @@ function init(){
     // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
     // TO WORK ON CURRENT CHROME!!  But this means our code can be properly
     // spec-compliant, and work on Chrome, Safari and Firefox.
+    
+    // swit-ch: forked it too to link locally (offline)
 
     audioContext = new AudioContext();
 
