@@ -3,22 +3,21 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
-    <title>Metronome</title>
+    <title>Metronome swit-ch testing</title>
     <link rel="stylesheet" href="css/main.css">
     
     <style type="text/css">
       #github {
         position: absolute; top: -5px; right: 15px;
       }
-      input {
+      input[type="range"] {
          height: 20px; width: 200px;
       }
     </style>
-    
-   <!--  <script src="http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
-    
-    <script src="../AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> 
-    
+    <!-- <script src="http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
+    <!-- <script src="../AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
+    <script src="js/AudioContextMonkeyPatch.js"></script> 
+        
     <script src="js/metronome.js"></script>
   </head>
   <body>
@@ -26,31 +25,124 @@
     <a id="github" href="https://github.com/cwilso/metronome" >Fork me on GitHub</a>
     </span>
     <div id="controls">
-      <div><a class="play" onclick="this.innerText = play();">play</a></div>
-      <div id="tempoBox">Tempo: <span id="showTempo">120</span>BPM <input id="tempo" type="range" min="30.0" max="160.0" step="1" value="120"></div>
-      <div>Resolution:<select onchange="noteResolution = this.selectedIndex;"><option>16th notes<option>8th notes<option>Quarter notes</select></div>
-      
-      <div>Gain: 
-      <input type="range" id="gain" min="0" max="1" step="any" value="0.5">
+	<!--   play doesn't  work on iOS Safari ?!   -->
+     <div class="play" id="playCtl">play</div>
+      <div id="tempoBox">Tempo: <span id="showTempo">120</span>BPM <input id="tempoCtl" type="range"></div>      
+      <div>Resolution:<select id="resoCtl"><option>16th notes<option>8th notes<option>Quarter notes</select></div>
+      <div>Gain: <span id="showGain">0.5</span><input type="range" id="gainCtl">
       </div>
-      
     </div>
-    <script type="text/javascript">
+    <script type="text/javascript"> // forgot onclick, onchange, css type selector "range"
+      // change controller IDs to abcCtl to use as var names in js, _no_ b/c see:
+      // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
+      // range specs to code here
+      'use strict';
+      
+      var playCtl = document.getElementById('playCtl');
+      var tempoCtl = document.getElementById('tempoCtl');
+      var showTempo = document.getElementById('showTempo');
+      var resoCtl = document.getElementById('resoCtl');
+      var gainCtl = document.getElementById('gainCtl');
+      var showGain = document.getElementById('showGain');    
+    
+      var tempoSpec = {
+      	min: 30, max: 160, step: 1, value: 120
+      };
+      var gainSpec = {
+      	min: 0, max: 1, step: "any", value: 0.5
+      };
+      
+      // setAttribute any better ?
+      tempoCtl.min = tempoSpec.min;
+      tempoCtl.max = tempoSpec.max;
+      tempoCtl.step = tempoSpec.step;
+      tempoCtl.value = tempo = tempoSpec.value;
+      gainCtl.min = gainSpec.min;
+      gainCtl.max = gainSpec.max;
+      gainCtl.step = gainSpec.step;
+      gainCtl.value = gain = gainSpec.value;
+      
+      function togglePlay(){
+        var str = play();
+        playCtl.textContent = str;
+      }
+      function setTempo(bpm){
+        tempo = bpm;
+        showTempo.textContent = tempo;
+      }
+      function setGain(val){
+        setMainGain(val);
+        showGain.textContent = Math.round(gain * 100) / 100;;
+      }
+      
+      playCtl.addEventListener('click', togglePlay, false);
+      tempoCtl.addEventListener('input', function (event){
+        setTempo(event.target.value);
+      }, false);
+      resoCtl.addEventListener('change', function (event){
+        noteResolution = event.target.selectedIndex;
+     }, false);
+      gainCtl.addEventListener('input', function (event){
+        var val = event.target.value;
+        setGain(val);
+      }, false);
+    </script>
+<!-- 
+    <script type="text/javascript"> // forgot onclick, onchange, css type selector "range"
+      // change controller IDs to abcCtl to use as var names in js, _no_ b/c see:
+      // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
+      'use strict';
+      
+      var playCtl = document.getElementById('playCtl');
+      var tempoCtl = document.getElementById('tempoCtl');
+      var showTempo = document.getElementById('showTempo');
+      var resoCtl = document.getElementById('resoCtl');
+      var gainCtl = document.getElementById('gainCtl');
+      
+      playCtl.addEventListener('click', function (event){
+        event.target.textContent = play();
+      }, false);
+      tempoCtl.addEventListener('input', function (event){
+        tempo = event.target.value;
+        showTempo.textContent = tempo;
+      }, false);
+      resoCtl.addEventListener('change', function (event){
+//      console.log(this === event.target); // true
+        noteResolution = event.target.selectedIndex;
+     }, false);
+      gainCtl.addEventListener('input', function (event){
+        var val = event.target.value;
+        setMainGain(val);
+      }, false);
+    </script>
+ -->
+<!-- 
+    <script type="text/javascript"> // forgot onclick, onchange
+      var playCtl = document.getElementById('play');
       var tempoCtl = document.getElementById('tempo');
       var showTempo = document.getElementById('showTempo');
+      var resoCtl = document.getElementById('reso');
+      var gainCtl = document.getElementById('gain');
+      function playAction(event){
+        event.target.textContent = play();
+      }
       function tempoAction(event){
         tempo = event.target.value;
         showTempo.textContent = tempo;
-//        console.log(tempo);
       }
-      var gainCtl = document.getElementById('gain');
+     function resoAction(event){
+//      console.log(this === event.target); // true
+        noteResolution = event.target.selectedIndex;
+     }
       function gainAction(event){
         var val = event.target.value;
-//        console.log(val);
         setMainGain(val);
       }
+      playCtl.addEventListener('click', playAction, false);
       tempoCtl.addEventListener('input', tempoAction, false);
+      resoCtl.addEventListener('change', resoAction, false);
       gainCtl.addEventListener('input', gainAction, false);
     </script>
+ -->
    </body>
 </html>
