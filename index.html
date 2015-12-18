@@ -25,11 +25,11 @@
     <a id="github" href="https://github.com/cwilso/metronome" >Fork me on GitHub</a>
     </span>
     <div id="controls">
-	<!--   play doesn't  work on iOS Safari ?!   -->
+  <!--   play doesn't  work on iOS Safari ?!   -->
      <div class="play" id="playCtl">play</div>
-      <div id="tempoBox">Tempo: <span id="showTempo">120</span>BPM <input id="tempoCtl" type="range"></div>      
+      <div id="tempoBox">Tempo: <span id="showTempo"></span>BPM <input id="tempoCtl" type="range"></div>      
       <div>Resolution:<select id="resoCtl"><option>16th notes<option>8th notes<option>Quarter notes</select></div>
-      <div>Gain: <span id="showGain">0.5</span><input type="range" id="gainCtl">
+      <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl">
       </div>
     </div>
     <script type="text/javascript"> // forgot onclick, onchange, css type selector "range"
@@ -46,10 +46,10 @@
       var showGain = document.getElementById('showGain');    
     
       var tempoSpec = {
-      	min: 30, max: 160, step: 1, value: 120
+        min: 30, max: 160, step: 1, value: 120
       };
       var gainSpec = {
-      	min: 0, max: 1, step: "any", value: 0.5
+        min: 0, max: 1, step: "any", value: 0.5
       };
       
       // setAttribute any better ?
@@ -70,9 +70,12 @@
         tempo = bpm;
         showTempo.textContent = tempo;
       }
+      function updGainGUI(){
+        showGain.textContent = Math.round(gain * 100) / 100;
+      }
       function setGain(val){
         setMainGain(val);
-        showGain.textContent = Math.round(gain * 100) / 100;;
+        updGainGUI();
       }
       
       playCtl.addEventListener('click', togglePlay, false);
@@ -86,6 +89,11 @@
         var val = event.target.value;
         setGain(val);
       }, false);
+      
+      // init
+      setTempo(120);
+//       setGain(0.5); // too early
+      updGainGUI();
     </script>
    </body>
 </html>
