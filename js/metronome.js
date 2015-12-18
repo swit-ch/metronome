@@ -19,7 +19,7 @@ var notesInQueue = [];      // the notes that have been put into the web audio,
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
 var mainGainNode; // testing
-var gain = 0.5; // init
+var gain = 0.5; // tempo and gain defaults here!
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){

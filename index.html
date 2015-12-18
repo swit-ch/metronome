@@ -32,10 +32,12 @@
       <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl">
       </div>
     </div>
-    <script type="text/javascript"> // forgot onclick, onchange, css type selector "range"
-      // change controller IDs to abcCtl to use as var names in js, _no_ b/c see:
+    <script type="text/javascript"> 
+      
+      // initial tempo and gain defined in metronome.js
+      
+      // don't use html ele ID as var, see: 
       // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
-      // range specs to code here
       'use strict';
       
       var playCtl = document.getElementById('playCtl');
@@ -44,23 +46,23 @@
       var resoCtl = document.getElementById('resoCtl');
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');    
-    
+      
       var tempoSpec = {
-        min: 30, max: 160, step: 1, value: 120
+        min: 30, max: 160, step: 1, value: tempo
       };
       var gainSpec = {
-        min: 0, max: 1, step: "any", value: 0.5
+        min: 0, max: 1, step: "any", value: gain
       };
       
       // setAttribute any better ?
       tempoCtl.min = tempoSpec.min;
       tempoCtl.max = tempoSpec.max;
       tempoCtl.step = tempoSpec.step;
-      tempoCtl.value = tempo = tempoSpec.value;
+      tempoCtl.value = tempoSpec.value;
       gainCtl.min = gainSpec.min;
       gainCtl.max = gainSpec.max;
       gainCtl.step = gainSpec.step;
-      gainCtl.value = gain = gainSpec.value;
+      gainCtl.value = gainSpec.value;
       
       function togglePlay(){
         var str = play();
