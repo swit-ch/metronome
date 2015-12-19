@@ -39,10 +39,12 @@
     <script type="text/javascript"> 
       'use strict';
       
+      
       // initial tempo, noteResolution, gain defined in metronome.js -- test override here
-      // local storage ?
-      tempo = 111; gain = 1 / 8; 
-      noteResolution = 1; // 1 / [ 16, 8, 4 ]
+      tempo = localStorage.tempo ? localStorage.tempo : 123;
+      gain = localStorage.gain ? localStorage.gain : 1 / 7;
+      noteResolution = localStorage.noteResolution ? localStorage.noteResolution : 2;
+      
       
       // don't use html ele ID as var directly, see: 
       // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
@@ -56,7 +58,7 @@
       var tempoSpec = { min: 30, max: 160, step: 1 };
       var gainSpec = {  min: 0, max: 1, step: "any" };
       var resoOptions = [ '16th notes', '8th notes', 'Quarter notes' ];
-      
+            
       // setAttribute any better ?
       tempoCtl.min = tempoSpec.min;
       tempoCtl.max = tempoSpec.max;
@@ -104,6 +106,15 @@
         var val = event.target.value;
         setGain(val);
       }, false);
+            
+      
+      // storage per origin 
+      window.addEventListener("beforeunload", function(ev) {    
+        localStorage.setItem('tempo', tempo);
+        localStorage.setItem('gain', gain);
+        localStorage.setItem('noteResolution', noteResolution);
+      }, false);
+
       
       // init gui
       updTempoGUI();
