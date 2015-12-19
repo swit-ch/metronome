@@ -1,12 +1,16 @@
-Hi, just playing around here with the original code by Chris Wilson.
+Hi, just playing around with a fork of original code by Chris Wilson (thanks!).  
+https://github.com/cwilso/metronome
 
-I won't be interested in divisions of 8th, 16th notes, if at all there should be many other tuplets. 
+Trying to understand git, GitHub and web technologies, almost private. 
 
-But many different time signatures would be nice, (therefor also) greater range of BPMs ...
+Metronome:  
+Probably I won't be interested in divisions of 8th, 16th notes, if at all there should be other tuplets too. 
+Different time signatures would be useful to me, greater range of BPMs ...
 
 Stephan
 
-Here follows the original text of the forked metronome:
+
+Here follows the original readme text of the forked metronome:
 
 # Web Audio Metronome
 
