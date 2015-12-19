@@ -1,16 +1,20 @@
 Hi, just playing around with a fork of original code by Chris Wilson (thanks!).  
-https://github.com/cwilso/metronome
+https://github.com/cwilso/metronome  
+http://www.html5rocks.com/en/tutorials/audio/scheduling/
 
-Trying to understand git, GitHub and web technologies, almost private. 
+Trying to understand git, GitHub and web technologies, almost privately here. 
 
 Metronome:  
 Probably I won't be interested in divisions of 8th, 16th notes, if at all there should be other tuplets too. 
-Different time signatures would be useful to me, greater range of BPMs ...
+But time signatures might be useful to me, greater range of BPMs ...
+
+Current state:  
+http://swit-ch.github.io/metronome/
 
 Stephan
 
 
-Here follows the original readme text of the forked metronome:
+Here the original readme text of the forked metronome:
 
 # Web Audio Metronome
 
