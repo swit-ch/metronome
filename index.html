@@ -28,17 +28,19 @@
   <!--   play doesn't  work on iOS Safari ?!   -->
      <div class="play" id="playCtl">play</div>
       <div id="tempoBox">Tempo: <span id="showTempo"></span>BPM <input id="tempoCtl" type="range"></div>      
-      <div>Resolution:<select id="resoCtl"><option>16th notes<option>8th notes<option>Quarter notes</select></div>
+      <div>Resolution:<select id="resoCtl"></select></div>
       <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl">
       </div>
     </div>
     <script type="text/javascript"> 
       
-      // initial tempo and gain defined in metronome.js
-      
       // don't use html ele ID as var, see: 
       // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
       'use strict';
+      
+      // initial tempo and gain defined in metronome.js -- test override here
+      tempo = 111; gain = 1 / 8; 
+      noteResolution = 1; // 1 / [ 16, 8, 4 ]
       
       var playCtl = document.getElementById('playCtl');
       var tempoCtl = document.getElementById('tempoCtl');
@@ -47,30 +49,37 @@
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');    
       
-      var tempoSpec = {
-        min: 30, max: 160, step: 1, value: tempo
-      };
-      var gainSpec = {
-        min: 0, max: 1, step: "any", value: gain
-      };
+      var tempoSpec = { min: 30, max: 160, step: 1 };
+      var gainSpec = {  min: 0, max: 1, step: "any" };
+      var resoOptions = [ '16th notes', '8th notes', 'Quarter notes' ];
       
       // setAttribute any better ?
       tempoCtl.min = tempoSpec.min;
       tempoCtl.max = tempoSpec.max;
       tempoCtl.step = tempoSpec.step;
-      tempoCtl.value = tempoSpec.value;
+      tempoCtl.value = tempo;
       gainCtl.min = gainSpec.min;
       gainCtl.max = gainSpec.max;
       gainCtl.step = gainSpec.step;
-      gainCtl.value = gainSpec.value;
+      gainCtl.value = gain;
+      
+      var rol = resoOptions.length;
+      for(var i = 0; i < rol; i++){
+        var o = document.createElement('option');
+        o.textContent = resoOptions[i];
+        resoCtl.appendChild(o);
+      }
       
       function togglePlay(){
         var str = play();
         playCtl.textContent = str;
       }
+      function updTempoGUI(){
+        showTempo.textContent = tempo;
+      }
       function setTempo(bpm){
         tempo = bpm;
-        showTempo.textContent = tempo;
+        updTempoGUI();
       }
       function updGainGUI(){
         showGain.textContent = Math.round(gain * 100) / 100;
@@ -80,7 +89,7 @@
         updGainGUI();
       }
       
-      playCtl.addEventListener('click', togglePlay, false);
+      playCtl.addEventListener('click', togglePlay, false); // touch ?
       tempoCtl.addEventListener('input', function (event){
         setTempo(event.target.value);
       }, false);
@@ -93,9 +102,10 @@
       }, false);
       
       // init
-      setTempo(120);
-//       setGain(0.5); // too early
+      updTempoGUI();
       updGainGUI();
+      resoCtl.selectedIndex = noteResolution;
+
     </script>
    </body>
 </html>
