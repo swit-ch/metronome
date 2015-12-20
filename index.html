@@ -30,7 +30,11 @@
     </span>
     <div id="controls">
   <!--   play doesn't  work on iOS Safari ?!   -->
-     <div class="play" id="playCtl">play</div>
+      <!-- <div class="play" id="playCtl">play</div> -->
+      <!-- <div><input type="button" id="playCtl" value="play"></div> -->
+      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0">Hä?</button></div>
+      
+      
       <div id="tempoBox">Tempo: <span id="showTempo"></span>BPM <input id="tempoCtl" type="range"></div>      
       <div>Resolution:<select id="resoCtl"></select></div>
       <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl">
@@ -38,9 +42,9 @@
     </div>
     <script type="text/javascript"> 
       'use strict';
-      
-      
+            
       // initial tempo, noteResolution, gain defined in metronome.js -- test override here
+      // hm if localStorage undefined ==> TypeError
       tempo = localStorage.tempo ? localStorage.tempo : 123;
       gain = localStorage.gain ? localStorage.gain : 1 / 7;
       noteResolution = localStorage.noteResolution ? localStorage.noteResolution : 2;
@@ -48,6 +52,7 @@
       
       // don't use html ele ID as var directly, see: 
       // https://www.tjvantoll.com/2012/07/19/dom-element-references-as-global-variables/
+      // could as well create the widgets here, instead of this:
       var playCtl = document.getElementById('playCtl');
       var tempoCtl = document.getElementById('tempoCtl');
       var showTempo = document.getElementById('showTempo');
@@ -76,7 +81,10 @@
         resoCtl.appendChild(o);
       }
       
-      function togglePlay(){
+      function togglePlay(ev){
+        
+        console.log(ev);
+        
         var str = play();
         playCtl.textContent = str;
       }
@@ -95,7 +103,11 @@
         updGainGUI();
       }
       
-      playCtl.addEventListener('click', togglePlay, false); // touch ?
+      
+      playCtl.addEventListener('click', togglePlay, false); // touch ? ev received iOS but no sound/iamge
+      
+//       playCtl.addEventListener('touchstart', togglePlay, false);
+      
       tempoCtl.addEventListener('input', function (event){
         setTempo(event.target.value);
       }, false);
