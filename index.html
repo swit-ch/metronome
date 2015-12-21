@@ -4,18 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
     <title>Metronome swit-ch testing</title>
-    <link rel="stylesheet" href="css/main.css">
+    <!-- <link rel="stylesheet" href="css/main.css"> -->
 
     <style type="text/css">
+/* 
       #github {
         position: absolute; top: -5px; right: 15px;
       }
+ */
+/* 
       input[type="range"] {
          height: 20px; width: 200px;
       }
+ */
       span > #github {
         display: none;
       }
+/* 
+      button, select {
+        font-size: 40px;
+      }
+ */
 
     </style>
     <!-- <script src="http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
@@ -32,11 +41,11 @@
   <!--   play doesn't  work on iOS Safari ?!   -->
       <!-- <div class="play" id="playCtl">play</div> -->
       <!-- <div><input type="button" id="playCtl" value="play"></div> -->
-      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0">Hä?</button></div>
+      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0"> Hä? </button></div>
       
       
-      <div id="tempoBox">Tempo: <span id="showTempo"></span>BPM <input id="tempoCtl" type="range"></div>      
-      <div>Resolution:<select id="resoCtl"></select></div>
+      <div id="tempoBox">Tempo: <span id="showTempo"></span> BPM <input id="tempoCtl" type="range"></div>      
+      <div>Resolution: <select id="resoCtl"></select></div>
       <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl">
       </div>
     </div>
