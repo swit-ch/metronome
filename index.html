@@ -4,45 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
     <title>Metronome swit-ch testing</title>
-    <!-- <link rel="stylesheet" href="css/main.css"> -->
 
     <style type="text/css">
-/* 
-      #github {
-        position: absolute; top: -5px; right: 15px;
+      body {
+        font-family: sans-serif;
+        line-height: 3;
       }
- */
-/* 
-      input[type="range"] {
-         height: 20px; width: 200px;
+      input {
+        vertical-align: middle;
       }
- */
-      span > #github {
-        display: none;
+        /* https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Styling_HTML_forms */
+      button, input, select, textarea {
+        font-family : inherit;
+        font-size   : 100%;
       }
-/* 
-      button, select {
-        font-size: 40px;
-      }
- */
-
     </style>
-    <!-- <script src="http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
-    <!-- <script src="../AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></script> -->
     <script src="js/AudioContextMonkeyPatch.js"></script> 
-        
     <script src="js/metronome.js"></script>
   </head>
   <body>
-    <span>
-    <a id="github" href="https://github.com/cwilso/metronome" >Fork me on GitHub</a>
-    </span>
     <div id="controls">
-  <!--   play doesn't  work on iOS Safari ?!   -->
-      <!-- <div class="play" id="playCtl">play</div> -->
-      <!-- <div><input type="button" id="playCtl" value="play"></div> -->
-      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0"> Hä? </button></div>
+      <!-- play (gui?) doesn't work on iOS Safari, Windows 7 IE recent ?!   -->
       
+      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0"> Hä? </button></div>
       
       <div id="tempoBox">Tempo: <span id="showTempo"></span> BPM <input id="tempoCtl" type="range"></div>      
       <div>Resolution: <select id="resoCtl"></select></div>
@@ -115,7 +99,7 @@
       
       playCtl.addEventListener('click', togglePlay, false); // touch ? ev received iOS but no sound/iamge
       
-//       playCtl.addEventListener('touchstart', togglePlay, false);
+//    playCtl.addEventListener('touchstart', togglePlay, false);
       
       tempoCtl.addEventListener('input', function (event){
         setTempo(event.target.value);
