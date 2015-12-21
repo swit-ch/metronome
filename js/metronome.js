@@ -58,7 +58,16 @@ function scheduleNote( beatNumber, time ) {
     var osc = audioContext.createOscillator();
 //     osc.connect( audioContext.destination );
     
-    osc.connect( mainGainNode );
+    var eg = audioContext.createGain();
+    
+    eg.gain.setValueAtTime(1.0, time);
+    eg.gain.setValueAtTime(1.0, time + (noteLength / 7));
+    eg.gain.exponentialRampToValueAtTime(0.001, time + noteLength);
+    
+    osc.type = [ "sine", "square", "sawtooth", "triangle" ][3];
+    
+    osc.connect(eg);
+    eg.connect( mainGainNode );
     
     if (beatNumber % 16 === 0)    // beat 0 == low pitch
         osc.frequency.value = 880.0;
@@ -134,10 +143,9 @@ function setMainGain(val){
     mainGainNode.gain.value = gain;
 }
 
-
 function init(){
     var container = document.createElement( 'div' );
-
+    
     container.className = "container";
     canvas = document.createElement( 'canvas' );
     canvasContext = canvas.getContext( '2d' );
@@ -159,8 +167,11 @@ function init(){
 
     // if we wanted to load audio files, etc., this is where we should do it.
     
+    
+    
     mainGainNode = audioContext.createGain();
     setMainGain(gain); // init
+   
     mainGainNode.connect( audioContext.destination );
 
     window.onorientationchange = resetCanvas;
