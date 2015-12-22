@@ -162,7 +162,13 @@ function init(){
     // spec-compliant, and work on Chrome, Safari and Firefox.
     
     // swit-ch: forked it too to link locally (offline)
-
+	
+	if (window.AudioContext == undefined) {
+		console.log("AudioContext undefined. Return early from init() now.");
+		disablePlayCtls();
+		return;
+	};
+	
     audioContext = new AudioContext();
 
     // if we wanted to load audio files, etc., this is where we should do it.
