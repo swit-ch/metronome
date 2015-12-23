@@ -37,11 +37,11 @@
       'use strict';
             
       // initial tempo, noteResolution, gain defined in metronome.js -- test override here
-      // hm if localStorage undefined ==> TypeError
-      tempo = localStorage.tempo ? localStorage.tempo : 123;
-      gain = localStorage.gain ? localStorage.gain : 1 / 7;
-      noteResolution = localStorage.noteResolution ? localStorage.noteResolution : 2;
+      // no localStorage in Opera mini
+      var storageTest = window.localStorage; // possibly undefined (Opera mini), else localStorage
+      var storage = storageTest ? localStorage : { tempo: 123, gain: 1 / 7, noteResolution: 2 };
       
+      tempo = storage.tempo; gain = storage.gain; noteResolution = storage.noteResolution;
 
       // could as well create the widgets here, instead of this:
       var playCtl = document.getElementById('playCtl');
@@ -124,12 +124,13 @@
       }
       
       // storage per origin 
-      window.addEventListener("beforeunload", function(ev) {    
-        localStorage.setItem('tempo', tempo);
-        localStorage.setItem('gain', gain);
-        localStorage.setItem('noteResolution', noteResolution);
-      }, false);
-      
+      if (storageTest){
+          window.addEventListener("beforeunload", function(ev) {    
+            localStorage.setItem('tempo', tempo);
+            localStorage.setItem('gain', gain);
+            localStorage.setItem('noteResolution', noteResolution);
+          }, false);
+      };
 //       window.addEventListener('load', function(ev) {
 //         var audioTest = audioContext !== null; // see monkey patch
 //         if (! audioTest){
