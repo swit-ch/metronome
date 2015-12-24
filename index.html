@@ -37,11 +37,20 @@
       'use strict';
             
       // initial tempo, noteResolution, gain defined in metronome.js -- test override here
-      // no localStorage in Opera mini
-      var storageTest = window.localStorage; // possibly undefined (Opera mini), else localStorage
-      var storage = storageTest ? localStorage : { tempo: 123, gain: 1 / 7, noteResolution: 2 };
-      
-      tempo = storage.tempo; gain = storage.gain; noteResolution = storage.noteResolution;
+      // no localStorage in Opera mini (but audio doesn't work there anyway)
+      var storage = window.localStorage; // possibly undefined (Opera mini)
+            
+      if (storage) {
+        (function(){
+          var t = storage.getItem('tempo'); 
+          var g = storage.getItem('gain'); 
+          var nr = storage.getItem('noteResolution');
+        
+          tempo = t ? t : 123; 
+          gain = g ? g : 1 / 7; 
+          noteResolution = nr ? nr : 1;
+        })()
+      }
 
       // could as well create the widgets here, instead of this:
       var playCtl = document.getElementById('playCtl');
@@ -75,9 +84,7 @@
       }
       
       function togglePlay(ev){
-        
-        console.log(ev);
-        
+//         console.log(ev);
         var str = play();
         playCtl.textContent = str;
       }
@@ -112,31 +119,27 @@
         setGain(val);
       }, false);
       
+      
       trigCtl.addEventListener('click', function (event){
-        
         scheduleNote(0, audioContext.currentTime); // beatNumber, time
 //         scheduler();
       }, false);
       
+      // called in init func (on win load) of metronome.js if no audio context
       function disablePlayCtls(){
           playCtl.disabled = true;
           trigCtl.disabled = true;
       }
       
       // storage per origin 
-      if (storageTest){
+      if (storage){
           window.addEventListener("beforeunload", function(ev) {    
             localStorage.setItem('tempo', tempo);
             localStorage.setItem('gain', gain);
             localStorage.setItem('noteResolution', noteResolution);
           }, false);
       };
-//       window.addEventListener('load', function(ev) {
-//         var audioTest = audioContext !== null; // see monkey patch
-//         if (! audioTest){
-//             disablePlayCtls();
-//         };
-//       }, false);
+
       // init gui
       updTempoGUI();
       updGainGUI();
