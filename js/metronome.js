@@ -163,8 +163,8 @@ function init(){
     
     // swit-ch: forked it too to link locally (offline)
 	
-	if (window.AudioContext == undefined) {
-		console.log("AudioContext undefined. Return early from init() now.");
+	if (window.AudioContext == undefined || window.Worker == undefined) {
+		console.log("AudioContext or Worker undefined. Return early from 'init' now.");
 		disablePlayCtls();
 		return;
 	};
