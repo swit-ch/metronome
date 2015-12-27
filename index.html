@@ -28,7 +28,9 @@
       <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0"> Hä? </button></div>
       
       <div id="tempoBox">Tempo: <span id="showTempo"></span> BPM <input id="tempoCtl" type="range"></div>      
+<!-- 
       <div>Resolution: <select id="resoCtl"></select></div>
+ -->
       <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl"></div>
       <div><button type="button" id="trig" class="play" tabindex="0">Single Trig test</button></div>
 
@@ -44,11 +46,11 @@
         (function(){
           var t = storage.getItem('tempo'); 
           var g = storage.getItem('gain'); 
-          var nr = storage.getItem('noteResolution');
+//           var nr = storage.getItem('noteResolution');
         
           tempo = t ? t : 123; 
           gain = g ? g : 1 / 7; 
-          noteResolution = nr ? nr : 1;
+//           noteResolution = nr ? nr : 1;
         })()
       }
 
@@ -76,12 +78,12 @@
       gainCtl.step = gainSpec.step;
       gainCtl.value = gain;
       
-      var rol = resoOptions.length;
-      for(var i = 0; i < rol; i++){
-        var o = document.createElement('option');
-        o.textContent = resoOptions[i];
-        resoCtl.appendChild(o);
-      }
+//       var rol = resoOptions.length;
+//       for(var i = 0; i < rol; i++){
+//         var o = document.createElement('option');
+//         o.textContent = resoOptions[i];
+//         resoCtl.appendChild(o);
+//       }
       
       function togglePlay(ev){
 //         console.log(ev);
@@ -111,9 +113,9 @@
       tempoCtl.addEventListener('input', function (event){
         setTempo(event.target.value);
       }, false);
-      resoCtl.addEventListener('change', function (event){
-        noteResolution = event.target.selectedIndex;
-     }, false);
+//       resoCtl.addEventListener('change', function (event){
+//         noteResolution = event.target.selectedIndex;
+//      }, false);
       gainCtl.addEventListener('input', function (event){
         var val = event.target.value;
         setGain(val);
@@ -136,14 +138,14 @@
           window.addEventListener("beforeunload", function(ev) {    
             localStorage.setItem('tempo', tempo);
             localStorage.setItem('gain', gain);
-            localStorage.setItem('noteResolution', noteResolution);
+//             localStorage.setItem('noteResolution', noteResolution);
           }, false);
       };
 
       // init gui
       updTempoGUI();
       updGainGUI();
-      resoCtl.selectedIndex = noteResolution;
+//       resoCtl.selectedIndex = noteResolution;
 
     </script>
    </body>
