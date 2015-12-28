@@ -8,7 +8,7 @@
     <style type="text/css">
       body {
         font-family: sans-serif;
-        line-height: 2;
+        line-height: 1.8;
         
       }
       input {
@@ -18,6 +18,7 @@
       button, input, select, textarea {
         font-family : inherit;
         font-size   : 100%;
+        line-height: inherit; /* iOS ? */
       }
       #showTempo, #showGain { 
         display: inline-block;
@@ -26,11 +27,11 @@
         width: 5em;
         text-align: center; /* not for select ? */
       }
-      .activeControl {
+      .activeCtl {
         background-color: rgba(200, 200, 255, 0.25); /* not visible in slider */
       }
 /* 
-      input[type="range"].activeControl {
+      input[type="range"].activeCtl {
         color = magenta .magenta !important;
       }
  */
@@ -41,6 +42,9 @@
         padding-right: 1ex;
       }
       .info { display: none; }
+      canvas {
+        border: 1px solid black;
+      }
     </style>
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/metronome.js"></script>
@@ -48,17 +52,16 @@
   <body>
     <div id="controls">
       <!-- class 'play' rules in main.css, not used currently -->
-      <div><button type="button" id="playCtl" autofocus="true" class="play activeControl" tabindex="0"> Hä? </button></div>
+      <div><button type="button" id="playCtl" autofocus="true" class="play activeCtl" tabindex="0"> Hä? </button></div>
       
       <!-- is this a table ? A form? -->
-      <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeControl"></select></div>
-      <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeControl"></select></div>
-      <div><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeControl"></div>      
-      <div><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeControl"></div>
+      <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
+      <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
+      <div><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
+      <div><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
       
-<!-- 
-      <div><button type="button" id="trig" class="play" tabindex="0">Single Trig test</button></div>
- -->
+      <div><button type="button" id="trigCtl" class="activeCtl" tabindex="0">Single Trig 0</button>
+      <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Single Trig 1</button></div>
 
     </div>
     <script type="text/javascript"> 
@@ -91,7 +94,8 @@
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');    
       
-//       var trigCtl = document.getElementById('trig');
+      var trigCtl = document.getElementById('trigCtl');
+      var trigCtl1 = document.getElementById('trigCtl1');
       
       var tempoSpec = { min: 20, max: 400, step: 1 };
       var gainSpec = {  min: 0, max: 1, step: "any" };
@@ -202,15 +206,18 @@
       }, false);
       
       
-//       trigCtl.addEventListener('click', function (ev){
-//         scheduleNote(0, audioContext.currentTime); // beatNumber, time
-// //         scheduler();
-//       }, false);
+      trigCtl.addEventListener('click', function (ev){
+        scheduleNote(0, audioContext.currentTime); // beatNumber, time
+      }, false);
+      trigCtl1.addEventListener('click', function (ev){
+        scheduleNote(1, audioContext.currentTime); // beatNumber, time
+      }, false);
       
       // called in init func (on win load) of metronome.js if no audio context etc
       function disablePlayCtls(){
           playCtl.disabled = true;
-//           trigCtl.disabled = true;
+          trigCtl.disabled = true;
+          trigCtl1.disabled = true;
       }
       
       // storage per origin 
