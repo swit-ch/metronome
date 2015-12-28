@@ -8,7 +8,8 @@
     <style type="text/css">
       body {
         font-family: sans-serif;
-        line-height: 3;
+        line-height: 2;
+        
       }
       input {
         vertical-align: middle;
@@ -18,56 +19,84 @@
         font-family : inherit;
         font-size   : 100%;
       }
+      #showTempo, #showGain { 
+        display: inline-block;
+      }
+      #showTempo, #showGain, select, button {
+        width: 5em;
+        text-align: center; /* not for select ? */
+      }
+      .activeControl {
+        background-color: rgba(200, 200, 255, 0.25); /* not visible in slider */
+      }
+/* 
+      input[type="range"].activeControl {
+        color = magenta .magenta !important;
+      }
+ */
+      .ctlLabel {
+        display: inline-block;
+        width: 7em;
+        text-align: right;
+        padding-right: 1ex;
+      }
+      .info { display: none; }
     </style>
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/metronome.js"></script>
   </head>
   <body>
     <div id="controls">
+      <!-- class 'play' rules in main.css, not used currently -->
+      <div><button type="button" id="playCtl" autofocus="true" class="play activeControl" tabindex="0"> Hä? </button></div>
       
-      <div><button type="button" id="playCtl" autofocus="true" class="play" tabindex="0"> Hä? </button></div>
+      <!-- is this a table ? A form? -->
+      <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeControl"></select></div>
+      <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeControl"></select></div>
+      <div><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeControl"></div>      
+      <div><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeControl"></div>
       
-      <div id="tempoBox">Tempo: <span id="showTempo"></span> BPM <input id="tempoCtl" type="range"></div>      
 <!-- 
-      <div>Resolution: <select id="resoCtl"></select></div>
- -->
-      <div>Gain: <span id="showGain"></span><input type="range" id="gainCtl"></div>
       <div><button type="button" id="trig" class="play" tabindex="0">Single Trig test</button></div>
+ -->
 
     </div>
     <script type="text/javascript"> 
       'use strict';
             
-      // initial tempo, noteResolution, gain defined in metronome.js -- test override here
-      // no localStorage in Opera mini (but audio doesn't work there anyway)
+      // initial tempo, gain defined in metronome.js -- test override here
+      // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
       var storage = window.localStorage; // possibly undefined (Opera mini)
             
-      if (storage) {
-        (function(){
+      if (storage) { // oh, values always strings ?!
+        (function(){ // maybe better have a state object
           var t = storage.getItem('tempo'); 
           var g = storage.getItem('gain'); 
-//           var nr = storage.getItem('noteResolution');
+          var bpb = storage.getItem('beatsPerBar');
+          var bu = storage.getItem('beatUnit');
         
-          tempo = t ? t : 123; 
-          gain = g ? g : 1 / 7; 
-//           noteResolution = nr ? nr : 1;
+          tempo = t ? Number(t) : 123; 
+          gain = g ? Number(g) : 1 / 7; 
+          beatsPerBar = bpb ? Number(bpb) : 3;
+          beatUnit = bu ? Number(bu) : 1 / 4;
         })()
       }
 
-      // could as well create the widgets here, instead of this:
+      // could as well create the widgets right here, instead of this:
       var playCtl = document.getElementById('playCtl');
       var tempoCtl = document.getElementById('tempoCtl');
       var showTempo = document.getElementById('showTempo');
-      var resoCtl = document.getElementById('resoCtl');
+      var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
+      var beatUnitCtl = document.getElementById('beatUnitCtl');
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');    
       
-      var trigCtl = document.getElementById('trig');
+//       var trigCtl = document.getElementById('trig');
       
-      var tempoSpec = { min: 30, max: 160, step: 1 };
+      var tempoSpec = { min: 20, max: 400, step: 1 };
       var gainSpec = {  min: 0, max: 1, step: "any" };
-      var resoOptions = [ '16th notes', '8th notes', 'Quarter notes' ];
-                
+//       var resoOptions = [ '16th notes', '8th notes', 'Quarter notes' ];
+            
       // setAttribute any better ?
       tempoCtl.min = tempoSpec.min;
       tempoCtl.max = tempoSpec.max;
@@ -78,31 +107,75 @@
       gainCtl.step = gainSpec.step;
       gainCtl.value = gain;
       
-//       var rol = resoOptions.length;
-//       for(var i = 0; i < rol; i++){
-//         var o = document.createElement('option');
-//         o.textContent = resoOptions[i];
-//         resoCtl.appendChild(o);
-//       }
+      var beatsPerBarObj = {
+        labels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ], 
+        values: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ], 
+        len: 23
+      };
+      for(var i = 0; i < beatsPerBarObj.len; i++){
+        var o = document.createElement('option');
+        o.textContent = beatsPerBarObj.labels[i];
+        beatsPerBarCtl.add(o);
+      };
+      
+      var beatUnitObj = {
+        labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ], 
+        values: [ 1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32 ], 
+        len: 6
+      };
+      for(var i = 0; i < beatUnitObj.len; i++){
+        var o = document.createElement('option');
+        o.textContent = beatUnitObj.labels[i];
+        beatUnitCtl.add(o);
+      };
+
+      
+      
+      
+      tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
+      gainCtl.style.width = '200px';
+      
+      
+      function updShowTempo(){
+        showTempo.textContent = tempo;
+      }
+      function updShowGain(){
+        showGain.textContent = Math.round(gain * 100) / 100;
+      }
+      
+      // indexOf tests for strict equality
+      function updBeatsPerBarGUI(){
+        beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(beatsPerBar);
+      }
+      function updBeatUnitGUI(){
+        beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(beatUnit);
+      }
+      
       
       function togglePlay(ev){
 //         console.log(ev);
         var str = play();
         playCtl.textContent = str;
       }
-      function updTempoGUI(){
-        showTempo.textContent = tempo;
-      }
+
       function setTempo(bpm){
         tempo = bpm;
-        updTempoGUI();
+        updShowTempo();
       }
-      function updGainGUI(){
-        showGain.textContent = Math.round(gain * 100) / 100;
+      
+      
+      function setBeatsPerBar(n) { // test, constrain ?
+//         beatsPerBar = n;
+        nextBeatsPerBar = n;
       }
+      function setBeatUnit(x) {
+//         beatUnit = x;
+        nextBeatUnit = x;
+      }            
+
       function setGain(val){
         setMainGain(val); // defined in metronome.js
-        updGainGUI();
+        updShowGain();
       }
       
       
@@ -110,42 +183,53 @@
       
 //    playCtl.addEventListener('touchstart', togglePlay, false);
       
-      tempoCtl.addEventListener('input', function (event){
-        setTempo(event.target.value);
+      beatsPerBarCtl.addEventListener('change', function(ev){
+        var ix = this.selectedIndex;
+        setBeatsPerBar(beatsPerBarObj.values[ix]);
       }, false);
-//       resoCtl.addEventListener('change', function (event){
-//         noteResolution = event.target.selectedIndex;
-//      }, false);
-      gainCtl.addEventListener('input', function (event){
-        var val = event.target.value;
-        setGain(val);
+      
+      beatUnitCtl.addEventListener('change', function(ev){
+        var ix = this.selectedIndex;
+        setBeatUnit(beatUnitObj.values[ix]);
+      }, false);
+      
+      tempoCtl.addEventListener('input', function (ev){
+        setTempo(this.value);
+      }, false);
+
+      gainCtl.addEventListener('input', function (ev){
+        setGain(this.value);
       }, false);
       
       
-      trigCtl.addEventListener('click', function (event){
-        scheduleNote(0, audioContext.currentTime); // beatNumber, time
-//         scheduler();
-      }, false);
+//       trigCtl.addEventListener('click', function (ev){
+//         scheduleNote(0, audioContext.currentTime); // beatNumber, time
+// //         scheduler();
+//       }, false);
       
-      // called in init func (on win load) of metronome.js if no audio context
+      // called in init func (on win load) of metronome.js if no audio context etc
       function disablePlayCtls(){
           playCtl.disabled = true;
-          trigCtl.disabled = true;
+//           trigCtl.disabled = true;
       }
       
       // storage per origin 
       if (storage){
           window.addEventListener("beforeunload", function(ev) {    
             localStorage.setItem('tempo', tempo);
-            localStorage.setItem('gain', gain);
-//             localStorage.setItem('noteResolution', noteResolution);
+            localStorage.setItem('gain', gain);            
+            localStorage.setItem('beatsPerBar', beatsPerBar);
+            localStorage.setItem('beatUnit', beatUnit);
           }, false);
       };
-
+      
+      nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line 
+      
       // init gui
-      updTempoGUI();
-      updGainGUI();
-//       resoCtl.selectedIndex = noteResolution;
+      updBeatsPerBarGUI();
+      updBeatUnitGUI();
+      updShowTempo();
+      updShowGain();
 
     </script>
    </body>

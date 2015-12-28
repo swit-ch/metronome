@@ -25,7 +25,7 @@ var gain = 0.5; // tempo and gain defaults here
 var beatsPerBar = 3; // positive integer
 var beatUnit = 1 / 2; 
 var currentBeat;
-
+var nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line (?)
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){
@@ -40,16 +40,16 @@ window.requestAnimFrame = (function(){
 })();
 
 function nextNote() {
-    // Advance current note and time by a 16th note...
+    // Advance current note and time by a 16th note... No, beat
     var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
                                           // tempo value to calculate beat length.
     nextNoteTime += beatUnit * 4 * secondsPerBeat;    // Add beat length to last beat time
 
-    currentBeat++;    // Advance the beat number, wrap to zero
-    if (currentBeat == beatsPerBar) {
-        currentBeat = 0;
-    };
-
+//     currentBeat++;    // Advance the beat number, wrap to zero
+//     if (currentBeat == beatsPerBar) {
+//         currentBeat = 0;
+//     };
+    currentBeat = (currentBeat + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
 }
 // beatNumber is passed in currentBeat
 function scheduleNote( beatNumber, time ) {
@@ -68,7 +68,7 @@ function scheduleNote( beatNumber, time ) {
     osc.connect(eg);
     eg.connect( mainGainNode );
     
-    console.log(beatNumber); // correct, but no sound on first zero
+//     console.log(beatNumber); // correct, but no sound on first zero (fixed ?)
     
 //     if (beatNumber % 16 === 0)    // beat 0 == low pitch
 //         osc.frequency.value = 880.0;
@@ -77,9 +77,14 @@ function scheduleNote( beatNumber, time ) {
 //     else                        // other 16th notes = high pitch
 //         osc.frequency.value = 220.0;
     
-    if (beatNumber === 0)
-    	osc.frequency.value = 880.0;
-    
+    if (beatNumber === 0){ // the ONE
+      
+      // here ? works
+      if (nextBeatsPerBar != beatsPerBar) { beatsPerBar = nextBeatsPerBar };
+      if (nextBeatUnit != beatUnit) { beatUnit = nextBeatUnit };
+      
+      osc.frequency.value = 880.0;
+    };
     osc.start( time );
     osc.stop( time + noteLength );
 }
@@ -166,13 +171,13 @@ function init(){
     // spec-compliant, and work on Chrome, Safari and Firefox.
     
     // swit-ch: forked it too to link locally (offline)
-	
-	if (window.AudioContext == undefined || window.Worker == undefined) {
-		console.log("AudioContext or Worker undefined. Return early from 'init' now.");
-		disablePlayCtls();
-		return;
-	};
-	
+  
+  if (window.AudioContext == undefined || window.Worker == undefined) {
+    console.log("AudioContext or Worker undefined. Return early from 'init' now.");
+    disablePlayCtls();
+    return;
+  };
+  
     audioContext = new AudioContext();
 
     // if we wanted to load audio files, etc., this is where we should do it.
