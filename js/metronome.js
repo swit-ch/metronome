@@ -54,6 +54,16 @@ function nextNote() {
 //     };
     currentBeat = (currentBeat + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
 }
+
+// iOS hack
+function pseudoSound(){
+    // create an oscillator, connecting not necessary
+    var osc = audioContext.createOscillator();    
+    var time = audioContext.currentTime;
+    osc.start( time );
+    osc.stop( time + 0.01 );
+}
+
 // beatNumber is passed in currentBeat
 function scheduleNote( beatNumber, time ) {
     // push the note on the queue, even if we're not playing.
@@ -99,6 +109,10 @@ function scheduler() {
     while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
        
 //     		console.log("scheduler currentBeat : " + currentBeat); // stops after 1 iOS
+// b/c above condition false
+// nextNoteTime not advancing, audioContext.currentTime 0, ah
+// audioContext state suspended
+// what then does manual trig do to fix this? scheduleNote(n, audioContext.currentTime)
        
         scheduleNote( currentBeat, nextNoteTime );
         nextNote();
@@ -107,8 +121,14 @@ function scheduler() {
 
 function play() {
     isPlaying = !isPlaying;
-    
-    if (isPlaying) { // start playing        
+		
+    if (isPlaying) { // start playing
+    		
+    			// iOS hack
+    		if (audioContext.state !== 'running'){
+    			pseudoSound();
+    		};
+    		
         currentBeat = 0;
         nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
         timerWorker.postMessage("start");
@@ -183,12 +203,17 @@ function init(){
     canvas = document.createElement( 'canvas' );
     canvasContext = canvas.getContext( '2d' );
 
-    resetCanvas();
+//     resetCanvas();
     
-    document.body.appendChild( container );
+//     document.body.appendChild( container );
+    
+    
+    
     container.appendChild(canvas);    
     canvasContext.strokeStyle = "#ffffff";
     canvasContext.lineWidth = 2;
+    
+    document.body.insertBefore(container, debugContainer); // hä ?!
 
     // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
     // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
@@ -204,6 +229,14 @@ function init(){
   };
   
     audioContext = new AudioContext();
+    
+    //////////////////////////////////////
+		audioContext.onstatechange = function(ev){
+			var span = document.createElement('span');
+			span.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
+			debugField.appendChild(span);
+		};
+		////////////////////////////////////////
 
     // if we wanted to load audio files, etc., this is where we should do it.
     
@@ -211,8 +244,8 @@ function init(){
     setMainGain(gain); // init
     mainGainNode.connect( audioContext.destination );
 
-    window.onorientationchange = resetCanvas;
-    window.onresize = resetCanvas;
+//     window.onorientationchange = resetCanvas;
+//     window.onresize = resetCanvas;
 
     requestAnimFrame(draw);    // start the drawing loop.
 

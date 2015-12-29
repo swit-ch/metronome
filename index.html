@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width user-scalable=no">
     <title>Metronome swit-ch testing</title>
     <!-- <link rel="stylesheet" href="css/main.css"> -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <style type="text/css">
       body {
         font-family: sans-serif;
         line-height: 1.8;
-        
+      }
+      body > * {
+        border: 0.5px solid gray;
       }
       input {
         vertical-align: middle;
@@ -18,9 +23,9 @@
       button, input, select, textarea {
         font-family : inherit;
         font-size   : 100%;
-        line-height: inherit; /* iOS ? */
+        line-height: inherit; /* button iOS ? */
       }
-      #showTempo, #showGain { 
+      #showTempo, #showGain, #debugField { 
         display: inline-block;
       }
       #showTempo, #showGain, select, button {
@@ -43,7 +48,12 @@
       }
       .info { display: none; }
       canvas {
-        border: 1px solid black;
+        
+        width: 100%;
+        height: 40px;
+      }
+      #debugContainer button {
+        display: none;
       }
     </style>
     <script src="js/AudioContextMonkeyPatch.js"></script> 
@@ -59,16 +69,20 @@
       <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
       <div><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
       <div><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
-      
-      <div><button type="button" id="trigCtl" class="activeCtl" tabindex="0">Single Trig 0</button>
-      <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Single Trig 1</button></div>
-
     </div>
+    
+    <div id="debugContainer">
+      <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
+      <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Trig 1</button>
+      <div id="debugField"></div>
+    </div>
+    
     <script type="text/javascript"> 
       'use strict';
             
       // initial tempo, gain defined in metronome.js -- test override here
       // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
+      // localStorage iOS no?
       var storage = window.localStorage; // possibly undefined (Opera mini)
             
       if (storage) { // oh, values always strings ?!
@@ -92,7 +106,11 @@
       var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
       var beatUnitCtl = document.getElementById('beatUnitCtl');
       var gainCtl = document.getElementById('gainCtl');
-      var showGain = document.getElementById('showGain');    
+      var showGain = document.getElementById('showGain');  
+      
+      var debugContainer = document.getElementById('debugContainer');
+      var debugField = document.getElementById('debugField');
+       
       
       var trigCtl = document.getElementById('trigCtl');
       var trigCtl1 = document.getElementById('trigCtl1');
