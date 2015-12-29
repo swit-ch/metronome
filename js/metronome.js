@@ -72,6 +72,7 @@ function scheduleNote( beatNumber, time ) {
     eg.connect( mainGainNode );
     
 //     console.log(beatNumber); // correct, but no sound on first zero (fixed ?)
+// 				console.log(time); // only one iOS currently
     
 //     if (beatNumber % 16 === 0)    // beat 0 == low pitch
 //         osc.frequency.value = 880.0;
