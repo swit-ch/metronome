@@ -95,7 +95,7 @@
             
       // initial tempo, gain defined in metronome.js -- test override here
       // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
-      // localStorage iOS broken?
+      // 
       var storage = window.localStorage; // possibly undefined (Opera mini)
             
       if (storage) { // oh, values always strings ?!
@@ -230,15 +230,16 @@
           window.scrollTo(0,0); // goog onorientationchange
       }
       
-      playCtl.addEventListener('click', togglePlay, false); // touch ? ev received iOS but no sound/iamge
-      
+      playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
 //    playCtl.addEventListener('touchstart', togglePlay, false);
       
+      // NB: sets nextBeatsPerBar !
       beatsPerBarCtl.addEventListener('change', function(ev){
         var ix = this.selectedIndex;
         setBeatsPerBar(beatsPerBarObj.values[ix]);
       }, false);
       
+      // NB: sets nextBeatUnit !
       beatUnitCtl.addEventListener('change', function(ev){
         var ix = this.selectedIndex;
         setBeatUnit(beatUnitObj.values[ix]);
@@ -268,10 +269,11 @@
       }
       
       // storage per origin 
+      // arghh, spent much time only to find out 'unload' is supported by Safari mobile unlike 'beforeunload'
       if (storage){
-          window.addEventListener("beforeunload", function(ev) {    
-            
-            console.log("beforeunload");
+          // window.addEventListener("beforeunload", function(ev) {    
+            window.addEventListener("unload", function(ev) { 
+//             console.log("beforeunload");
             
             localStorage.setItem('tempo', tempo);
             localStorage.setItem('gain', gain);            

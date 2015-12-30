@@ -95,10 +95,10 @@ function scheduleNote( beatNumber, time ) {
     if (beatNumber === 0){ // the ONE
       
       // here ? works
-      if (nextBeatsPerBar != beatsPerBar) {
+      if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
       	beatsPerBar = nextBeatsPerBar;
       };
-      if (nextBeatUnit != beatUnit) {
+      if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
       	beatUnit = nextBeatUnit;
       };
       
