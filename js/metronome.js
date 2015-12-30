@@ -11,8 +11,8 @@ var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
 var nextNoteTime = 0.0;     // when the next note is due.
 // var noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
 var noteLength = 0.05;      // length of "beep" (in seconds)
-var canvas,                 // the canvas element
-    canvasContext;          // canvasContext is the canvas' context 2D
+// var canvas;                 // the canvas element -- now in HTML
+var canvasContext;          // canvasContext is the canvas' context 2D
 // var last16thNoteDrawn = -1; // the last "box" we drew on the screen
 
 var lastBeatDrawn = -1; // the last "box" we drew on the screen
@@ -139,19 +139,6 @@ function play() {
     }
 }
 
-// function resetCanvas (e) {
-//     // resize the canvas - but remember - this clears the canvas too.
-//     canvas.width = window.innerWidth;
-//     canvas.height = window.innerHeight;
-// 
-//     //make sure we scroll to the top left.
-//     window.scrollTo(0,0); 
-// }
-function resetCanvas (e) {
-    // resize the canvas - but remember - this clears the canvas too.
-    canvas.width = window.innerWidth;
-    canvas.height = 50; 
-}
 function draw() {
     var currentNote = lastBeatDrawn;
     var currentTime = audioContext.currentTime;
@@ -174,15 +161,16 @@ function draw() {
 //     }
     if (lastBeatDrawn != currentNote) {
         var x = Math.floor( canvas.width / (beatsPerBar) );
+        
         canvasContext.clearRect(0, 0, canvas.width, canvas.height); 
+        
         for (var i = 0; i < beatsPerBar; i++) {
 
 //             console.log(currentNote); // like beatNumber
             canvasContext.fillStyle = ( currentNote == i ) ? 
                 ((currentNote === 0) ? "red" : "blue") : "#bbb";
                 
-            canvasContext.fillRect( x * i , 0, x / 2, 50 );
-            canvasContext.strokeRect( x * i , 0, x / 2, 50 );
+            canvasContext.fillRect( x * i , 0, x / 2, 30 );
         }
         lastBeatDrawn = currentNote;
     }
@@ -197,24 +185,14 @@ function setMainGain(val){
 }
 
 function init(){
-    var container = document.createElement( 'div' );
-    
-    container.className = "container";
-    canvas = document.createElement( 'canvas' );
+		// canvas, resetCanvas now in index.html
     canvasContext = canvas.getContext( '2d' );
-
-//     resetCanvas();
+    resetCanvas();    
+//     canvasContext.strokeStyle = "#ffffff";
+//     canvasContext.lineWidth = 2;
+    window.onorientationchange = resetCanvas;
+    window.onresize = resetCanvas;
     
-//     document.body.appendChild( container );
-    
-    
-    
-    container.appendChild(canvas);    
-    canvasContext.strokeStyle = "#ffffff";
-    canvasContext.lineWidth = 2;
-    
-    document.body.insertBefore(container, debugContainer); // hä ?!
-
     // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
     // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
     // TO WORK ON CURRENT CHROME!!  But this means our code can be properly
@@ -232,9 +210,9 @@ function init(){
     
     //////////////////////////////////////
 		audioContext.onstatechange = function(ev){
-			var span = document.createElement('span');
-			span.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
-			debugField.appendChild(span);
+			var ele = document.createElement('div');
+			ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
+			debugField.appendChild(ele);
 		};
 		////////////////////////////////////////
 
@@ -243,9 +221,6 @@ function init(){
     mainGainNode = audioContext.createGain();
     setMainGain(gain); // init
     mainGainNode.connect( audioContext.destination );
-
-//     window.onorientationchange = resetCanvas;
-//     window.onresize = resetCanvas;
 
     requestAnimFrame(draw);    // start the drawing loop.
 

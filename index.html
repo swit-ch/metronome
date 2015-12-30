@@ -13,9 +13,25 @@
         font-family: sans-serif;
         line-height: 1.8;
       }
-      body > * {
-        border: 0.5px solid gray;
+/* 
+      body > * 
+ */
+      body *
+      {
+        /* border: 0.5px solid gray; */
+        /* background-color: rgba(200, 200, 255, 0.1); */
       }
+      
+      div#controls > div {
+        padding: 0.3em 0;
+      }
+      div.hasSlider {
+        border-top: 0.5px solid gray;
+      }
+      div#lastSlider {
+        border-bottom: 0.5px solid gray;
+      }
+      
       input {
         vertical-align: middle;
       }
@@ -25,7 +41,7 @@
         font-size   : 100%;
         line-height: inherit; /* button iOS ? */
       }
-      #showTempo, #showGain, #debugField { 
+      #showTempo, #showGain { 
         display: inline-block;
       }
       #showTempo, #showGain, select, button {
@@ -33,13 +49,8 @@
         text-align: center; /* not for select ? */
       }
       .activeCtl {
-        background-color: rgba(200, 200, 255, 0.25); /* not visible in slider */
+        /* background-color: rgba(200, 200, 255, 0.25); */ /* not visible in slider */
       }
-/* 
-      input[type="range"].activeCtl {
-        color = magenta .magenta !important;
-      }
- */
       .ctlLabel {
         display: inline-block;
         width: 7em;
@@ -48,12 +59,14 @@
       }
       .info { display: none; }
       canvas {
-        
         width: 100%;
-        height: 40px;
+        height: 30px;
       }
       #debugContainer button {
         display: none;
+      }
+      div#debugField {
+          font-family: monospace;
       }
     </style>
     <script src="js/AudioContextMonkeyPatch.js"></script> 
@@ -67,10 +80,10 @@
       <!-- is this a table ? A form? -->
       <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
       <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
-      <div><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
-      <div><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
+      <div class="hasSlider"><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
+      <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
     </div>
-    
+    <div><canvas id="beatCanvas"></canvas></div>
     <div id="debugContainer">
       <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
       <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Trig 1</button>
@@ -82,7 +95,7 @@
             
       // initial tempo, gain defined in metronome.js -- test override here
       // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
-      // localStorage iOS no?
+      // localStorage iOS broken?
       var storage = window.localStorage; // possibly undefined (Opera mini)
             
       if (storage) { // oh, values always strings ?!
@@ -107,6 +120,8 @@
       var beatUnitCtl = document.getElementById('beatUnitCtl');
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');  
+      
+      var canvas = document.getElementById('beatCanvas');
       
       var debugContainer = document.getElementById('debugContainer');
       var debugField = document.getElementById('debugField');
@@ -155,6 +170,9 @@
       
       
       tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
+      tempoCtl.style.maxWidth = '100%'; // ha !
+      
+      
       gainCtl.style.width = '200px';
       
       
@@ -201,6 +219,17 @@
       }
       
       
+      // here now, called in metronome.js but layout related
+      
+      function resetCanvas (e) {
+          // resize the canvas - but remember - this clears the canvas too.
+          canvas.width = window.innerWidth;
+          // canvas.height = window.innerHeight;
+          canvas.height = 30;
+          //make sure we scroll to the top left.
+          window.scrollTo(0,0); // goog onorientationchange
+      }
+      
       playCtl.addEventListener('click', togglePlay, false); // touch ? ev received iOS but no sound/iamge
       
 //    playCtl.addEventListener('touchstart', togglePlay, false);
@@ -241,6 +270,9 @@
       // storage per origin 
       if (storage){
           window.addEventListener("beforeunload", function(ev) {    
+            
+            console.log("beforeunload");
+            
             localStorage.setItem('tempo', tempo);
             localStorage.setItem('gain', gain);            
             localStorage.setItem('beatsPerBar', beatsPerBar);
