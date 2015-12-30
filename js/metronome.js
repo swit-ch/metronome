@@ -28,7 +28,8 @@ var gain = 0.5; // tempo and gain defaults here
 var beatsPerBar = 3; // positive integer
 var beatUnit = 1 / 2; 
 var currentBeat;
-var nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line (?)
+// var nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line (?)
+var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){
@@ -94,8 +95,12 @@ function scheduleNote( beatNumber, time ) {
     if (beatNumber === 0){ // the ONE
       
       // here ? works
-      if (nextBeatsPerBar != beatsPerBar) { beatsPerBar = nextBeatsPerBar };
-      if (nextBeatUnit != beatUnit) { beatUnit = nextBeatUnit };
+      if (nextBeatsPerBar != beatsPerBar) {
+      	beatsPerBar = nextBeatsPerBar;
+      };
+      if (nextBeatUnit != beatUnit) {
+      	beatUnit = nextBeatUnit;
+      };
       
       osc.frequency.value = 880.0;
     };
