@@ -80,7 +80,7 @@
       <!-- is this a table ? A form? -->
       <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
       <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
-      <div class="hasSlider"><span class="ctlLabel">Tempo: </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
+      <div class="hasSlider"><span class="ctlLabel">Tempo (1/4): </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
       <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
     </div>
     <div><canvas id="beatCanvas"></canvas></div>
@@ -92,26 +92,44 @@
     
     <script type="text/javascript"> 
       'use strict';
-            
+      
+      
+      
+      
       // initial tempo, gain defined in metronome.js -- test override here
       // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
       // 
-      var storage = window.localStorage; // possibly undefined (Opera mini)
-            
-      if (storage) { // oh, values always strings ?!
-        (function(){ // maybe better have a state object
-          var t = storage.getItem('tempo'); 
-          var g = storage.getItem('gain'); 
-          var bpb = storage.getItem('beatsPerBar');
-          var bu = storage.getItem('beatUnit');
+      var storage = window.localStorage; // possibly undefined // storage per origin
+      
+      // is it safe to get/set via prop name instead of getItem, setItem ?
+      function readItems(store){ // oh, localStorage values always strings ?!
+        var bpb = store.getItem('beatsPerBar');
+        var bu = store.getItem('beatUnit');
+        var t = store.getItem('tempo'); 
+        var g = store.getItem('gain');           
         
-          tempo = t ? Number(t) : 123; 
-          gain = g ? Number(g) : 1 / 7; 
-          beatsPerBar = bpb ? Number(bpb) : 3;
-          beatUnit = bu ? Number(bu) : 1 / 4;
-        })()
+        beatsPerBar = bpb ? Number(bpb) : 3;
+        beatUnit = bu ? Number(bu) : 1 / 4;
+        tempo = t ? Number(t) : 123; 
+        gain = g ? Number(g) : 1 / 7; 
       }
-
+      function writeItems(store){
+        store.setItem('tempo', tempo);
+        store.setItem('gain', gain);            
+        store.setItem('beatsPerBar', beatsPerBar);
+        store.setItem('beatUnit', beatUnit);
+      }
+       
+      if (storage) { readItems(storage); }; // init
+      
+      // arghh, spent much time only to find out 'unload' is supported by Safari mobile unlike 'beforeunload'
+      if (storage){
+        window.addEventListener("unload", function(ev) {
+          writeItems(storage);
+        }, false);
+      };
+      
+      
       // could as well create the widgets right here, instead of this:
       var playCtl = document.getElementById('playCtl');
       var tempoCtl = document.getElementById('tempoCtl');
@@ -268,21 +286,7 @@
           trigCtl1.disabled = true;
       }
       
-      // storage per origin 
-      // arghh, spent much time only to find out 'unload' is supported by Safari mobile unlike 'beforeunload'
-      if (storage){
-          // window.addEventListener("beforeunload", function(ev) {    
-            window.addEventListener("unload", function(ev) { 
-//             console.log("beforeunload");
-            
-            localStorage.setItem('tempo', tempo);
-            localStorage.setItem('gain', gain);            
-            localStorage.setItem('beatsPerBar', beatsPerBar);
-            localStorage.setItem('beatUnit', beatUnit);
-          }, false);
-      };
-      
-      nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line 
+//       nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line 
       
       // init gui
       updBeatsPerBarGUI();

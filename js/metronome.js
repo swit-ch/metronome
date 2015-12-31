@@ -1,8 +1,12 @@
+'use strict';
+
+var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
+var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
+
 var audioContext = null;
 var isPlaying = false;      // Are we currently playing?
 // var startTime;              // The start time of the entire sequence.   NOT USED
 // var current16thNote;        // What note is currently last scheduled? ==> currentBeat
-var tempo = 120.0;          // tempo (in beats per minute)
 var lookahead = 25.0;       // How frequently to call scheduling function 
                             //(in milliseconds)
 var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
@@ -21,15 +25,9 @@ var notesInQueue = [];      // the notes that have been put into the web audio,
                             // and may or may not have played yet. {note, time}
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
-var mainGainNode; // testing
-var gain = 0.5; // tempo and gain defaults here
-
-
-var beatsPerBar = 3; // positive integer
-var beatUnit = 1 / 2; 
+var mainGainNode; 
 var currentBeat;
-// var nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line (?)
-var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
+
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){
@@ -56,13 +54,22 @@ function nextNote() {
     currentBeat = (currentBeat + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
 }
 
-// iOS hack
+// iOS Safari hack
 function pseudoSound(){
     // create an oscillator, connecting not necessary
     var osc = audioContext.createOscillator();    
     var time = audioContext.currentTime;
     osc.start( time );
     osc.stop( time + 0.01 );
+}
+
+function updateTimeSignature (){
+	if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
+		beatsPerBar = nextBeatsPerBar;
+	};
+	if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
+		beatUnit = nextBeatUnit;
+	};
 }
 
 // beatNumber is passed in currentBeat
@@ -95,12 +102,7 @@ function scheduleNote( beatNumber, time ) {
     if (beatNumber === 0){ // the ONE
       
       // here ? works
-      if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
-      	beatsPerBar = nextBeatsPerBar;
-      };
-      if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
-      	beatUnit = nextBeatUnit;
-      };
+			updateTimeSignature();
       
       osc.frequency.value = 880.0;
     };
@@ -112,13 +114,6 @@ function scheduler() {
     // while there are notes that will need to play before the next interval, 
     // schedule them and advance the pointer.
     while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-       
-//     		console.log("scheduler currentBeat : " + currentBeat); // stops after 1 iOS
-// b/c above condition false
-// nextNoteTime not advancing, audioContext.currentTime 0, ah
-// audioContext state suspended
-// what then does manual trig do to fix this? scheduleNote(n, audioContext.currentTime)
-       
         scheduleNote( currentBeat, nextNoteTime );
         nextNote();
     }
@@ -129,7 +124,7 @@ function play() {
 		
     if (isPlaying) { // start playing
     		
-    			// iOS hack
+    			// iOS hack, otherwise audioContext suspended
     		if (audioContext.state !== 'running'){
     			pseudoSound();
     		};
@@ -233,7 +228,7 @@ function init(){
 
     timerWorker.onmessage = function(e) {
         if (e.data == "tick") {
-//             console.log("tick!"); // appears ok also IOS
+//             console.log("tick!"); 
             scheduler();
         }
         else
