@@ -20,27 +20,54 @@
       {
         /* border: 0.5px solid gray; */
         /* background-color: rgba(200, 200, 255, 0.1); */
+        /* -webkit-appearance: none; */
       }
       
       div#controls > div {
         padding: 0.3em 0;
       }
+/* 
       div.hasSlider {
         border-top: 0.5px solid gray;
       }
       div#lastSlider {
         border-bottom: 0.5px solid gray;
       }
+ */
       
-      input {
-        vertical-align: middle;
-      }
         /* https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Styling_HTML_forms */
       button, input, select, textarea {
         font-family : inherit;
         font-size   : 100%;
-        line-height: inherit; /* button iOS ? */
+        height: 2em; /* slightly better iOS */
+        /* background-color: #0f0; */
       }
+      
+      input[type="range"] {
+        -webkit-appearance: none; /* ha */
+        vertical-align: middle;
+        border-radius: 6px;
+      }
+      /* fit into whole range */
+      input[type="range"]::-webkit-slider-runnable-track {
+        -webkit-appearance: none;
+        height: 2em;
+          
+        border: 0.5px solid grey; 
+        border-radius: 6px;
+        /* background-color: yellow; */
+      }
+      /* big thumb better for iOS */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; 
+        height: 2em;
+        width: 2em;
+        /* vertical-align: middle; */ /* no effect */
+        border: 1px solid black;
+        border-radius: 4px;
+        /* background-color: red; */
+      }
+      
       #showTempo, #showGain { 
         display: inline-block;
       }
