@@ -3,6 +3,9 @@
 var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
 var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
+var beatDur; // new, for beatView
+var counter = 0;
+
 var audioContext = null;
 var isPlaying = false;      // Are we currently playing?
 // var startTime;              // The start time of the entire sequence.   NOT USED
@@ -42,15 +45,20 @@ window.requestAnimFrame = (function(){
 })();
 
 function nextNote() {
-    // Advance current note and time by a 16th note... No, beat
+    // Advance current note and time by a 16th note... No, one beat
     var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
                                           // tempo value to calculate beat length.
-    nextNoteTime += beatUnit * 4 * secondsPerBeat;    // Add beat length to last beat time
+    
+    beatDur = beatUnit * 4 * secondsPerBeat;
+    
+    nextNoteTime += beatDur;    // Add beat length to last beat time
 
 //     currentBeat++;    // Advance the beat number, wrap to zero
 //     if (currentBeat == beatsPerBar) {
 //         currentBeat = 0;
 //     };
+		
+		// special case: 1 beatsPerBar !
     currentBeat = (currentBeat + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
 }
 
@@ -163,11 +171,11 @@ function draw() {
 //         }
 //         lastBeatDrawn = currentNote;
 //     }
+		
+		// hmm, special case one beatsPerBar !
     if (lastBeatDrawn != currentNote) {
         var x = Math.floor( canvas.width / (beatsPerBar) );
-        
         canvasContext.clearRect(0, 0, canvas.width, canvas.height); 
-        
         for (var i = 0; i < beatsPerBar; i++) {
 
 //             console.log(currentNote); // like beatNumber
@@ -177,7 +185,19 @@ function draw() {
             canvasContext.fillRect( x * i , 0, x / 2, 30 );
         }
         lastBeatDrawn = currentNote;
-    }
+        
+        beatView.style.transitionDuration = beatDur + "s";
+        // beatView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
+       
+       console.log(counter);
+       
+        if (counter % 2 == 0){
+       		beatView.classList.add('other');
+        } else {
+       		beatView.classList.remove('other');
+        };
+        counter++;
+    };
     // set up to draw again
     requestAnimFrame(draw);
 }
