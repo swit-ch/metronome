@@ -66,9 +66,13 @@ function pseudoSound(){
 function updateTimeSignature (){
 	if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 		beatsPerBar = nextBeatsPerBar;
+		
+		updBeatsPerBarGUI();
 	};
 	if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
 		beatUnit = nextBeatUnit;
+		
+		updBeatUnitGUI();
 	};
 }
 
@@ -144,8 +148,8 @@ function draw() {
     var currentTime = audioContext.currentTime;
 
     while (notesInQueue.length && notesInQueue[0].time < currentTime) {
-        currentNote = notesInQueue[0].note;
-        notesInQueue.splice(0,1);   // remove note from queue
+			currentNote = notesInQueue[0].note;
+			notesInQueue.splice(0,1);   // remove note from queue
     }
 
     // We only need to draw if the note has moved.

@@ -133,18 +133,27 @@
         var bpb = store.getItem('beatsPerBar');
         var bu = store.getItem('beatUnit');
         var t = store.getItem('tempo'); 
-        var g = store.getItem('gain');           
+        var g = store.getItem('gain');
+        
+        var nbpb = store.getItem('nextBeatsPerBar');
+        var nbu = store .getItem('nextBeatUnit');
         
         beatsPerBar = bpb ? Number(bpb) : 3;
         beatUnit = bu ? Number(bu) : 1 / 4;
         tempo = t ? Number(t) : 123; 
         gain = g ? Number(g) : 1 / 7; 
+        
+        nextBeatsPerBar = nbpb ? Number(nbpb) : 3;
+        nextBeatUnit = nbu ? Number(nbu) : 1 / 4;
       }
       function writeItems(store){
-        store.setItem('tempo', tempo);
-        store.setItem('gain', gain);            
         store.setItem('beatsPerBar', beatsPerBar);
         store.setItem('beatUnit', beatUnit);
+        store.setItem('tempo', tempo);
+        store.setItem('gain', gain);    
+                
+        store.setItem('nextBeatsPerBar', nextBeatsPerBar);
+        store.setItem('nextBeatUnit', nextBeatUnit);
       }
        
       if (storage) { readItems(storage); }; // init
@@ -190,10 +199,12 @@
       gainCtl.value = gain;
       
       var beatsPerBarObj = {
-        labels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ], 
-        values: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ], 
-        len: 23
+        values: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
+        ]
       };
+      beatsPerBarObj.labels = beatsPerBarObj.values;
+      beatsPerBarObj.len = beatsPerBarObj.values.length;
       for(var i = 0; i < beatsPerBarObj.len; i++){
         var o = document.createElement('option');
         o.textContent = beatsPerBarObj.labels[i];
@@ -201,10 +212,12 @@
       };
       
       var beatUnitObj = {
-        labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ], 
-        values: [ 1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32 ], 
-        len: 6
+        labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
       };
+      beatUnitObj.values = beatUnitObj.labels.map(function(item, i){
+        return eval(item);
+      });
+      beatUnitObj.len = beatUnitObj.labels.length;
       for(var i = 0; i < beatUnitObj.len; i++){
         var o = document.createElement('option');
         o.textContent = beatUnitObj.labels[i];
@@ -230,10 +243,13 @@
       
       // indexOf tests for strict equality
       function updBeatsPerBarGUI(){
-        beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(beatsPerBar);
+        // special case: next is set, next bar not reached (?)
+        var val = nextBeatsPerBar || beatsPerBar;
+        beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(val);
       }
       function updBeatUnitGUI(){
-        beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(beatUnit);
+      var val = nextBeatUnit || beatUnit;
+        beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
       }
       
       
