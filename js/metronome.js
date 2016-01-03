@@ -3,13 +3,16 @@
 var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
 var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
+var beatInBar; // was 'currentBeat' 
+var beats; // since last 'play' (signature change ?) -- not used currently
 var beatDur; // new, for beatView
-var counter = 0;
+
+var mainGainNode; 
 
 var audioContext = null;
 var isPlaying = false;      // Are we currently playing?
 // var startTime;              // The start time of the entire sequence.   NOT USED
-// var current16thNote;        // What note is currently last scheduled? ==> currentBeat
+// var current16thNote;        // What note is currently last scheduled? ==> beatInBar
 var lookahead = 25.0;       // How frequently to call scheduling function 
                             //(in milliseconds)
 var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
@@ -28,8 +31,9 @@ var notesInQueue = [];      // the notes that have been put into the web audio,
                             // and may or may not have played yet. {note, time}
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
-var mainGainNode; 
-var currentBeat;
+
+
+
 
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -48,18 +52,19 @@ function nextNote() {
     // Advance current note and time by a 16th note... No, one beat
     var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
                                           // tempo value to calculate beat length.
-    
+    // tempo change on next beat
     beatDur = beatUnit * 4 * secondsPerBeat;
     
     nextNoteTime += beatDur;    // Add beat length to last beat time
 
-//     currentBeat++;    // Advance the beat number, wrap to zero
-//     if (currentBeat == beatsPerBar) {
-//         currentBeat = 0;
+//     beatInBar++;    // Advance the beat number, wrap to zero
+//     if (beatInBar == beatsPerBar) {
+//         beatInBar = 0;
 //     };
 		
 		// special case: 1 beatsPerBar !
-    currentBeat = (currentBeat + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
+    beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
+		beats++;
 }
 
 // iOS Safari hack
@@ -84,7 +89,7 @@ function updateTimeSignature (){
 	};
 }
 
-// beatNumber is passed in currentBeat
+// beatNumber is passed in beatInBar
 function scheduleNote( beatNumber, time ) {
     // push the note on the queue, even if we're not playing.
     notesInQueue.push( { note: beatNumber, time: time } );
@@ -111,6 +116,8 @@ function scheduleNote( beatNumber, time ) {
 //     else                        // other 16th notes = high pitch
 //         osc.frequency.value = 220.0;
     
+//     console.log("scheduleNote beatNumber : " + beatNumber);
+    
     if (beatNumber === 0){ // the ONE
       
       // here ? works
@@ -126,7 +133,7 @@ function scheduler() {
     // while there are notes that will need to play before the next interval, 
     // schedule them and advance the pointer.
     while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-        scheduleNote( currentBeat, nextNoteTime );
+        scheduleNote( beatInBar, nextNoteTime );
         nextNote();
     }
 }
@@ -141,7 +148,9 @@ function play() {
     			pseudoSound();
     		};
     		
-        currentBeat = 0;
+        beatInBar = 0;
+        beats = 0;
+        
         nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
         timerWorker.postMessage("start");
         return "stop";
@@ -177,26 +186,26 @@ function draw() {
         var x = Math.floor( canvas.width / (beatsPerBar) );
         canvasContext.clearRect(0, 0, canvas.width, canvas.height); 
         for (var i = 0; i < beatsPerBar; i++) {
-
-//             console.log(currentNote); // like beatNumber
+						
+						var test = Math.round(Math.random() * 255);
+						test = "rgb(" + test + ", 100, 100)";
+						
+//             console.log("draw currentNote : " + currentNote); // like beatNumber
             canvasContext.fillStyle = ( currentNote == i ) ? 
-                ((currentNote === 0) ? "red" : "blue") : "#bbb";
+//                 ((currentNote === 0) ? "red" : "blue") : "#bbb";
+                ((currentNote === 0) ? test : "blue") : "#bbb";
                 
             canvasContext.fillRect( x * i , 0, x / 2, 30 );
         }
         lastBeatDrawn = currentNote;
         
-        beatView.style.transitionDuration = beatDur + "s";
+//         beatView.style.transitionDuration = beatDur + "s";
+        beatView.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
         // beatView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
-       
-       console.log(counter);
-       
-        if (counter % 2 == 0){
-       		beatView.classList.add('other');
-        } else {
-       		beatView.classList.remove('other');
-        };
-        counter++;
+					beatView.classList.toggle('other'); // ha !
     };
     // set up to draw again
     requestAnimFrame(draw);
