@@ -5,7 +5,7 @@ var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 var beatInBar; // was 'currentBeat' 
 var beats; // since last 'play' (like SuperCollider ?)
-var beatDur; // new, for beatView
+var beatDur; // new, for pendulumView
 
 var mainGainNode; 
 
@@ -179,8 +179,8 @@ function draw() {
 
     // We only need to draw if the note has moved.
 //     if (lastBeatInBarDrawn != currentBeatInBar) {
-//         var x = Math.floor( canvas.width / 18 );
-//         canvasContext.clearRect(0,0,canvas.width, canvas.height); 
+//         var x = Math.floor( barView.width / 18 );
+//         canvasContext.clearRect(0,0,barView.width, barView.height); 
 //         for (var i=0; i<16; i++) {
 //             canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
 //                 ((currentBeatInBar%4 === 0)?"red":"blue") : "black";
@@ -193,8 +193,8 @@ function draw() {
     if //(lastBeatInBarDrawn != currentBeatInBar) 
     ( lastBeatsDrawn != currentBeats )
     {
-        var x = Math.floor( canvas.width / (beatsPerBar) );
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height); 
+        var x = Math.floor( barView.width / (beatsPerBar) );
+        canvasContext.clearRect(0, 0, barView.width, barView.height); 
         for (var i = 0; i < beatsPerBar; i++) {
 						
 						var test = Math.round(Math.random() * 255);
@@ -209,13 +209,13 @@ function draw() {
         lastBeatInBarDrawn = currentBeatInBar;
         lastBeatsDrawn = currentBeats;
         
-//         beatView.style.transitionDuration = beatDur + "s";
-        beatView.setAttribute(
+//         pendulumView.style.transitionDuration = beatDur + "s";
+        pendulumView.setAttribute(
         	'style', 
         	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
         );
-        // beatView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
-					beatView.classList.toggle('other'); // ha !
+        // pendulumView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
+					pendulumView.classList.toggle('other'); // ha !
     };
     // set up to draw again
     requestAnimFrame(draw);
@@ -228,13 +228,13 @@ function setMainGain(val){
 }
 
 function init(){
-		// canvas, resetCanvas now in index.html
-    canvasContext = canvas.getContext( '2d' );
-    resetCanvas();    
+		// barView, resetbarView now in index.html
+    canvasContext = barView.getContext( '2d' );
+    resetbarView();    
 //     canvasContext.strokeStyle = "#ffffff";
 //     canvasContext.lineWidth = 2;
-    window.onorientationchange = resetCanvas;
-    window.onresize = resetCanvas;
+    window.onorientationchange = resetbarView;
+    window.onresize = resetbarView;
     
     // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
     // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
@@ -255,7 +255,7 @@ function init(){
 		audioContext.onstatechange = function(ev){
 			var ele = document.createElement('div');
 			ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
-			debugField.appendChild(ele);
+			postView.appendChild(ele);
 		};
 		////////////////////////////////////////
 

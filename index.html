@@ -14,15 +14,6 @@
         line-height: 1.8;
         margin: 12px;
       }
-/* 
-      body > * 
- */
-      body *
-      {
-        /* border: 0.5px solid gray; */
-        /* background-color: rgba(200, 200, 255, 0.1); */
-        /* -webkit-appearance: none; */
-      }
       
       div#controls > div {
         padding: 0.3em 0;
@@ -41,25 +32,20 @@
         font-family : inherit;
         font-size   : 100%;
         height: 2em; /* slightly better iOS */
-        /* background-color: #0f0; */
       }
       
       input[type="range"] {
         -webkit-appearance: none; /* ha */
         vertical-align: middle;
-        
-        border-radius: 6px;
-        
-        border-radius: 6px;
+        /* border: 0.5px solid grey; */ /* not nice if appearance unchanged */
+        /* border-radius: 6px; */
       }
       /* fit into whole range */
       input[type="range"]::-webkit-slider-runnable-track {
         -webkit-appearance: none;
         height: 2em;
-          
         border: 0.5px solid grey; 
-        border-radius: 6px;
-        /* background-color: yellow; */
+        /* border-radius: 6px; */
       }
       /* big thumb better for iOS */
       input[type="range"]::-webkit-slider-thumb {
@@ -68,8 +54,7 @@
         width: 2em;
         /* vertical-align: middle; */ /* no effect */
         border: 1px solid black;
-        border-radius: 4px;
-        /* background-color: red; */
+        /* border-radius: 4px; */
       }
       
       #showTempo, #showGain { 
@@ -89,17 +74,17 @@
         padding-right: 1ex;
       }
       .info { display: none; }
-      canvas {
+      canvas#barView {
         width: 100%;
         height: 30px;
       }
 
-      div#beatViewContainer {
+      div#pendulumViewContainer {
         border: 1px solid black;
         height: 30px;
         width: 100%;
       }
-      div#beatView {
+      div#pendulumView {
         width: 10px;
         height: 30px;
         background-color: gray;
@@ -107,7 +92,7 @@
         -webkit-transition: margin-left linear;
         transition: margin-left linear;
       }
-      div#beatView.other {        
+      div#pendulumView.other {        
         margin-left: calc(100% - 10px);
         -webkit-transition: margin-left linear;
         transition: margin-left linear;
@@ -116,7 +101,7 @@
       #debugContainer button {
         display: none;
       }
-      div#debugField {
+      div#postView {
           font-family: monospace;
       }
     </style>
@@ -134,23 +119,19 @@
       <div class="hasSlider"><span class="ctlLabel">Tempo (1 / 4): </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
       <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
     </div>
-    <div><canvas id="beatCanvas"></canvas></div>
+    <div><canvas id="barView"></canvas></div>
     
-    <div id="beatViewContainer">
-    <div id="beatView"></div></div>
+    <div id="pendulumViewContainer"><div id="pendulumView"></div></div>
     
     <div id="debugContainer">
       <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
       <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Trig 1</button>
-      <div id="debugField"></div>
+      <div id="postView"></div>
     </div>
     
     <script type="text/javascript"> 
       'use strict';
-      
-      
-      
-      
+            
       // initial tempo, gain defined in metronome.js -- test override here
       // no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
       // 
@@ -203,15 +184,15 @@
       var gainCtl = document.getElementById('gainCtl');
       var showGain = document.getElementById('showGain');  
       
-      var canvas = document.getElementById('beatCanvas');
+      var barView = document.getElementById('barView');
       
       var debugContainer = document.getElementById('debugContainer');
-      var debugField = document.getElementById('debugField');
+      var postView = document.getElementById('postView');
        
       var trigCtl = document.getElementById('trigCtl');
       var trigCtl1 = document.getElementById('trigCtl1');
       
-      var beatView = document.getElementById('beatView');
+      var pendulumView = document.getElementById('pendulumView');
       
       var tempoSpec = { min: 10, max: 400, step: 1 };
       var gainSpec = {  min: 0, max: 1, step: "any" };
@@ -229,8 +210,7 @@
       
       var beatsPerBarObj = {
         values: [
-          1, 
-          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
         ]
       };
       beatsPerBarObj.labels = beatsPerBarObj.values;
@@ -254,9 +234,7 @@
         beatUnitCtl.add(o);
       };
 
-      
-      
-      
+            
       tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
       tempoCtl.style.maxWidth = '100%'; // ha !
       
@@ -312,11 +290,10 @@
       
       // here now, called in metronome.js but layout related
       
-      function resetCanvas (e) {
+      function resetbarView (e) {
           // resize the canvas - but remember - this clears the canvas too.
-          canvas.width = window.innerWidth;
-          // canvas.height = window.innerHeight;
-          canvas.height = 30;
+          barView.width = window.innerWidth;
+          barView.height = 30;
           //make sure we scroll to the top left.
           window.scrollTo(0,0); // goog onorientationchange
       }
@@ -358,9 +335,7 @@
           trigCtl.disabled = true;
           trigCtl1.disabled = true;
       }
-      
-//       nextBeatsPerBar = beatsPerBar, nextBeatUnit = beatUnit; // change only at next bar line 
-      
+            
       // init gui
       updBeatsPerBarGUI();
       updBeatUnitGUI();
