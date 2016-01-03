@@ -4,7 +4,7 @@ var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
 var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 var beatInBar; // was 'currentBeat' 
-var beats; // since last 'play' (signature change ?) -- not used currently
+var beats; // since last 'play' (like SuperCollider ?)
 var beatDur; // new, for beatView
 
 var mainGainNode; 
@@ -25,10 +25,13 @@ var noteLength = 0.05;      // length of "beep" (in seconds)
 var canvasContext;          // canvasContext is the canvas' context 2D
 // var last16thNoteDrawn = -1; // the last "box" we drew on the screen
 
-var lastBeatDrawn = -1; // the last "box" we drew on the screen
+// var lastBeatDrawn = -1; // the last "box" we drew on the screen
+var lastBeatInBarDrawn = -1;
+var lastBeatsDrawn = -1;
 
 var notesInQueue = [];      // the notes that have been put into the web audio,
                             // and may or may not have played yet. {note, time}
+// note becomes beatInBar, added beats
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
 
@@ -89,10 +92,11 @@ function updateTimeSignature (){
 	};
 }
 
-// beatNumber is passed in beatInBar
-function scheduleNote( beatNumber, time ) {
+// beatNumber is passed in beatInBar ==> argBeatInBar
+// new testing argBeats
+function scheduleNote( argBeatInBar, time, argBeats ) {
     // push the note on the queue, even if we're not playing.
-    notesInQueue.push( { note: beatNumber, time: time } );
+    notesInQueue.push( { beatInBar: argBeatInBar, time: time, beats: argBeats } );
 
     // create an oscillator
     var osc = audioContext.createOscillator();    
@@ -106,19 +110,16 @@ function scheduleNote( beatNumber, time ) {
     osc.connect(eg);
     eg.connect( mainGainNode );
     
-//     console.log(beatNumber); // correct, but no sound on first zero (fixed ?)
-// 				console.log(time); // only one iOS currently
-    
-//     if (beatNumber % 16 === 0)    // beat 0 == low pitch
+//     if (argBeatInBar % 16 === 0)    // beat 0 == low pitch
 //         osc.frequency.value = 880.0;
-//     else if (beatNumber % 4 === 0 )    // quarter notes = medium pitch
+//     else if (argBeatInBar % 4 === 0 )    // quarter notes = medium pitch
 //         osc.frequency.value = 440.0;
 //     else                        // other 16th notes = high pitch
 //         osc.frequency.value = 220.0;
     
-//     console.log("scheduleNote beatNumber : " + beatNumber);
+//     console.log("scheduleNote argBeatInBar : " + argBeatInBar + " argBeats : " + argBeats);
     
-    if (beatNumber === 0){ // the ONE
+    if (argBeatInBar === 0){ // the ONE
       
       // here ? works
 			updateTimeSignature();
@@ -133,7 +134,8 @@ function scheduler() {
     // while there are notes that will need to play before the next interval, 
     // schedule them and advance the pointer.
     while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-        scheduleNote( beatInBar, nextNoteTime );
+//         scheduleNote( beatInBar, nextNoteTime );
+        scheduleNote( beatInBar, nextNoteTime, beats );
         nextNote();
     }
 }
@@ -161,28 +163,36 @@ function play() {
 }
 
 function draw() {
-    var currentNote = lastBeatDrawn;
+    var currentBeatInBar = lastBeatInBarDrawn; //  was "currentNote"
+    
+    var currentBeats = lastBeatsDrawn; // new
+    
     var currentTime = audioContext.currentTime;
 
     while (notesInQueue.length && notesInQueue[0].time < currentTime) {
-			currentNote = notesInQueue[0].note;
+			currentBeatInBar = notesInQueue[0].beatInBar;
+			
+			currentBeats = notesInQueue[0].beats;
+			
 			notesInQueue.splice(0,1);   // remove note from queue
     }
 
     // We only need to draw if the note has moved.
-//     if (lastBeatDrawn != currentNote) {
+//     if (lastBeatInBarDrawn != currentBeatInBar) {
 //         var x = Math.floor( canvas.width / 18 );
 //         canvasContext.clearRect(0,0,canvas.width, canvas.height); 
 //         for (var i=0; i<16; i++) {
-//             canvasContext.fillStyle = ( currentNote == i ) ? 
-//                 ((currentNote%4 === 0)?"red":"blue") : "black";
+//             canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+//                 ((currentBeatInBar%4 === 0)?"red":"blue") : "black";
 //             canvasContext.fillRect( x * (i+1), x, x/2, x/2 );
 //         }
-//         lastBeatDrawn = currentNote;
+//         lastBeatInBarDrawn = currentBeatInBar;
 //     }
 		
 		// hmm, special case one beatsPerBar !
-    if (lastBeatDrawn != currentNote) {
+    if //(lastBeatInBarDrawn != currentBeatInBar) 
+    ( lastBeatsDrawn != currentBeats )
+    {
         var x = Math.floor( canvas.width / (beatsPerBar) );
         canvasContext.clearRect(0, 0, canvas.width, canvas.height); 
         for (var i = 0; i < beatsPerBar; i++) {
@@ -190,14 +200,14 @@ function draw() {
 						var test = Math.round(Math.random() * 255);
 						test = "rgb(" + test + ", 100, 100)";
 						
-//             console.log("draw currentNote : " + currentNote); // like beatNumber
-            canvasContext.fillStyle = ( currentNote == i ) ? 
-//                 ((currentNote === 0) ? "red" : "blue") : "#bbb";
-                ((currentNote === 0) ? test : "blue") : "#bbb";
+            canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+//                 ((currentBeatInBar === 0) ? "red" : "blue") : "#bbb";
+                ((currentBeatInBar === 0) ? test : "blue") : "#bbb";
                 
             canvasContext.fillRect( x * i , 0, x / 2, 30 );
         }
-        lastBeatDrawn = currentNote;
+        lastBeatInBarDrawn = currentBeatInBar;
+        lastBeatsDrawn = currentBeats;
         
 //         beatView.style.transitionDuration = beatDur + "s";
         beatView.setAttribute(
