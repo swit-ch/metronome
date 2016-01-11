@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Metronome swit-ch testing</title>
     <!-- <link rel="stylesheet" href="css/main.css"> -->
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <style type="text/css">
       body {
@@ -31,7 +31,7 @@
       button, input, select, textarea {
         font-family : inherit;
         font-size   : 100%;
-        height: 2em; /* slightly better iOS */
+        /* height: 2em; */ /* slightly better iOS */
       }
       
       input[type="range"] {
@@ -56,24 +56,25 @@
         border: 1px solid black;
         /* border-radius: 4px; */
       }
-      
-      #showTempo, #showGain { 
+      #showTempoCtl, #showGainCtl { 
         display: inline-block;
       }
-      #showTempo, #showGain, select, button {
+      select, button, input[type="number"] {
         width: 5em;
         text-align: center; /* not for select ? */
       }
       .activeCtl {
         /* background-color: rgba(200, 200, 255, 0.25); */ /* not visible in slider */
       }
-      .ctlLabel {
+      span.ctlLabel {
         display: inline-block;
         width: 7em;
         text-align: right;
         padding-right: 1ex;
       }
       .info { display: none; }
+      
+      
       canvas#barView {
         width: 100%;
         height: 30px;
@@ -116,8 +117,17 @@
       <!-- is this a table ? A form? -->
       <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
       <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
-      <div class="hasSlider"><span class="ctlLabel">Tempo (1 / 4): </span><span id="showTempo"></span><span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
-      <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span><span id="showGain"></span><input type="range" id="gainCtl" class="activeCtl"></div>
+      
+      <div class="hasSlider"><span class="ctlLabel">Tempo (1 / 4): </span>
+      <!-- <span id="showTempo"></span> -->
+      <input type="number" id="showTempoCtl"> 
+      <span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
+      
+      <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span>
+      <!-- <span id="showGain"></span> -->
+      <input type="number" id="showGainCtl">
+      <input type="range" id="gainCtl" class="activeCtl"></div>
+      
     </div>
     <div><canvas id="barView"></canvas></div>
     
@@ -177,36 +187,52 @@
       
       // could as well create the widgets right here, instead of this:
       var playCtl = document.getElementById('playCtl');
-      var tempoCtl = document.getElementById('tempoCtl');
-      var showTempo = document.getElementById('showTempo');
+            
       var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
       var beatUnitCtl = document.getElementById('beatUnitCtl');
+      
+      var tempoCtl = document.getElementById('tempoCtl');
+      var showTempoCtl = document.getElementById('showTempoCtl');
       var gainCtl = document.getElementById('gainCtl');
-      var showGain = document.getElementById('showGain');  
+      var showGainCtl = document.getElementById('showGainCtl');
       
       var barView = document.getElementById('barView');
-      
+      var pendulumView = document.getElementById('pendulumView');
+
       var debugContainer = document.getElementById('debugContainer');
       var postView = document.getElementById('postView');
        
       var trigCtl = document.getElementById('trigCtl');
       var trigCtl1 = document.getElementById('trigCtl1');
-      
-      var pendulumView = document.getElementById('pendulumView');
-      
+            
       var tempoSpec = { min: 10, max: 400, step: 1 };
       var gainSpec = {  min: 0, max: 1, step: "any" };
-//       var resoOptions = [ '16th notes', '8th notes', 'Quarter notes' ];
             
       // setAttribute any better ?
       tempoCtl.min = tempoSpec.min;
       tempoCtl.max = tempoSpec.max;
       tempoCtl.step = tempoSpec.step;
       tempoCtl.value = tempo;
+      
+      showTempoCtl.min = tempoSpec.min;
+      showTempoCtl.max = tempoSpec.max;
+      showTempoCtl.step = tempoSpec.step;
+      showTempoCtl.value = tempo;
+      showTempoCtl.pattern = "[0-9]*";
+      showTempoCtl.inputmode= "numeric";
+      
       gainCtl.min = gainSpec.min;
       gainCtl.max = gainSpec.max;
       gainCtl.step = gainSpec.step;
       gainCtl.value = gain;
+      
+      showGainCtl.min = gainSpec.min;
+      showGainCtl.max = gainSpec.max;
+//       showGainCtl.step = gainSpec.step;
+      showGainCtl.step = 0.01;
+      showGainCtl.value = gain;
+      
+            
       
       var beatsPerBarObj = {
         values: [
@@ -234,19 +260,17 @@
         beatUnitCtl.add(o);
       };
 
-            
       tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
       tempoCtl.style.maxWidth = '100%'; // ha !
-      
-      
-      // gainCtl.style.width = '200px';
       gainCtl.style.width = tempoCtl.style.width;
       
       function updShowTempo(){
-        showTempo.textContent = tempo;
+//         showTempo.textContent = tempo;
+        showTempoCtl.value = tempo;
       }
       function updShowGain(){
-        showGain.textContent = Math.round(gain * 100) / 100;
+//         showGain.textContent = Math.round(gain * 100) / 100;
+        showGainCtl.value = Math.round(gain * 100) / 100;
       }
       
       // indexOf tests for strict equality
@@ -271,6 +295,10 @@
         tempo = bpm;
         updShowTempo();
       }
+      function setGain(val){
+        setMainGain(val); // defined in metronome.js
+        updShowGain();
+      }
       
       
       function setBeatsPerBar(n) { // test, constrain ?
@@ -280,11 +308,6 @@
       function setBeatUnit(x) {
 //         beatUnit = x;
         nextBeatUnit = x;
-      }            
-
-      function setGain(val){
-        setMainGain(val); // defined in metronome.js
-        updShowGain();
       }
       
       
