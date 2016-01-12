@@ -5,7 +5,7 @@ var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 var beatInBar; // was 'currentBeat' 
 var beats; // since last 'play' (like SuperCollider ?)
-var beatDur; // new, for pendulumView
+var beatDur; // new, for pendulumSwing
 
 var mainGainNode; 
 
@@ -209,13 +209,23 @@ function draw() {
         lastBeatInBarDrawn = currentBeatInBar;
         lastBeatsDrawn = currentBeats;
         
-//         pendulumView.style.transitionDuration = beatDur + "s";
-        pendulumView.setAttribute(
+        pendulumSwing.setAttribute(
         	'style', 
         	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
         );
-        // pendulumView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
-					pendulumView.classList.toggle('other'); // ha !
+				pendulumSwing.classList.toggle('other'); // ha !
+				
+				
+        pendulumHit.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
+        pendulumHit.classList.toggle('otherHit');
+        pendulumHit2.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
+        pendulumHit2.classList.toggle('otherHit2');
     };
     // set up to draw again
     requestAnimFrame(draw);

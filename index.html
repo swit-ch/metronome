@@ -81,23 +81,62 @@
       }
 
       div#pendulumViewContainer {
-        border: 1px solid black;
+        border: 0.5px solid gray;
         height: 30px;
         width: 100%;
+        position: relative; /* (not offset) for its positioned children ! */
       }
-      div#pendulumView {
+      
+      /* swing and hits */
+      div.pendulum {
         width: 10px;
         height: 30px;
         background-color: gray;
-        margin-left: 0;
-        -webkit-transition: margin-left linear;
-        transition: margin-left linear;
+        position: absolute;
+        left: 0;
       }
-      div#pendulumView.other {        
-        margin-left: calc(100% - 10px);
-        -webkit-transition: margin-left linear;
-        transition: margin-left linear;
+            
+      div#pendulumSwing {
+        -webkit-transition: left /* linear */; /* ah, curves smoother ... */
+        transition: left /* linear */;
       }
+      div#pendulumSwing.other {        
+        left: calc(100% - 10px);
+      }
+      
+       /* hack ? better use animation ? */
+      div#pendulumHit {
+        opacity: 1;
+        -webkit-transition-property: none; 
+        transition-property: none;
+        background-color: transparent;
+      }     
+      div#pendulumHit.otherHit {
+        opacity: 0; 
+        -webkit-transition: opacity; 
+        transition: opacity;
+        background-color: red;
+      }
+      
+      div#pendulumHit2 {
+        left: calc(100% - 10px);
+        opacity: 0; 
+        -webkit-transition: opacity; 
+        transition: opacity;
+        background-color: red;
+      }     
+      div#pendulumHit2.otherHit2 {        
+        opacity: 1;
+        -webkit-transition-property: none; 
+        transition-property: none;
+        background-color: transparent; 
+      }
+
+      
+      
+      
+      
+      
       
       #debugContainer button {
         display: none;
@@ -131,7 +170,11 @@
     </div>
     <div><canvas id="barView"></canvas></div>
     
-    <div id="pendulumViewContainer"><div id="pendulumView"></div></div>
+    <div id="pendulumViewContainer">
+      <div id="pendulumSwing" class="pendulum"></div>
+      <div id="pendulumHit" class="pendulum"></div>
+      <div id="pendulumHit2" class="pendulum"></div>
+    </div>
     
     <div id="debugContainer">
       <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
@@ -197,7 +240,8 @@
       var showGainCtl = document.getElementById('showGainCtl');
       
       var barView = document.getElementById('barView');
-      var pendulumView = document.getElementById('pendulumView');
+      var pendulumSwing = document.getElementById('pendulumSwing');
+      var pendulumHit = document.getElementById('pendulumHit');
 
       var debugContainer = document.getElementById('debugContainer');
       var postView = document.getElementById('postView');
