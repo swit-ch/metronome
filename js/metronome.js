@@ -5,7 +5,7 @@ var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 var beatInBar; // was 'currentBeat' 
 var beats; // since last 'play' (like SuperCollider ?)
-var beatDur; // new, for pendulumView
+var beatDur; // new, for pendulumSwing
 
 var mainGainNode; 
 
@@ -33,9 +33,6 @@ var notesInQueue = [];      // the notes that have been put into the web audio,
                             // and may or may not have played yet. {note, time}
 // note becomes beatInBar, added beats
 var timerWorker = null;     // The Web Worker used to fire timer messages
-
-
-
 
 
 
@@ -152,6 +149,7 @@ function play() {
     		
         beatInBar = 0;
         beats = 0;
+        resetPendulum();
         
         nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
         timerWorker.postMessage("start");
@@ -162,10 +160,17 @@ function play() {
     }
 }
 
+function resetPendulum() {
+	pendulumSwing.setAttribute(
+		'style', '-webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
+	);
+	pendulumHit.classList.remove('otherHit');
+}
+
 function draw() {
-    var currentBeatInBar = lastBeatInBarDrawn; //  was "currentNote"
-    
-    var currentBeats = lastBeatsDrawn; // new
+		//  was "currentNote" -- lastBeatInBarDrawn bad name
+    var currentBeatInBar = lastBeatInBarDrawn; 
+    var currentBeats = lastBeatsDrawn; // new (Doppelmoppel ? counter explosion)
     
     var currentTime = audioContext.currentTime;
 
@@ -189,33 +194,60 @@ function draw() {
 //         lastBeatInBarDrawn = currentBeatInBar;
 //     }
 		
+		
 		// hmm, special case one beatsPerBar !
     if //(lastBeatInBarDrawn != currentBeatInBar) 
     ( lastBeatsDrawn != currentBeats )
     {
-        var x = Math.floor( barView.width / (beatsPerBar) );
+        var x = Math.floor( barView.width / (beatsPerBar ) );
         canvasContext.clearRect(0, 0, barView.width, barView.height); 
         for (var i = 0; i < beatsPerBar; i++) {
 						
-						var test = Math.round(Math.random() * 255);
-						test = "rgb(" + test + ", 100, 100)";
+						var test = Math.round(Math.random() * 200) + 55;
+						test = "rgb(100, " + test + ", 100)";
 						
             canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
 //                 ((currentBeatInBar === 0) ? "red" : "blue") : "#bbb";
-                ((currentBeatInBar === 0) ? test : "blue") : "#bbb";
+                ((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
                 
-            canvasContext.fillRect( x * i , 0, x / 2, 30 );
+            canvasContext.fillRect( x * i, 0, x / 2, 30 );
         }
         lastBeatInBarDrawn = currentBeatInBar;
         lastBeatsDrawn = currentBeats;
         
-//         pendulumView.style.transitionDuration = beatDur + "s";
-        pendulumView.setAttribute(
+
+//         console.log("draw beats : " + beats + " currentBeats : " + currentBeats); 
+        
+        // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
+        var currentBeatsEven = currentBeats % 2 == 0;
+        var pendulumX = currentBeatsEven ? ((parseInt(pendulumWidth) - 30) + "px") : "0px";
+        
+        pendulumSwing.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; " + 
+        	"webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
+        );				
+				
+        pendulumHit.setAttribute(
         	'style', 
         	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
         );
-        // pendulumView.style.setAttribute('-webkit-transition-duration', beatDur + "s");
-					pendulumView.classList.toggle('other'); // ha !
+//         pendulumHit.classList.toggle('otherHit');
+        if (currentBeatsEven){
+        	pendulumHit.classList.add('otherHit'); } else {
+        	pendulumHit.classList.remove('otherHit'); 
+        };
+        
+        pendulumHit2.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
+//         pendulumHit2.classList.toggle('otherHit2'); 
+        if (currentBeatsEven){
+        	pendulumHit2.classList.add('otherHit2'); } else {
+        	pendulumHit2.classList.remove('otherHit2'); 
+        };
+        
     };
     // set up to draw again
     requestAnimFrame(draw);
@@ -228,13 +260,25 @@ function setMainGain(val){
 }
 
 function init(){
-		// barView, resetbarView now in index.html
+		
+		console.log("init");
+		
+		// barView, resetBarView now in index.html, also pendulum related ...
     canvasContext = barView.getContext( '2d' );
-    resetbarView();    
+    getPendulumWidth();
+    resetBarView(); // needs pendulumWidth now too
+    
 //     canvasContext.strokeStyle = "#ffffff";
 //     canvasContext.lineWidth = 2;
-    window.onorientationchange = resetbarView;
-    window.onresize = resetbarView;
+//     window.onorientationchange = resetBarView;
+//     window.onresize = resetBarView;
+    
+    
+    window.addEventListener('resize', resetBarView, false);
+    window.addEventListener('resize', getPendulumWidth, false);   
+    window.addEventListener('orientationchange', resetBarView, false);
+    window.addEventListener('orientationchange', getPendulumWidth, false);
+    
     
     // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
     // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
