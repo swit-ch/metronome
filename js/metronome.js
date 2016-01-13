@@ -259,8 +259,7 @@ function setMainGain(val){
 }
 
 function init(){
-		
-		console.log("init");
+		console.log("init from metronome.js");
 		
 		// barView, resetBarView now in index.html, also pendulum related ...
     canvasContext = barView.getContext( '2d' );
