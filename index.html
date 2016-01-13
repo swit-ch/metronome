@@ -80,7 +80,7 @@
         height: 30px;
       }
 
-      div#pendulumViewContainer {
+      div#pendulumContainer {
         border: 0.5px solid gray;
         height: 30px;
         width: 100%;
@@ -89,41 +89,62 @@
       
       /* swing and hits */
       div.pendulum {
-        width: 10px;
+        width: 30px;
         height: 30px;
-        background-color: gray;
+        background-color: #ccc;
         position: absolute;
         left: 0;
       }
             
+/* 
       div#pendulumSwing {
-        -webkit-transition: left /* linear */; /* ah, curves smoother ... */
-        transition: left /* linear */;
+        -webkit-transition: left;
+        transition: left;
       }
       div#pendulumSwing.other {        
-        left: calc(100% - 10px);
+        left: calc(100% - 30px);
+      }
+ */
+      
+      /* animating left or margin triggers layout */
+      /* but calc doesn't work here ... */
+      /* transform: translate( calc(100% - 30px), 0px); */
+      /* calc/get in cs ? */   
+      
+      div#pendulumSwing {
+        -webkit-transform: translate(0px, 0px);
+        transform: translate(0px, 0px);
+        -webkit-transition: transform linear;
+        transition: transform linear;
+      }
+      /* not used (no more toggle, wanted dynamic x if resize) */
+      div#pendulumSwing.other {        
+        -webkit-transform: translate(500px, 0px);
+        transform: translate(500px, 0px);
       }
       
-       /* hack ? better use animation ? */
+      
+      
+       /* hack ? use animation ? */
       div#pendulumHit {
         opacity: 1;
         -webkit-transition-property: none; 
         transition-property: none;
-        background-color: transparent;
+        background-color: transparent; 
       }     
       div#pendulumHit.otherHit {
         opacity: 0; 
         -webkit-transition: opacity; 
         transition: opacity;
-        background-color: red;
+        background-color: #0f0;
       }
       
       div#pendulumHit2 {
-        left: calc(100% - 10px);
+        left: calc(100% - 30px);
         opacity: 0; 
         -webkit-transition: opacity; 
         transition: opacity;
-        background-color: red;
+        background-color: #0f0;
       }     
       div#pendulumHit2.otherHit2 {        
         opacity: 1;
@@ -170,7 +191,7 @@
     </div>
     <div><canvas id="barView"></canvas></div>
     
-    <div id="pendulumViewContainer">
+    <div id="pendulumContainer">
       <div id="pendulumSwing" class="pendulum"></div>
       <div id="pendulumHit" class="pendulum"></div>
       <div id="pendulumHit2" class="pendulum"></div>
@@ -240,9 +261,14 @@
       var showGainCtl = document.getElementById('showGainCtl');
       
       var barView = document.getElementById('barView');
+      
+      // used in metronome.js draw ... (?)
+      var pendulumContainer = document.getElementById('pendulumContainer');
       var pendulumSwing = document.getElementById('pendulumSwing');
       var pendulumHit = document.getElementById('pendulumHit');
-
+      var pendulumHit2 = document.getElementById('pendulumHit2');
+      var pendulumWidth; // dynamic updated
+      
       var debugContainer = document.getElementById('debugContainer');
       var postView = document.getElementById('postView');
        
@@ -306,7 +332,9 @@
 
       tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
       tempoCtl.style.maxWidth = '100%'; // ha !
+      console.log(tempoCtl.style.width);
       gainCtl.style.width = tempoCtl.style.width;
+      gainCtl.style.maxWidth = '100%';
       
       function updShowTempo(){
 //         showTempo.textContent = tempo;
@@ -357,13 +385,22 @@
       
       // here now, called in metronome.js but layout related
       
-      function resetbarView (e) {
-          // resize the canvas - but remember - this clears the canvas too.
-          barView.width = window.innerWidth;
-          barView.height = 30;
-          //make sure we scroll to the top left.
-          window.scrollTo(0,0); // goog onorientationchange
+      function resetBarView (e) {
+        // resize the canvas - but remember - this clears the canvas too.
+//         barView.width = window.innerWidth;
+        barView.width = parseInt(pendulumWidth);
+        
+        barView.height = 30;
+        //make sure we scroll to the top left.
+        window.scrollTo(0,0); // goog onorientationchange
       }
+      
+      // string incl "px" -- reliable ?
+      function getPendulumWidth(){
+        pendulumWidth = window.getComputedStyle(pendulumContainer).width
+      }
+      
+      
       
       playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
 //    playCtl.addEventListener('touchstart', togglePlay, false);
