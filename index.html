@@ -117,12 +117,13 @@
         -webkit-transition: transform linear;
         transition: transform linear;
       }
-      /* not used (no more toggle, wanted dynamic x if resize) */
+      /* not used (no more toggle, wanted dynamic x if resize ==> js) */
+/* 
       div#pendulumSwing.other {        
         -webkit-transform: translate(500px, 0px);
         transform: translate(500px, 0px);
       }
-      
+ */
       
       
        /* hack ? use animation ? */
@@ -153,12 +154,7 @@
         background-color: transparent; 
       }
 
-      
-      
-      
-      
-      
-      
+
       #debugContainer button {
         display: none;
       }
@@ -332,7 +328,6 @@
 
       tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
       tempoCtl.style.maxWidth = '100%'; // ha !
-      console.log(tempoCtl.style.width);
       gainCtl.style.width = tempoCtl.style.width;
       gainCtl.style.maxWidth = '100%';
       
@@ -358,7 +353,6 @@
       
       
       function togglePlay(ev){
-//         console.log(ev);
         var str = play();
         playCtl.textContent = str;
       }
