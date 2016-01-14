@@ -115,11 +115,11 @@ function togglePlay(ev){
 function updShowTempo(){
 	showTempoCtl.value = tempo;
 }
-function updShowGain(){
-	showGainCtl.value = Math.round(gain * 100) / 100;
-}
 function updTempoCtl(){
 	tempoCtl.value = tempo;
+}
+function updShowGain(){
+	showGainCtl.value = Math.round(gain * 100) / 100;
 }
 function updGainCtl(){
 	gainCtl.value = gain;
@@ -213,11 +213,13 @@ tempoCtl.addEventListener('input', function (ev){
 
 showGainCtl.addEventListener('input', function (ev){
 	gain = this.value;
+	setMainGain(gain);
 	updGainCtl();
 }, false);
 gainCtl.addEventListener('input', function (ev){
 	// setGain(this.value);
 	gain = this.value;
+	setMainGain(gain);
 	updShowGain();
 }, false);
 
