@@ -2,6 +2,8 @@
 // main variables defined in metronome.js
 // here event listeners added, script at bottom of body
 
+// tempo, gain (others?) sometimes string, sometimes number. Problem ?!
+
 var useBarView = true;
 var usePendulum = true;
 
@@ -38,30 +40,26 @@ var postView = document.getElementById('postView');
 var trigCtl = document.getElementById('trigCtl');
 var trigCtl1 = document.getElementById('trigCtl1');
 			
-// setAttribute any better ?
+// init vals to bottom
 tempoCtl.min = tempoSpec.min;
 tempoCtl.max = tempoSpec.max;
 tempoCtl.step = tempoSpec.step;
-tempoCtl.value = tempo;
 
 // maybe have ez soon (also gainCtl)
 showTempoCtl.min = tempoSpec.min;
 showTempoCtl.max = tempoSpec.max;
 showTempoCtl.step = tempoSpec.step;
-showTempoCtl.value = tempo;
 showTempoCtl.pattern = "[0-9]*";
 showTempoCtl.inputmode= "numeric";
 
 gainCtl.min = gainSpec.min;
 gainCtl.max = gainSpec.max;
 gainCtl.step = gainSpec.step;
-gainCtl.value = gain;
 
 showGainCtl.min = gainSpec.min;
 showGainCtl.max = gainSpec.max;
 //       showGainCtl.step = gainSpec.step;
 showGainCtl.step = 0.01;
-showGainCtl.value = gain;
 
 			
 
@@ -96,16 +94,8 @@ tempoCtl.style.maxWidth = '100%'; // ha !
 gainCtl.style.width = tempoCtl.style.width;
 gainCtl.style.maxWidth = '100%';
 
-function updShowTempo(){
-//         showTempo.textContent = tempo;
-	showTempoCtl.value = tempo;
-}
-function updShowGain(){
-//         showGain.textContent = Math.round(gain * 100) / 100;
-	showGainCtl.value = Math.round(gain * 100) / 100;
-}
-
 // indexOf tests for strict equality
+// hmm, beatsPerBar, beatUnit no setters b/c nextX preference !
 function updBeatsPerBarGUI(){
 	// special case: next is set, next bar not reached (?)
 	var val = nextBeatsPerBar || beatsPerBar;
@@ -122,14 +112,27 @@ function togglePlay(ev){
 	playCtl.textContent = str;
 }
 
-function setTempo(bpm){
-	tempo = bpm;
-	updShowTempo();
+function updShowTempo(){
+	showTempoCtl.value = tempo;
 }
-function setGain(val){
-	setMainGain(val); // defined in metronome.js
-	updShowGain();
+function updShowGain(){
+	showGainCtl.value = Math.round(gain * 100) / 100;
 }
+function updTempoCtl(){
+	tempoCtl.value = tempo;
+}
+function updGainCtl(){
+	gainCtl.value = gain;
+}
+
+// function setTempo(bpm){
+// 	tempo = bpm;
+// 	updShowTempo();
+// }
+// function setGain(val){
+// 	setMainGain(val); // defined in metronome.js
+// 	updShowGain();
+// }
 
 
 function setBeatsPerBar(n) { // test, constrain ?
@@ -198,12 +201,24 @@ beatUnitCtl.addEventListener('change', function(ev){
 	setBeatUnit(beatUnitObj.values[ix]);
 }, false);
 
+showTempoCtl.addEventListener('input', function (ev){
+	tempo = this.value;
+	updTempoCtl();
+}, false);
 tempoCtl.addEventListener('input', function (ev){
-	setTempo(this.value);
+	// setTempo(this.value);
+	tempo = this.value;
+	updShowTempo();
 }, false);
 
+showGainCtl.addEventListener('input', function (ev){
+	gain = this.value;
+	updGainCtl();
+}, false);
 gainCtl.addEventListener('input', function (ev){
-	setGain(this.value);
+	// setGain(this.value);
+	gain = this.value;
+	updShowGain();
 }, false);
 
 barViewSwitch.addEventListener('click', function(ev){
@@ -239,14 +254,18 @@ function disablePlayCtls(){
 		trigCtl1.disabled = true;
 }
 			
-// init gui
-updBeatsPerBarGUI();
-updBeatUnitGUI();
-updShowTempo();
-updShowGain();
-if (useBarView){ showBarView() } else { hideBarView() };
-if (usePendulum){ showPendulum() } else { hidePendulum() };
-
+function initGUI(){
+	updBeatsPerBarGUI();
+	updBeatUnitGUI();
+	
+	updShowTempo();
+	updTempoCtl();
+	updShowGain();
+	updGainCtl();
+	
+	if (useBarView){ showBarView() } else { hideBarView() };
+	if (usePendulum){ showPendulum() } else { hidePendulum() };
+}
 
 
 
@@ -335,3 +354,5 @@ function draw() {
     // set up to draw again
     requestAnimFrame(draw);
 }
+
+initGUI()
