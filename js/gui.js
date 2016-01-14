@@ -2,7 +2,13 @@
 // main variables defined in metronome.js
 // here event listeners added, script at bottom of body
 
+var useBarView = true;
 var usePendulum = true;
+
+
+var tempoSpec = { min: 10, max: 400, step: 1 };
+var gainSpec = {  min: 0, max: 1, step: "any" };
+
 
 // could as well create the widgets right here, instead of this:
 var playCtl = document.getElementById('playCtl');
@@ -24,14 +30,13 @@ var pendulumHit = document.getElementById('pendulumHit');
 var pendulumHit2 = document.getElementById('pendulumHit2');
 var pendulumWidth; // dynamic updated
 
+var pendulumSwitch = document.getElementById('pendulumSwitch');
+
 var debugContainer = document.getElementById('debugContainer');
 var postView = document.getElementById('postView');
  
 var trigCtl = document.getElementById('trigCtl');
 var trigCtl1 = document.getElementById('trigCtl1');
-			
-var tempoSpec = { min: 10, max: 400, step: 1 };
-var gainSpec = {  min: 0, max: 1, step: "any" };
 			
 // setAttribute any better ?
 tempoCtl.min = tempoSpec.min;
@@ -39,6 +44,7 @@ tempoCtl.max = tempoSpec.max;
 tempoCtl.step = tempoSpec.step;
 tempoCtl.value = tempo;
 
+// maybe have ez soon (also gainCtl)
 showTempoCtl.min = tempoSpec.min;
 showTempoCtl.max = tempoSpec.max;
 showTempoCtl.step = tempoSpec.step;
@@ -147,13 +153,34 @@ function resetBarView (e) {
 	//make sure we scroll to the top left.
 	window.scrollTo(0, 0); // onorientationchange
 }
+function resetPendulum() {
+  pendulumSwing.setAttribute(
+    'style', '-webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
+  );
+  pendulumHit.classList.remove('otherHit');
+}
 
 // string incl "px" -- reliable ?
 function getPendulumWidth(){
 	pendulumWidth = window.getComputedStyle(pendulumContainer).width
 }
 
-
+function hideBarView(){
+	barViewContainer.style.visibility = 'hidden';
+	barViewSwitch.textContent = "show BarView";
+}
+function showBarView(){
+	barViewContainer.style.visibility = 'visible';
+	barViewSwitch.textContent = "hide BarView";
+}
+function hidePendulum(){
+	pendulumContainer.style.visibility = 'hidden';
+	pendulumSwitch.textContent = "show Pendulum";
+}
+function showPendulum(){
+	pendulumContainer.style.visibility = 'visible';
+	pendulumSwitch.textContent = "hide Pendulum";
+}
 
 playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
 //    playCtl.addEventListener('touchstart', togglePlay, false);
@@ -178,6 +205,24 @@ gainCtl.addEventListener('input', function (ev){
 	setGain(this.value);
 }, false);
 
+barViewSwitch.addEventListener('click', function(ev){
+	if (useBarView){
+		useBarView = false;
+		hideBarView();
+	} else {
+		useBarView = true;
+		showBarView();
+	}
+}, false);
+pendulumSwitch.addEventListener('click', function(ev){
+	if (usePendulum){
+		usePendulum = false;
+		hidePendulum();
+	} else {
+		usePendulum = true;
+		showPendulum();
+	}
+}, false);
 
 trigCtl.addEventListener('click', function (ev){
 	scheduleNote(0, audioContext.currentTime); // beatNumber, time
@@ -198,6 +243,24 @@ updBeatsPerBarGUI();
 updBeatUnitGUI();
 updShowTempo();
 updShowGain();
+if (useBarView){ showBarView() } else { hideBarView() };
+if (usePendulum){ showPendulum() } else { hidePendulum() };
+
+
+
+
+function drawBarView(currentBeatInBar){
+	var x = Math.floor( barView.width / (beatsPerBar ) );
+	canvasContext.clearRect(0, 0, barView.width, barView.height); 
+	for (var i = 0; i < beatsPerBar; i++) {
+		var test = Math.round(Math.random() * 200) + 55;
+		test = "rgb(100, " + test + ", 100)";
+		
+		canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+			((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
+		canvasContext.fillRect( x * i, 0, x / 2, 30 );
+	}
+}
 
 function animatePendulum (currentBeats) {
         // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
@@ -240,9 +303,7 @@ function draw() {
 
     while (notesInQueue.length && notesInQueue[0].time < currentTime) {
 			currentBeatInBar = notesInQueue[0].beatInBar;
-			
 			currentBeats = notesInQueue[0].beats;
-			
 			notesInQueue.splice(0,1);   // remove note from queue
     }
 
@@ -263,22 +324,11 @@ function draw() {
     if //(lastBeatInBarDrawn != currentBeatInBar) 
     ( lastBeatsDrawn != currentBeats )
     {
-        var x = Math.floor( barView.width / (beatsPerBar ) );
-        canvasContext.clearRect(0, 0, barView.width, barView.height); 
-        for (var i = 0; i < beatsPerBar; i++) {
-					var test = Math.round(Math.random() * 200) + 55;
-					test = "rgb(100, " + test + ", 100)";
-					
-					canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
-						((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
-					canvasContext.fillRect( x * i, 0, x / 2, 30 );
-        }
+			if (useBarView) {drawBarView(currentBeatInBar); };
+      if (usePendulum) { animatePendulum(currentBeats); } ;
+        
         lastBeatInBarDrawn = currentBeatInBar;
-        lastBeatsDrawn = currentBeats;
-        
-//         console.log("draw beats : " + beats + " currentBeats : " + currentBeats); 
-        
-        if (usePendulum) { animatePendulum(currentBeats); }
+        lastBeatsDrawn = currentBeats;        
     };
     // set up to draw again
     requestAnimFrame(draw);

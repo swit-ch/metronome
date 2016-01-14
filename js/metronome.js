@@ -38,205 +38,192 @@ var timerWorker = null;     // The Web Worker used to fire timer messages
 
 // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    function( callback ){
-        window.setTimeout(callback, 1000 / 60);
-    };
+	return  window.requestAnimationFrame ||
+	window.webkitRequestAnimationFrame ||
+	window.mozRequestAnimationFrame ||
+	window.oRequestAnimationFrame ||
+	window.msRequestAnimationFrame ||
+	function( callback ){
+			window.setTimeout(callback, 1000 / 60);
+	};
 })();
 
 function nextNote() {
-    // Advance current note and time by a 16th note... No, one beat
-    var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
-                                          // tempo value to calculate beat length.
-    // tempo change on next beat
-    beatDur = beatUnit * 4 * secondsPerBeat;
-    
-    nextNoteTime += beatDur;    // Add beat length to last beat time
+	// Advance current note and time by a 16th note... No, one beat
+	var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
+																				// tempo value to calculate beat length.
+	// tempo change on next beat
+	beatDur = beatUnit * 4 * secondsPerBeat;
+	
+	nextNoteTime += beatDur;    // Add beat length to last beat time
 
 //     beatInBar++;    // Advance the beat number, wrap to zero
 //     if (beatInBar == beatsPerBar) {
 //         beatInBar = 0;
 //     };
-		
-		// special case: 1 beatsPerBar !
-    beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
-		beats++;
+	
+	// special case: 1 beatsPerBar !
+	beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
+	beats++;
 }
 
 // iOS Safari hack
 function pseudoSound(){
-    // create an oscillator, connecting not necessary
-    var osc = audioContext.createOscillator();    
-    var time = audioContext.currentTime;
-    osc.start( time );
-    osc.stop( time + 0.01 );
+	// create an oscillator, connecting not necessary
+	var osc = audioContext.createOscillator();    
+	var time = audioContext.currentTime;
+	osc.start( time );
+	osc.stop( time + 0.01 );
 }
 
 function updateTimeSignature (){
-	if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
-		beatsPerBar = nextBeatsPerBar;
-		
-		updBeatsPerBarGUI();
-	};
-	if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
-		beatUnit = nextBeatUnit;
-		
-		updBeatUnitGUI();
-	};
+  if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
+    beatsPerBar = nextBeatsPerBar;
+    updBeatsPerBarGUI();
+  };
+  if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
+    beatUnit = nextBeatUnit;
+    updBeatUnitGUI();
+  };
 }
 
 // beatNumber is passed in beatInBar ==> argBeatInBar
 // new testing argBeats
 function scheduleNote( argBeatInBar, time, argBeats ) {
-    // push the note on the queue, even if we're not playing.
-    notesInQueue.push( { beatInBar: argBeatInBar, time: time, beats: argBeats } );
+	// push the note on the queue, even if we're not playing.
+	notesInQueue.push( { beatInBar: argBeatInBar, time: time, beats: argBeats } );
 
-    // create an oscillator
-    var osc = audioContext.createOscillator();    
-    var eg = audioContext.createGain();
-    
-    eg.gain.setValueAtTime(1.0, time);
-    eg.gain.setValueAtTime(1.0, time + (noteLength / 7));
-    eg.gain.exponentialRampToValueAtTime(0.001, time + noteLength);
-    
-    osc.type = [ "sine", "square", "sawtooth", "triangle" ][3];
-    osc.connect(eg);
-    eg.connect( mainGainNode );
-    
+	// create an oscillator
+	var osc = audioContext.createOscillator();    
+	var eg = audioContext.createGain();
+	
+	eg.gain.setValueAtTime(1.0, time);
+	eg.gain.setValueAtTime(1.0, time + (noteLength / 7));
+	eg.gain.exponentialRampToValueAtTime(0.001, time + noteLength);
+	
+	osc.type = [ "sine", "square", "sawtooth", "triangle" ][3];
+	osc.connect(eg);
+	eg.connect( mainGainNode );
+	
 //     if (argBeatInBar % 16 === 0)    // beat 0 == low pitch
 //         osc.frequency.value = 880.0;
 //     else if (argBeatInBar % 4 === 0 )    // quarter notes = medium pitch
 //         osc.frequency.value = 440.0;
 //     else                        // other 16th notes = high pitch
 //         osc.frequency.value = 220.0;
-    
+	
 //     console.log("scheduleNote argBeatInBar : " + argBeatInBar + " argBeats : " + argBeats);
-    
-    if (argBeatInBar === 0){ // the ONE
-      
-      // here ? works
-			updateTimeSignature();
-      
-      osc.frequency.value = 880.0;
-    };
-    osc.start( time );
-    osc.stop( time + noteLength );
+	
+	if (argBeatInBar === 0){ // the ONE
+		
+		// here ? works
+		updateTimeSignature();
+		
+		osc.frequency.value = 880.0;
+	};
+	osc.start( time );
+	osc.stop( time + noteLength );
 }
 
 function scheduler() {
-    // while there are notes that will need to play before the next interval, 
-    // schedule them and advance the pointer.
-    while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
+	// while there are notes that will need to play before the next interval, 
+	// schedule them and advance the pointer.
+	while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
 //         scheduleNote( beatInBar, nextNoteTime );
-        scheduleNote( beatInBar, nextNoteTime, beats );
-        nextNote();
-    }
+			scheduleNote( beatInBar, nextNoteTime, beats );
+			nextNote();
+	}
 }
 
 function play() {
-    isPlaying = !isPlaying;
+	isPlaying = !isPlaying;
+	
+	if (isPlaying) { // start playing
+			// iOS hack, otherwise audioContext suspended
+		if (audioContext.state !== 'running'){
+			pseudoSound();
+		};
 		
-    if (isPlaying) { // start playing
-    		
-    			// iOS hack, otherwise audioContext suspended
-    		if (audioContext.state !== 'running'){
-    			pseudoSound();
-    		};
-    		
-        beatInBar = 0;
-        beats = 0;
-        resetPendulum();
-        
-        nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
-        timerWorker.postMessage("start");
-        return "stop";
-    } else {
-        timerWorker.postMessage("stop");
-        return "play";
-    }
+		beatInBar = 0;
+		beats = 0;
+		resetPendulum();
+		
+		nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
+		timerWorker.postMessage("start");
+		return "stop";
+	} else {
+		timerWorker.postMessage("stop");
+		return "play";
+	}
 }
-
-function resetPendulum() {
-	pendulumSwing.setAttribute(
-		'style', '-webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
-	);
-	pendulumHit.classList.remove('otherHit');
-}
-
-
-
 
 function setMainGain(val){
-    gain = val;
-    mainGainNode.gain.value = gain;
+	gain = val;
+	mainGainNode.gain.value = gain;
 }
 
 function init(){
-		console.log("init from metronome.js");
-		
-		// barView, resetBarView now in index.html, also pendulum related ...
-    canvasContext = barView.getContext( '2d' );
-    getPendulumWidth();
-    resetBarView(); // needs pendulumWidth now too
-    
+	console.log("init from metronome.js");
+	
+	// barView, resetBarView now in index.html, also pendulum related ...
+	canvasContext = barView.getContext( '2d' );
+	getPendulumWidth();
+	resetBarView(); // needs pendulumWidth now too
+	
 //     canvasContext.strokeStyle = "#ffffff";
 //     canvasContext.lineWidth = 2;
 //     window.onorientationchange = resetBarView;
 //     window.onresize = resetBarView;
-    
-    
-    window.addEventListener('resize', resetBarView, false);
-    window.addEventListener('resize', getPendulumWidth, false);   
-    window.addEventListener('orientationchange', resetBarView, false);
-    window.addEventListener('orientationchange', getPendulumWidth, false);
-    
-    
-    // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
-    // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
-    // TO WORK ON CURRENT CHROME!!  But this means our code can be properly
-    // spec-compliant, and work on Chrome, Safari and Firefox.
-    
-    // swit-ch: forked it too to link locally (offline)
-  
-  if (window.AudioContext == undefined || window.Worker == undefined) {
-    console.log("AudioContext or Worker undefined. Return early from 'init' now.");
-    disablePlayCtls();
-    return;
-  };
-  
-    audioContext = new AudioContext();
-    
-    //////////////////////////////////////
-		audioContext.onstatechange = function(ev){
-			var ele = document.createElement('div');
-			ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
-			postView.appendChild(ele);
-		};
-		////////////////////////////////////////
+	
+	
+	window.addEventListener('resize', resetBarView, false);
+	window.addEventListener('resize', getPendulumWidth, false);   
+	window.addEventListener('orientationchange', resetBarView, false);
+	window.addEventListener('orientationchange', getPendulumWidth, false);
+	
+	
+	// NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
+	// Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
+	// TO WORK ON CURRENT CHROME!!  But this means our code can be properly
+	// spec-compliant, and work on Chrome, Safari and Firefox.
+	
+	// swit-ch: forked it too to link locally (offline)
 
-    // if we wanted to load audio files, etc., this is where we should do it.
-    
-    mainGainNode = audioContext.createGain();
-    setMainGain(gain); // init
-    mainGainNode.connect( audioContext.destination );
+	if (window.AudioContext == undefined || window.Worker == undefined) {
+		console.log("AudioContext or Worker undefined. Return early from 'init' now.");
+		disablePlayCtls();
+		return;
+	};
 
-    requestAnimFrame(draw);    // start the drawing loop.
+	audioContext = new AudioContext();
+	
+	//////////////////////////////////////
+	audioContext.onstatechange = function(ev){
+		var ele = document.createElement('div');
+		ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
+		postView.appendChild(ele);
+	};
+	////////////////////////////////////////
 
-    timerWorker = new Worker("js/metronomeworker.js");
+	// if we wanted to load audio files, etc., this is where we should do it.
+	
+	mainGainNode = audioContext.createGain();
+	setMainGain(gain); // init
+	mainGainNode.connect( audioContext.destination );
 
-    timerWorker.onmessage = function(e) {
-        if (e.data == "tick") {
+	requestAnimFrame(draw);    // start the drawing loop.
+
+	timerWorker = new Worker("js/metronomeworker.js");
+
+	timerWorker.onmessage = function(e) {
+			if (e.data == "tick") {
 //             console.log("tick!"); 
-            scheduler();
-        }
-        else
-            console.log("message: " + e.data);
-    };
-    timerWorker.postMessage({"interval":lookahead});
+					scheduler();
+			}
+			else
+					console.log("message: " + e.data);
+	};
+	timerWorker.postMessage({"interval":lookahead});
 }
 
 window.addEventListener("load", init );
