@@ -1,49 +1,8 @@
 'use strict';
+// main variables defined in metronome.js
+// here event listeners added, script at bottom of body
 
-console.log("script tag for 'gui.js' has 'defer' attr");
-			
-// initial tempo, gain defined in metronome.js -- test override here
-// no localStorage in Opera mini (but audio a.o. doesn't work there anyway ...)
-// 
-var storage = window.localStorage; // possibly undefined // storage per origin
-
-// is it safe to get/set via prop name instead of getItem, setItem ?
-function readItems(store){ // oh, localStorage values always strings ?!
-	var bpb = store.getItem('beatsPerBar');
-	var bu = store.getItem('beatUnit');
-	var t = store.getItem('tempo'); 
-	var g = store.getItem('gain');
-	
-	var nbpb = store.getItem('nextBeatsPerBar');
-	var nbu = store .getItem('nextBeatUnit');
-	
-	beatsPerBar = bpb ? Number(bpb) : 3;
-	beatUnit = bu ? Number(bu) : 1 / 4;
-	tempo = t ? Number(t) : 123; 
-	gain = g ? Number(g) : 1 / 7; 
-	
-	nextBeatsPerBar = nbpb ? Number(nbpb) : 3;
-	nextBeatUnit = nbu ? Number(nbu) : 1 / 4;
-}
-function writeItems(store){
-	store.setItem('beatsPerBar', beatsPerBar);
-	store.setItem('beatUnit', beatUnit);
-	store.setItem('tempo', tempo);
-	store.setItem('gain', gain);    
-					
-	store.setItem('nextBeatsPerBar', nextBeatsPerBar);
-	store.setItem('nextBeatUnit', nextBeatUnit);
-}
- 
-if (storage) { readItems(storage); }; // init
-
-// arghh, spent much time only to find out 'unload' is supported by Safari mobile unlike 'beforeunload'
-if (storage){
-	window.addEventListener("unload", function(ev) {
-		writeItems(storage);
-	}, false);
-};
-
+var usePendulum = true;
 
 // could as well create the widgets right here, instead of this:
 var playCtl = document.getElementById('playCtl');
@@ -56,7 +15,7 @@ var showTempoCtl = document.getElementById('showTempoCtl');
 var gainCtl = document.getElementById('gainCtl');
 var showGainCtl = document.getElementById('showGainCtl');
 
-var barView = document.getElementById('barView');
+var barView = document.getElementById('barView'); // a canvas
 
 // used in metronome.js draw ... (?)
 var pendulumContainer = document.getElementById('pendulumContainer');
@@ -186,7 +145,7 @@ function resetBarView (e) {
 	
 	barView.height = 30;
 	//make sure we scroll to the top left.
-	window.scrollTo(0,0); // goog onorientationchange
+	window.scrollTo(0, 0); // onorientationchange
 }
 
 // string incl "px" -- reliable ?
@@ -240,8 +199,37 @@ updBeatUnitGUI();
 updShowTempo();
 updShowGain();
 
-
-
+function animatePendulum (currentBeats) {
+        // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
+        var currentBeatsEven = currentBeats % 2 == 0;
+        var pendulumX = currentBeatsEven ? ((parseInt(pendulumWidth) - 30) + "px") : "0px";
+        
+        pendulumSwing.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; " + 
+        	"webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
+        );				
+				
+        pendulumHit.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
+//         pendulumHit.classList.toggle('otherHit');
+        if (currentBeatsEven){
+        	pendulumHit.classList.add('otherHit'); } else {
+        	pendulumHit.classList.remove('otherHit'); 
+        };
+        
+        pendulumHit2.setAttribute(
+        	'style', 
+        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        );
+//         pendulumHit2.classList.toggle('otherHit2'); 
+        if (currentBeatsEven){
+        	pendulumHit2.classList.add('otherHit2'); } else {
+        	pendulumHit2.classList.remove('otherHit2'); 
+        };
+}
 
 function draw() {
 		//  was "currentNote" -- lastBeatInBarDrawn bad name
@@ -278,51 +266,19 @@ function draw() {
         var x = Math.floor( barView.width / (beatsPerBar ) );
         canvasContext.clearRect(0, 0, barView.width, barView.height); 
         for (var i = 0; i < beatsPerBar; i++) {
-						
-						var test = Math.round(Math.random() * 200) + 55;
-						test = "rgb(100, " + test + ", 100)";
-						
-            canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
-//                 ((currentBeatInBar === 0) ? "red" : "blue") : "#bbb";
-                ((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
-                
-            canvasContext.fillRect( x * i, 0, x / 2, 30 );
+					var test = Math.round(Math.random() * 200) + 55;
+					test = "rgb(100, " + test + ", 100)";
+					
+					canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+						((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
+					canvasContext.fillRect( x * i, 0, x / 2, 30 );
         }
         lastBeatInBarDrawn = currentBeatInBar;
         lastBeatsDrawn = currentBeats;
         
 //         console.log("draw beats : " + beats + " currentBeats : " + currentBeats); 
         
-        // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
-        var currentBeatsEven = currentBeats % 2 == 0;
-        var pendulumX = currentBeatsEven ? ((parseInt(pendulumWidth) - 30) + "px") : "0px";
-        
-        pendulumSwing.setAttribute(
-        	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; " + 
-        	"webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
-        );				
-				
-        pendulumHit.setAttribute(
-        	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
-        );
-//         pendulumHit.classList.toggle('otherHit');
-        if (currentBeatsEven){
-        	pendulumHit.classList.add('otherHit'); } else {
-        	pendulumHit.classList.remove('otherHit'); 
-        };
-        
-        pendulumHit2.setAttribute(
-        	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
-        );
-//         pendulumHit2.classList.toggle('otherHit2'); 
-        if (currentBeatsEven){
-        	pendulumHit2.classList.add('otherHit2'); } else {
-        	pendulumHit2.classList.remove('otherHit2'); 
-        };
-        
+        if (usePendulum) { animatePendulum(currentBeats); }
     };
     // set up to draw again
     requestAnimFrame(draw);

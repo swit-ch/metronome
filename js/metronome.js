@@ -21,7 +21,7 @@ var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
 var nextNoteTime = 0.0;     // when the next note is due.
 // var noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
 var noteLength = 0.05;      // length of "beep" (in seconds)
-// var canvas;                 // the canvas element -- now in HTML
+// var canvas;                 // the canvas element -- now in index.html
 var canvasContext;          // canvasContext is the canvas' context 2D
 // var last16thNoteDrawn = -1; // the last "box" we drew on the screen
 
