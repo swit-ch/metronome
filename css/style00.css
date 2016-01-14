@@ -52,6 +52,10 @@
         width: 5em;
         text-align: center; /* not for select ? */
       }
+      input[type="number"] {
+        /* padding: 0; */
+        /* border: 1px; */
+      }
       .activeCtl {
         /* background-color: rgba(200, 200, 255, 0.25); */ /* not visible in slider */
       }
@@ -84,65 +88,42 @@
         position: absolute;
         left: 0;
       }
-            
-/* 
-      div#pendulumSwing {
-        -webkit-transition: left;
-        transition: left;
-      }
-      div#pendulumSwing.other {        
-        left: calc(100% - 30px);
-      }
- */
       
-      /* animating left or margin triggers layout */
+      
+      /* animating left or margin etc. triggers layout (html5rocks) */
       /* but calc doesn't work here ... */
       /* transform: translate( calc(100% - 30px), 0px); */
       /* calc/get in cs ? */   
       
       div#pendulumSwing {
-        -webkit-transform: translate(0px, 0px);
-        transform: translate(0px, 0px);
-        -webkit-transition: transform linear;
-        transition: transform linear;
+        -moz-transform: translate(0px, 0px); -webkit-transform: translate(0px, 0px); transform: translate(0px, 0px);
+       /* curves smoother ? */
+        -moz-transition: -moz-transform linear; -webkit-transition: -webkit-transform linear; transition: transform linear;
       }
-      /* not used (no more toggle, wanted dynamic x if resize ==> js) */
-/* 
-      div#pendulumSwing.other {        
-        -webkit-transform: translate(500px, 0px);
-        transform: translate(500px, 0px);
-      }
- */
       
-      
-       /* hack ? use animation ? */
+       /* HACK ? use animation ? */
       div#pendulumHit {
         opacity: 1;
-        -webkit-transition-property: none; 
-        transition-property: none;
+        -moz-transition-property: none; -webkit-transition-property: none; transition-property: none;
         background-color: transparent; 
-      }     
+      }
       div#pendulumHit.otherHit {
         opacity: 0; 
-        -webkit-transition: opacity; 
-        transition: opacity;
+        -moz-transition: opacity; -webkit-transition: opacity; transition: opacity;
         background-color: #0f0;
       }
       
       div#pendulumHit2 {
         left: calc(100% - 30px);
         opacity: 0; 
-        -webkit-transition: opacity; 
-        transition: opacity;
+        -moz-transition: opacity; -webkit-transition: opacity; transition: opacity;
         background-color: #0f0;
       }     
       div#pendulumHit2.otherHit2 {        
         opacity: 1;
-        -webkit-transition-property: none; 
-        transition-property: none;
+        -moz-transition-property: none; -webkit-transition-property: none; transition-property: none;
         background-color: transparent; 
       }
-
 
       #debugContainer button {
         display: none;

@@ -155,7 +155,8 @@ function resetBarView (e) {
 }
 function resetPendulum() {
   pendulumSwing.setAttribute(
-    'style', '-webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
+    'style', 
+    '-moz-transform: translate(0px, 0px); -webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
   );
   pendulumHit.classList.remove('otherHit');
 }
@@ -262,6 +263,7 @@ function drawBarView(currentBeatInBar){
 	}
 }
 
+// ah, 'beatDur' from context metronome.js function 'nextNote'
 function animatePendulum (currentBeats) {
         // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
         var currentBeatsEven = currentBeats % 2 == 0;
@@ -269,13 +271,13 @@ function animatePendulum (currentBeats) {
         
         pendulumSwing.setAttribute(
         	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; " + 
-        	"webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
+        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s; " + 
+        	"-moz-transform: translate(" + pendulumX + ", 0px); -webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
         );				
 				
         pendulumHit.setAttribute(
         	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s" 
         );
 //         pendulumHit.classList.toggle('otherHit');
         if (currentBeatsEven){
@@ -285,7 +287,7 @@ function animatePendulum (currentBeats) {
         
         pendulumHit2.setAttribute(
         	'style', 
-        	"transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s"
+        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s"
         );
 //         pendulumHit2.classList.toggle('otherHit2'); 
         if (currentBeatsEven){
