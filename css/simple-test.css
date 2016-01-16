@@ -1,0 +1,93 @@
+/* setBarViewSize() sets canvas css size to intrinsic */
+/* 
+@media screen and (min-device-width: 700px) {
+	body {
+		padding-left: 14%;
+	}
+}
+@media screen and (min-device-height: 700px) {
+	body {
+		padding-top: 4em;
+	}
+}
+ */
+
+body {
+	margin: 1em;
+	font-family: sans-serif;
+	font-size: 12pt;
+}
+
+button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
+	display: inline-block; 
+	font: inherit; /* now everything em-based */
+	height: 2em;
+}
+
+span, button {
+	width: 8em;
+}
+select, input[type="number"] {
+	width: 5em;
+	text-align: center;
+}
+input[type="range"] {
+	width: 15em;
+	vertical-align: middle;
+}
+canvas#barView, div#pendulumContainer {
+	width: 20em;
+}
+
+div#pendulumContainer {
+	position: relative; /* children */
+}
+/* swing and hits */
+.pendulum {
+	width: 2em;
+	background-color: #0f0;
+	position: absolute;
+} 
+#pendulumSwing {
+	/* actual transition, transform defined and triggered in gui.js */
+	-moz-transition-timing-function: linear;
+	-webkit-transition-timing-function: linear;
+	transition-timing-function: linear;
+	background-color: #ccc;
+} 
+#pendulumHit {
+	left: 0;
+	opacity: 0;
+}
+#pendulumHit2 {
+	/* right did not work ? */
+	left: 18em;
+	opacity: 0;
+}
+/* animation-name set in gui.js */
+@keyframes opa {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+#debugContainer {
+	margin-top: 1em;
+	font-family: monospace; 
+}
+#postView {
+	margin-top: 0.5em;
+}
+
+/* debug */
+/* 
+body > div {
+	border: 1px solid cyan;
+}
+ */
+
+
+span.info { display: none; }

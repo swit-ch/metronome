@@ -1,73 +1,65 @@
 'use strict';
 // main variables defined in metronome.js
-// here event listeners added, script at bottom of body
-
-// tempo, gain (others?) sometimes string, sometimes number. Problem ?!
+// here event listeners added, scripts at bottom of body
 
 var useBarView = true;
 var usePendulum = true;
-
-
-var tempoSpec = { min: 10, max: 400, step: 1 };
-var gainSpec = {  min: 0, max: 1, step: "any" };
-
-
-// could as well create the widgets right here, instead of this:
-var playCtl = document.getElementById('playCtl');
-			
-var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
-var beatUnitCtl = document.getElementById('beatUnitCtl');
-
-var tempoCtl = document.getElementById('tempoCtl');
-var showTempoCtl = document.getElementById('showTempoCtl');
-var gainCtl = document.getElementById('gainCtl');
-var showGainCtl = document.getElementById('showGainCtl');
-
-var barView = document.getElementById('barView'); // a canvas
-
-// used in metronome.js draw ... (?)
-var pendulumContainer = document.getElementById('pendulumContainer');
-var pendulumSwing = document.getElementById('pendulumSwing');
-var pendulumHit = document.getElementById('pendulumHit');
-var pendulumHit2 = document.getElementById('pendulumHit2');
-var pendulumWidth; // dynamic updated
-
-var pendulumSwitch = document.getElementById('pendulumSwitch');
-
-var debugContainer = document.getElementById('debugContainer');
-var postView = document.getElementById('postView');
- 
-var trigCtl = document.getElementById('trigCtl');
-var trigCtl1 = document.getElementById('trigCtl1');
-			
-// init vals to bottom
-tempoCtl.min = tempoSpec.min;
-tempoCtl.max = tempoSpec.max;
-tempoCtl.step = tempoSpec.step;
-
-// maybe have ez soon (also gainCtl)
-showTempoCtl.min = tempoSpec.min;
-showTempoCtl.max = tempoSpec.max;
-showTempoCtl.step = tempoSpec.step;
-showTempoCtl.pattern = "[0-9]*";
-showTempoCtl.inputmode= "numeric";
-
-gainCtl.min = gainSpec.min;
-gainCtl.max = gainSpec.max;
-gainCtl.step = gainSpec.step;
-
-showGainCtl.min = gainSpec.min;
-showGainCtl.max = gainSpec.max;
-//       showGainCtl.step = gainSpec.step;
-showGainCtl.step = 0.01;
-
-			
 
 var beatsPerBarObj = {
 	values: [
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
 	]
 };
+var beatUnitObj = {
+	labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
+};
+// hmm, pattern useful for input type number newer iOS
+var tempoSpec = { min: 10, max: 400, step: 1, pattern: "[0-9]*" };
+var gainSpec = {  min: 0, max: 1, step: "any", numStep: 0.01 };
+
+var pendulumSquareLength; // get computed, so can change css independently
+var pendulumContainerWidth;
+
+// html elements
+var playCtl = document.getElementById('playCtl');
+var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
+var beatUnitCtl = document.getElementById('beatUnitCtl');
+var tempoSliderCtl = document.getElementById('tempoSliderCtl');
+var tempoNumCtl = document.getElementById('tempoNumCtl');
+var gainSliderCtl = document.getElementById('gainSliderCtl');
+var gainNumCtl = document.getElementById('gainNumCtl');
+var barView = document.getElementById('barView'); // a canvas
+var pendulumContainer = document.getElementById('pendulumContainer');
+var pendulumSwing = document.getElementById('pendulumSwing');
+var pendulumHit = document.getElementById('pendulumHit');
+var pendulumHit2 = document.getElementById('pendulumHit2');
+var pendulumSwitch = document.getElementById('pendulumSwitch');
+var debugContainer = document.getElementById('debugContainer');
+var trigCtl = document.getElementById('trigCtl');
+var trigCtl1 = document.getElementById('trigCtl1');
+var sizeInfoCtl = document.getElementById('sizeInfoCtl');
+var postView = document.getElementById('postView');
+
+function prepInputCtl(ctl, spec){
+// 	console.log(ctl.type);
+	ctl.min = spec.min;
+	ctl.max = spec.max;
+	ctl.step = spec.step;
+	
+	if (spec.numStep && (ctl.type == "number")){
+		console.log("yo numStep");
+		ctl.step = spec.numStep;
+	};
+	if (spec.pattern && (ctl.type == "range")){
+		console.log("yo pattern");
+		ctl.pattern = spec.pattern;
+	};
+}
+prepInputCtl(tempoNumCtl, tempoSpec);
+prepInputCtl(tempoSliderCtl, tempoSpec);
+prepInputCtl(gainNumCtl, gainSpec);
+prepInputCtl(gainSliderCtl, gainSpec);
+
 beatsPerBarObj.labels = beatsPerBarObj.values;
 beatsPerBarObj.len = beatsPerBarObj.values.length;
 for(var i = 0; i < beatsPerBarObj.len; i++){
@@ -76,9 +68,6 @@ for(var i = 0; i < beatsPerBarObj.len; i++){
 	beatsPerBarCtl.add(o);
 };
 
-var beatUnitObj = {
-	labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
-};
 beatUnitObj.values = beatUnitObj.labels.map(function(item, i){
 	return eval(item);
 });
@@ -88,11 +77,6 @@ for(var i = 0; i < beatUnitObj.len; i++){
 	o.textContent = beatUnitObj.labels[i];
 	beatUnitCtl.add(o);
 };
-
-tempoCtl.style.width = tempoSpec.max - tempoSpec.min + 1 + 'px';
-tempoCtl.style.maxWidth = '100%'; // ha !
-gainCtl.style.width = tempoCtl.style.width;
-gainCtl.style.maxWidth = '100%';
 
 // indexOf tests for strict equality
 // hmm, beatsPerBar, beatUnit no setters b/c nextX preference !
@@ -106,34 +90,23 @@ var val = nextBeatUnit || beatUnit;
 	beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
 }
 
-
 function togglePlay(ev){
 	var str = play();
 	playCtl.textContent = str;
 }
 
-function updShowTempo(){
-	showTempoCtl.value = tempo;
+function updTempoNumCtl(){
+	tempoNumCtl.value = tempo;
 }
 function updTempoCtl(){
-	tempoCtl.value = tempo;
+	tempoSliderCtl.value = tempo;
 }
-function updShowGain(){
-	showGainCtl.value = Math.round(gain * 100) / 100;
+function updGainNumCtl(){
+	gainNumCtl.value = Math.round(gain * 100) / 100;
 }
-function updGainCtl(){
-	gainCtl.value = gain;
+function updGainSliderCtl(){
+	gainSliderCtl.value = gain;
 }
-
-// function setTempo(bpm){
-// 	tempo = bpm;
-// 	updShowTempo();
-// }
-// function setGain(val){
-// 	setMainGain(val); // defined in metronome.js
-// 	updShowGain();
-// }
-
 
 function setBeatsPerBar(n) { // test, constrain ?
 //         beatsPerBar = n;
@@ -144,19 +117,22 @@ function setBeatUnit(x) {
 	nextBeatUnit = x;
 }
 
+// string incl "px" -- ah, called in metronome.js init()
+function getPendulumLenghts(){
+	pendulumSquareLength = window.getComputedStyle(pendulumHit).width;
+	pendulumContainerWidth = window.getComputedStyle(pendulumContainer).width;
+}
 
 // here now, called in metronome.js but layout related
-
-function resetBarView (e) {
-	// resize the canvas - but remember - this clears the canvas too.
-//         barView.width = window.innerWidth;
-	barView.width = parseInt(pendulumWidth);
-	
-	barView.height = 30;
-	//make sure we scroll to the top left.
-	window.scrollTo(0, 0); // onorientationchange
+// old 'setBatView' also window.scrollTo(0, 0); // onorientationchange
+function setBarViewSize(){
+	var c = window.getComputedStyle(barView); // css in EMs
+	barView.width = parseInt(c.width); // but draw func w/ intrinsic view, height .......
+	barView.height = parseInt(c.height);
 }
-function resetPendulum() {
+
+// to the left !
+function resetPendulumSwing() {
   pendulumSwing.setAttribute(
     'style', 
     '-moz-transform: translate(0px, 0px); -webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
@@ -164,17 +140,12 @@ function resetPendulum() {
   pendulumHit.classList.remove('otherHit');
 }
 
-// string incl "px" -- reliable ?
-function getPendulumWidth(){
-	pendulumWidth = window.getComputedStyle(pendulumContainer).width
-}
-
 function hideBarView(){
-	barViewContainer.style.visibility = 'hidden';
+	barView.style.visibility = 'hidden';
 	barViewSwitch.textContent = "show BarView";
 }
 function showBarView(){
-	barViewContainer.style.visibility = 'visible';
+	barView.style.visibility = 'visible';
 	barViewSwitch.textContent = "hide BarView";
 }
 function hidePendulum(){
@@ -201,26 +172,29 @@ beatUnitCtl.addEventListener('change', function(ev){
 	setBeatUnit(beatUnitObj.values[ix]);
 }, false);
 
-showTempoCtl.addEventListener('input', function (ev){
+// constrain keyboard input, verify ?
+tempoNumCtl.addEventListener('input', 
+// 'change', 
+function (ev){
 	tempo = this.value;
 	updTempoCtl();
 }, false);
-tempoCtl.addEventListener('input', function (ev){
-	// setTempo(this.value);
+tempoSliderCtl.addEventListener('input', function (ev){
 	tempo = this.value;
-	updShowTempo();
+	updTempoNumCtl();
 }, false);
 
-showGainCtl.addEventListener('input', function (ev){
+gainNumCtl.addEventListener('input', 
+// 'change', 
+function (ev){
 	gain = this.value;
 	setMainGain(gain);
-	updGainCtl();
+	updGainSliderCtl();
 }, false);
-gainCtl.addEventListener('input', function (ev){
-	// setGain(this.value);
+gainSliderCtl.addEventListener('input', function (ev){
 	gain = this.value;
 	setMainGain(gain);
-	updShowGain();
+	updGainNumCtl();
 }, false);
 
 barViewSwitch.addEventListener('click', function(ev){
@@ -242,11 +216,17 @@ pendulumSwitch.addEventListener('click', function(ev){
 	}
 }, false);
 
+// debug only
 trigCtl.addEventListener('click', function (ev){
 	scheduleNote(0, audioContext.currentTime); // beatNumber, time
 }, false);
 trigCtl1.addEventListener('click', function (ev){
 	scheduleNote(1, audioContext.currentTime); // beatNumber, time
+}, false);
+sizeInfoCtl.addEventListener('click', function (ev) {
+	var ele = document.createElement('div');
+	ele.textContent = "innerWidth : " + window.innerWidth + " innerHeight : " + window.innerHeight;
+	postView.appendChild(ele);
 }, false);
 
 // called in init func (on win load) of metronome.js if no audio context etc
@@ -260,61 +240,49 @@ function initGUI(){
 	updBeatsPerBarGUI();
 	updBeatUnitGUI();
 	
-	updShowTempo();
+	updTempoNumCtl();
 	updTempoCtl();
-	updShowGain();
-	updGainCtl();
+	updGainNumCtl();
+	updGainSliderCtl();
 	
 	if (useBarView){ showBarView() } else { hideBarView() };
 	if (usePendulum){ showPendulum() } else { hidePendulum() };
 }
 
-
-
 function drawBarView(currentBeatInBar){
-	var x = Math.floor( barView.width / (beatsPerBar ) );
+	var x = Math.floor( barView.width / (beatsPerBar - 0.5 ) );
 	canvasContext.clearRect(0, 0, barView.width, barView.height); 
 	for (var i = 0; i < beatsPerBar; i++) {
 		var test = Math.round(Math.random() * 200) + 55;
 		test = "rgb(100, " + test + ", 100)";
 		
 		canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
-			((currentBeatInBar === 0) ? test : "#abf") : "#ccc";
-		canvasContext.fillRect( x * i, 0, x / 2, 30 );
+			((currentBeatInBar === 0) ? test : "#abf") : "#ddd";
+		canvasContext.fillRect( x * i, 0, x / 2, parseInt(pendulumSquareLength) );
 	}
 }
 
 // ah, 'beatDur' from context metronome.js function 'nextNote'
 function animatePendulum (currentBeats) {
-        // toggle was easier than those 2 states, should reset on restart (if last cur beat was even) ...
-        var currentBeatsEven = currentBeats % 2 == 0;
-        var pendulumX = currentBeatsEven ? ((parseInt(pendulumWidth) - 30) + "px") : "0px";
-        
-        pendulumSwing.setAttribute(
-        	'style', 
-        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s; " + 
-        	"-moz-transform: translate(" + pendulumX + ", 0px); -webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
-        );				
-				
-        pendulumHit.setAttribute(
-        	'style', 
-        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s" 
-        );
-//         pendulumHit.classList.toggle('otherHit');
-        if (currentBeatsEven){
-        	pendulumHit.classList.add('otherHit'); } else {
-        	pendulumHit.classList.remove('otherHit'); 
-        };
-        
-        pendulumHit2.setAttribute(
-        	'style', 
-        	"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s"
-        );
-//         pendulumHit2.classList.toggle('otherHit2'); 
-        if (currentBeatsEven){
-        	pendulumHit2.classList.add('otherHit2'); } else {
-        	pendulumHit2.classList.remove('otherHit2'); 
-        };
+	var currentBeatsEven = currentBeats % 2 == 0;
+	var pendulumX = currentBeatsEven ? ((parseInt(pendulumContainerWidth) - parseInt(pendulumSquareLength)) + "px") : 0;
+	
+	pendulumSwing.setAttribute(
+		'style', 
+		"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s; " + 
+		"-moz-transform: translate(" + pendulumX + ", 0px); -webkit-transform: translate(" + pendulumX + ", 0px); transform: translate(" + pendulumX + ", 0px); "
+	);
+	
+	var setAni = "-moz-animation-name: opa; animation-duration: " + beatDur + "s; -webkit-animation-name: opa; animation-duration: " + beatDur + "s; animation-name: opa; animation-duration: " + beatDur + "s; ";
+	var unsetAni = '-moz-animation-name: hubba; -webkit-animation-name: hubba; animation-name: hubba';
+	
+	if (currentBeatsEven) {
+		pendulumHit.setAttribute('style', setAni);
+		pendulumHit2.setAttribute('style', unsetAni);
+	} else {
+		pendulumHit.setAttribute('style', unsetAni);
+		pendulumHit2.setAttribute('style', setAni);
+	};
 }
 
 function draw() {

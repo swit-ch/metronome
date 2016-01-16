@@ -3,6 +3,25 @@
         line-height: 1.8;
         margin: 12px;
       }
+      @media screen and (min-device-width: 600px) {
+      	body {
+      		padding: 0 16%;
+      	}
+      }
+      
+      div { /* debug */
+      	border: 0.5px solid rgba(200, 255, 255, 0.8);
+      }
+      
+      div#controls {
+        margin: 1em 0;
+      }
+      div#moreControls {
+        margin: 1em 0;
+      }
+      div#debugContainer {
+        margin: 1em 0;
+      }
       
       div#controls > div {
         padding: 0.3em 0;
@@ -18,14 +37,25 @@
       
         /* https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Styling_HTML_forms */
       button, input, select, textarea {
-        font-family : inherit;
+        /* 
+font-family : inherit;
         font-size   : 100%;
+ */
+        font: inherit;
+        
+        line-height: inherit; /* not select ?! */
+        
         /* height: 2em; */ /* slightly better iOS */
       }
       
       input[type="range"] {
         -webkit-appearance: none; /* ha */
         vertical-align: middle;
+        
+        /* width: auto; */
+        width: 100%;
+        height: 2em;
+        
         /* border: 0.5px solid grey; */ /* not nice if appearance unchanged */
         /* border-radius: 6px; */
       }
@@ -45,9 +75,12 @@
         border: 1px solid black;
         /* border-radius: 4px; */
       }
-      #showTempoCtl, #showGainCtl { 
+      #tempoNumCtl, #gainNumCtl { 
         display: inline-block;
       }
+      
+      select { display: inline-block; }
+      
       select, button, input[type="number"] {
         width: 5em;
         text-align: center; /* not for select ? */
@@ -69,14 +102,14 @@
       
       
       canvas#barView {
-        width: 100%;
+        /* width: 100%; */
         height: 30px;
       }
 
       div#pendulumContainer {
         border: 0.5px solid gray;
         height: 30px;
-        width: 100%;
+        /* width: 100%; */
         position: relative; /* (not offset) for its positioned children ! */
       }
       
@@ -124,8 +157,11 @@
         -moz-transition-property: none; -webkit-transition-property: none; transition-property: none;
         background-color: transparent; 
       }
-
-      #debugContainer button {
+			
+			#debugContainer {
+				border-top: 1px solid black;
+			}
+      #debugContainer #trigCtl, #debugContainer #trigCtl1 {
         display: none;
       }
       div#postView {

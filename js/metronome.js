@@ -5,7 +5,7 @@ var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
 
 var beatInBar; // was 'currentBeat' 
 var beats; // since last 'play' (like SuperCollider ?)
-var beatDur; // new, for pendulumSwing
+var beatDur; // new, for pendulum
 
 var mainGainNode; 
 
@@ -146,7 +146,7 @@ function play() {
 		
 		beatInBar = 0;
 		beats = 0;
-		resetPendulum();
+		resetPendulumSwing();
 		
 		nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
 		timerWorker.postMessage("start");
@@ -165,21 +165,20 @@ function setMainGain(val){
 function init(){
 	console.log("init from metronome.js");
 	
-	// barView, resetBarView now in index.html, also pendulum related ...
 	canvasContext = barView.getContext( '2d' );
-	getPendulumWidth();
-	resetBarView(); // needs pendulumWidth now too
+	getPendulumLenghts();
+	setBarViewSize();
 	
 //     canvasContext.strokeStyle = "#ffffff";
 //     canvasContext.lineWidth = 2;
-//     window.onorientationchange = resetBarView;
-//     window.onresize = resetBarView;
+//     window.onorientationchange = setBarViewSize;
+//     window.onresize = setBarViewSize;
 	
 	
-	window.addEventListener('resize', resetBarView, false);
-	window.addEventListener('resize', getPendulumWidth, false);   
-	window.addEventListener('orientationchange', resetBarView, false);
-	window.addEventListener('orientationchange', getPendulumWidth, false);
+// 	window.addEventListener('resize', setBarViewSize, false);
+// 	window.addEventListener('resize', getPendulumLenghts, false);   
+// // 	window.addEventListener('orientationchange', setBarViewSize, false);
+// 	window.addEventListener('orientationchange', getPendulumLenghts, false);
 	
 	
 	// NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
@@ -198,7 +197,7 @@ function init(){
 	audioContext = new AudioContext();
 	
 	//////////////////////////////////////
-	audioContext.onstatechange = function(ev){
+	audioContext.onstatechange = function(ev){ // have post, postln funcs ?
 		var ele = document.createElement('div');
 		ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
 		postView.appendChild(ele);

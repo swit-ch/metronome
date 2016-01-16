@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Metronome swit-ch testing</title>
+    <!-- <link rel="stylesheet" href="css/main.css"> --><!-- was orig -->
+    <!-- <link rel="stylesheet" href="css/style00.css"> -->
     <link rel="stylesheet" href="css/simple-test.css">
   </head>
   <body>
@@ -16,33 +19,26 @@
       <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
       <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
       
-      <div class="hasSlider">
-        <span class="ctlLabel">Tempo (1 / 4): </span>
-        <input type="number" id="tempoNumCtl"> 
-        <span class="info">BPM</span>
-        <input id="tempoSliderCtl" type="range" class="activeCtl">
-      </div>      
+      <div class="hasSlider"><span class="ctlLabel">Tempo (1 / 4): </span>
+      <!-- <span id="showTempo"></span> -->
+      <input type="number" id="tempoNumCtl"> 
+      <span class="info">BPM</span><input id="tempoSliderCtl" type="range" class="activeCtl"></div>      
       
-      <div class="hasSlider" id="lastSlider">
-        <span class="ctlLabel">Gain: </span>
-        <!-- <span id="showGain"></span> -->
-        <input type="number" id="gainNumCtl">
-        <input type="range" id="gainSliderCtl" class="activeCtl">
-      </div>
+      <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span>
+      <!-- <span id="showGain"></span> -->
+      <input type="number" id="gainNumCtl">
+      <input type="range" id="gainSliderCtl" class="activeCtl"></div>
+    </div>
+    <div id="barViewContainer"><canvas id="barView"></canvas></div>
+    <div id="pendulumContainer">
+      <div id="pendulumSwing" class="pendulum"></div>
+      <div id="pendulumHit" class="pendulum"></div>
+      <div id="pendulumHit2" class="pendulum"></div>
     </div>
     
-    <div id="barViewContainer">
+    <div id="moreControls">
       <button id="barViewSwitch">BarView</button>
-      <canvas id="barView"></canvas>
-    </div>
-    
-    <div>
       <button id="pendulumSwitch">Pendulum</button>
-      <div id="pendulumContainer">
-        <span id="pendulumSwing" class="pendulum"></span>
-        <span id="pendulumHit" class="pendulum"></span>
-        <span id="pendulumHit2" class="pendulum"></span>
-      </div>
     </div>
     
     <div id="debugContainer">
@@ -56,5 +52,5 @@
     <script src="js/metronome.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/gui.js"></script>
-  </body>
+   </body>
 </html>
