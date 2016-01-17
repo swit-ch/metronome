@@ -1,7 +1,15 @@
 'use strict';
 
-var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
+// var beatsPerBar = 3, beatUnit = 1 / 2, tempo = 120.0, gain = 0.5;
+var beatsPerBar, beatUnit, tempo, gain;
 var nextBeatsPerBar, nextBeatUnit; // change only at next bar line (?)
+
+///////// argh gui, defined in storage (clean up [later])
+// var barViewHidden;
+// var pendulumHidden;
+//////////////////
+
+
 
 var beatInBar; // was 'currentBeat' 
 var beats; // since last 'play' (like SuperCollider ?)
@@ -76,16 +84,24 @@ function pseudoSound(){
 	osc.stop( time + 0.01 );
 }
 
+
+// var updTev = new Event("timeSignature", { "bubbles": true, "cancelable": true });
+// var updTev = new CustomEvent("timeSignature");
+
 function updateTimeSignature (){
   if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
     beatsPerBar = nextBeatsPerBar;
-    updBeatsPerBarGUI();
+    updBeatsPerBarGUI(); // hmmm
+    
+    // document.dispatchEvent(updTev);
   };
   if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
     beatUnit = nextBeatUnit;
     updBeatUnitGUI();
   };
 }
+
+// document.addEventListener('timeSignature', function(ev){ console.log(ev) }, false);
 
 // beatNumber is passed in beatInBar ==> argBeatInBar
 // new testing argBeats
@@ -166,8 +182,8 @@ function init(){
 	console.log("init from metronome.js");
 	
 	canvasContext = barView.getContext( '2d' );
-	getPendulumLenghts();
-	setBarViewSize();
+// 	getPendulumLenghts();
+// 	setBarViewSize();
 	
 //     canvasContext.strokeStyle = "#ffffff";
 //     canvasContext.lineWidth = 2;
@@ -196,14 +212,17 @@ function init(){
 
 	audioContext = new AudioContext();
 	
-	//////////////////////////////////////
+	
+	////////////////////////////////////// knows about gui .........
 	audioContext.onstatechange = function(ev){ // have post, postln funcs ?
 		var ele = document.createElement('div');
 		ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
 		postView.appendChild(ele);
 	};
 	////////////////////////////////////////
-
+	
+	
+	
 	// if we wanted to load audio files, etc., this is where we should do it.
 	
 	mainGainNode = audioContext.createGain();
@@ -225,5 +244,5 @@ function init(){
 	timerWorker.postMessage({"interval":lookahead});
 }
 
-window.addEventListener("load", init );
+// window.addEventListener("load", init );
 

@@ -10,51 +10,56 @@
   <body>
     <div id="controls">
       <!-- class 'play' rules in main.css, not used currently -->
-      <div><button type="button" id="playCtl" autofocus="true" class="play activeCtl" tabindex="0"> Hä? </button></div>
+      <div><button type="button" id="playCtl" autofocus="true" tabindex="0"> Hä? </button></div>
       
-      <!-- is this a table ? A form? -->
-      <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
-      <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
-      
-      <div class="hasSlider">
-        <span class="ctlLabel">Tempo (1 / 4): </span>
+      <!-- is this a table ? A form? Class 'label' (was 'ctlLabel') not used ATM -->
+      <div>
+        <span class="label">Beats per bar: </span>
+        <select id="beatsPerBarCtl"></select>
+      </div>
+      <div>
+        <span class="label">Beat unit: </span>
+        <select id="beatUnitCtl"></select>
+      </div>
+      <div>
+        <span class="label">Tempo (1 / 4): </span>
         <input type="number" id="tempoNumCtl"> 
-        <span class="info">BPM</span>
-        <input id="tempoSliderCtl" type="range" class="activeCtl">
+        <input type="range" id="tempoSliderCtl">
       </div>      
-      
-      <div class="hasSlider" id="lastSlider">
-        <span class="ctlLabel">Gain: </span>
-        <!-- <span id="showGain"></span> -->
+      <div>
+        <span class="label">Gain: </span>
         <input type="number" id="gainNumCtl">
-        <input type="range" id="gainSliderCtl" class="activeCtl">
+        <input type="range" id="gainSliderCtl">
       </div>
     </div>
-    
-    <div id="barViewContainer">
-      <button id="barViewSwitch">BarView</button>
-      <canvas id="barView"></canvas>
-    </div>
-    
-    <div>
-      <button id="pendulumSwitch">Pendulum</button>
-      <div id="pendulumContainer">
-        <span id="pendulumSwing" class="pendulum"></span>
-        <span id="pendulumHit" class="pendulum"></span>
-        <span id="pendulumHit2" class="pendulum"></span>
+    <div id="displays">
+      <div>
+        <button id="barViewSwitch">BarView</button>
+        <canvas id="barView"></canvas>
+      </div>
+      <div>
+        <button id="pendulumSwitch">Pendulum</button>
+        <div id="pendulumContainer">
+          <span id="pendulumSwing" class="pendulum"></span>
+          <span id="pendulumHit" class="pendulum"></span>
+          <span id="pendulumHit2" class="pendulum"></span>
+        </div>
       </div>
     </div>
-    
     <div id="debugContainer">
-      <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
-      <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Trig 1</button>
-      <button type="button" id="sizeInfoCtl" class="activeCtl" tabindex="0">size ?</button>
+      <button type="button" id="trigCtl">Trig 0</button>
+      <button type="button" id="trigCtl1">Trig 1</button>
+      <button type="button" id="sizeInfoCtl">size ?</button>
       <div id="postView"></div>
     </div>
-    
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/metronome.js"></script>
-    <script src="js/storage.js"></script>
     <script src="js/gui.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+      readItems(storage);
+      init();
+      initGUI();
+    </script>
   </body>
 </html>

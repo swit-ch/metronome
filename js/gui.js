@@ -1,9 +1,37 @@
 'use strict';
-// main variables defined in metronome.js
-// here event listeners added, scripts at bottom of body
+// many variables declared in metronome.js, some defined w/ storage.js
+// here event listeners added, scripts at bottom of html body
 
-var useBarView = true;
-var usePendulum = true;
+var barViewHidden /* = false */;
+var pendulumHidden /* = false */;
+
+function togglePlay(ev){
+	var str = play(); // metronome.js
+	playCtl.textContent = str;
+}
+
+
+var changedBackground = "#fcc";
+
+function nextBeatsPerBarChanged(){
+	beatsPerBarCtl.style.background = changedBackground;
+}
+function nextBeatUnitChanged(){
+	beatUnitCtl.style.background = changedBackground;
+}
+
+function setBeatsPerBar(n) { // test, constrain ?
+//         beatsPerBar = n;
+	nextBeatsPerBar = n;
+	nextBeatsPerBarChanged();
+}
+function setBeatUnit(x) {
+//         beatUnit = x;
+	nextBeatUnit = x;
+	nextBeatUnitChanged();
+}
+
+
 
 var beatsPerBarObj = {
 	values: [
@@ -41,17 +69,13 @@ var sizeInfoCtl = document.getElementById('sizeInfoCtl');
 var postView = document.getElementById('postView');
 
 function prepInputCtl(ctl, spec){
-// 	console.log(ctl.type);
 	ctl.min = spec.min;
 	ctl.max = spec.max;
 	ctl.step = spec.step;
-	
 	if (spec.numStep && (ctl.type == "number")){
-		console.log("yo numStep");
 		ctl.step = spec.numStep;
 	};
 	if (spec.pattern && (ctl.type == "range")){
-		console.log("yo pattern");
 		ctl.pattern = spec.pattern;
 	};
 }
@@ -84,15 +108,12 @@ function updBeatsPerBarGUI(){
 	// special case: next is set, next bar not reached (?)
 	var val = nextBeatsPerBar || beatsPerBar;
 	beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(val);
+	beatsPerBarCtl.style.background = null;
 }
 function updBeatUnitGUI(){
 var val = nextBeatUnit || beatUnit;
 	beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
-}
-
-function togglePlay(ev){
-	var str = play();
-	playCtl.textContent = str;
+	beatUnitCtl.style.background = null;
 }
 
 function updTempoNumCtl(){
@@ -108,15 +129,6 @@ function updGainSliderCtl(){
 	gainSliderCtl.value = gain;
 }
 
-function setBeatsPerBar(n) { // test, constrain ?
-//         beatsPerBar = n;
-	nextBeatsPerBar = n;
-}
-function setBeatUnit(x) {
-//         beatUnit = x;
-	nextBeatUnit = x;
-}
-
 // string incl "px" -- ah, called in metronome.js init()
 function getPendulumLenghts(){
 	pendulumSquareLength = window.getComputedStyle(pendulumHit).width;
@@ -124,7 +136,7 @@ function getPendulumLenghts(){
 }
 
 // here now, called in metronome.js but layout related
-// old 'setBatView' also window.scrollTo(0, 0); // onorientationchange
+// old 'setBarView' also window.scrollTo(0, 0); // onorientationchange
 function setBarViewSize(){
 	var c = window.getComputedStyle(barView); // css in EMs
 	barView.width = parseInt(c.width); // but draw func w/ intrinsic view, height .......
@@ -166,6 +178,18 @@ beatsPerBarCtl.addEventListener('change', function(ev){
 	setBeatsPerBar(beatsPerBarObj.values[ix]);
 }, false);
 
+// Firefox 
+beatsPerBarCtl.addEventListener('keyup', function(ev){
+// 	console.log(ev, this.value);
+	if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
+    console.log(ev.key);
+    var ix = this.selectedIndex;
+		setBeatsPerBar(beatsPerBarObj.values[ix]);
+	}
+}, false);
+
+
+
 // NB: sets nextBeatUnit !
 beatUnitCtl.addEventListener('change', function(ev){
 	var ix = this.selectedIndex;
@@ -198,20 +222,20 @@ gainSliderCtl.addEventListener('input', function (ev){
 }, false);
 
 barViewSwitch.addEventListener('click', function(ev){
-	if (useBarView){
-		useBarView = false;
+	if (! barViewHidden){
+		barViewHidden = true;
 		hideBarView();
 	} else {
-		useBarView = true;
+		barViewHidden = false;
 		showBarView();
 	}
 }, false);
 pendulumSwitch.addEventListener('click', function(ev){
-	if (usePendulum){
-		usePendulum = false;
+	if (! pendulumHidden){
+		pendulumHidden = true;
 		hidePendulum();
 	} else {
-		usePendulum = true;
+		pendulumHidden = false;
 		showPendulum();
 	}
 }, false);
@@ -235,22 +259,22 @@ function disablePlayCtls(){
 		trigCtl.disabled = true;
 		trigCtl1.disabled = true;
 }
-			
-function initGUI(){
-	updBeatsPerBarGUI();
-	updBeatUnitGUI();
-	
-	updTempoNumCtl();
-	updTempoCtl();
-	updGainNumCtl();
-	updGainSliderCtl();
-	
-	if (useBarView){ showBarView() } else { hideBarView() };
-	if (usePendulum){ showPendulum() } else { hidePendulum() };
-}
 
+// function drawBarView(currentBeatInBar){
+// 	var x = Math.floor( barView.width / (beatsPerBar ) );
+// 	canvasContext.clearRect(0, 0, barView.width, barView.height); 
+// 	for (var i = 0; i < beatsPerBar; i++) {
+// 		var test = Math.round(Math.random() * 200) + 55;
+// 		test = "rgb(100, " + test + ", 100)";
+// 		
+// 		canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+// 			((currentBeatInBar === 0) ? test : "#abf") : "#ddd";
+// 		canvasContext.fillRect( x * i, 0, x / 2, parseInt(pendulumSquareLength) );
+// 	}
+// }
 function drawBarView(currentBeatInBar){
-	var x = Math.floor( barView.width / (beatsPerBar - 0.5 ) );
+	var x = //Math.floor( barView.width / (beatsPerBar * 2 - 1 ) );
+	barView.width / (beatsPerBar * 2 - 1);
 	canvasContext.clearRect(0, 0, barView.width, barView.height); 
 	for (var i = 0; i < beatsPerBar; i++) {
 		var test = Math.round(Math.random() * 200) + 55;
@@ -258,7 +282,7 @@ function drawBarView(currentBeatInBar){
 		
 		canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
 			((currentBeatInBar === 0) ? test : "#abf") : "#ddd";
-		canvasContext.fillRect( x * i, 0, x / 2, parseInt(pendulumSquareLength) );
+		canvasContext.fillRect( x * i * 2, 0, x, parseInt(pendulumSquareLength) );
 	}
 }
 
@@ -276,6 +300,8 @@ function animatePendulum (currentBeats) {
 	var setAni = "-moz-animation-name: opa; animation-duration: " + beatDur + "s; -webkit-animation-name: opa; animation-duration: " + beatDur + "s; animation-name: opa; animation-duration: " + beatDur + "s; ";
 	var unsetAni = '-moz-animation-name: hubba; -webkit-animation-name: hubba; animation-name: hubba';
 	
+	setAni = "animation: opa " + beatDur + "s cubic-bezier(0, 0.62, 0.36, 1)";
+	
 	if (currentBeatsEven) {
 		pendulumHit.setAttribute('style', setAni);
 		pendulumHit2.setAttribute('style', unsetAni);
@@ -285,6 +311,7 @@ function animatePendulum (currentBeats) {
 	};
 }
 
+// was in metronome.js therefor knows some vars ... //////////////////////
 function draw() {
 		//  was "currentNote" -- lastBeatInBarDrawn bad name
     var currentBeatInBar = lastBeatInBarDrawn; 
@@ -315,8 +342,8 @@ function draw() {
     if //(lastBeatInBarDrawn != currentBeatInBar) 
     ( lastBeatsDrawn != currentBeats )
     {
-			if (useBarView) {drawBarView(currentBeatInBar); };
-      if (usePendulum) { animatePendulum(currentBeats); } ;
+			if (! barViewHidden) {drawBarView(currentBeatInBar); };
+      if (! pendulumHidden) { animatePendulum(currentBeats); } ;
         
         lastBeatInBarDrawn = currentBeatInBar;
         lastBeatsDrawn = currentBeats;        
@@ -325,4 +352,19 @@ function draw() {
     requestAnimFrame(draw);
 }
 
-initGUI()
+function initGUI(){
+	updBeatsPerBarGUI();
+	updBeatUnitGUI();
+	
+	updTempoNumCtl();
+	updTempoCtl();
+	updGainNumCtl();
+	updGainSliderCtl();
+	
+	getPendulumLenghts(); // simplify (?)
+	setBarViewSize();
+	
+	if (! barViewHidden){ showBarView() } else { hideBarView() };
+	if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+}
+// initGUI()
