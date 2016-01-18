@@ -53,13 +53,15 @@
       <div id="postView"></div>
     </div>
     <script src="js/AudioContextMonkeyPatch.js"></script> 
+    <script src="js/common-for-now.js"></script> 
     <script src="js/metronome.js"></script>
-    <script src="js/gui.js"></script>
-    <script src="js/storage.js"></script>
+    <!-- <script src="js/gui.js"></script> -->
+    <!-- <script src="js/storage.js"></script> -->
     <script>
-      readItems(storage);
-      init();
-      initGUI();
+//       readItems(storage);
+      var m =  makeAudioMetro();
+      m.init();
+      // initGUI();
     </script>
   </body>
 </html>

@@ -24,8 +24,9 @@ function readItems(store){ // oh, localStorage values always strings ?!
 	gain = g ? Number(g) : 1 / 7; 
 	nextBeatsPerBar = nbpb ? Number(nbpb) : 3;
 	nextBeatUnit = nbu ? Number(nbu) : 1 / 4;
-	barViewHidden = bvh == "true" ? true : false;
-	pendulumHidden = ph == "true" ? true : false;
+	// gui.js
+// 	barViewHidden = bvh == "true" ? true : false;
+// 	pendulumHidden = ph == "true" ? true : false;
 }
 
 function writeItems(store){

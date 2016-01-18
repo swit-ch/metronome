@@ -1,7 +1,8 @@
 'use strict';
 // many variables declared in metronome.js, some defined w/ storage.js
-// here event listeners added, scripts at bottom of html body
+// here event listeners added, scripts at bottom of html body, no load event
 
+var canvasContext;
 var barViewHidden /* = false */;
 var pendulumHidden /* = false */;
 
@@ -353,6 +354,9 @@ function draw() {
 }
 
 function initGUI(){
+	
+	canvasContext = barView.getContext( '2d' );
+	
 	updBeatsPerBarGUI();
 	updBeatUnitGUI();
 	
