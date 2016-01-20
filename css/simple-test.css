@@ -50,6 +50,17 @@ select, input[type="number"] {
 input[type="range"] {
 	width: 16em;
 }
+
+
+/* nextX changed */
+.notYet {
+	background-color: #cfc;
+}
+
+
+
+
+
 canvas#barView, div#pendulumContainer {
 	width: 22em;
 }

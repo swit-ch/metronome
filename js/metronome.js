@@ -54,7 +54,7 @@ function makeAudioMetro () {
 	})();
 
 	function nextNote() {
-		// Advance current note and time by a 16th note... No, one beat
+		// Advance current note and time by a 16th note... No, one beat unit
 		var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
 																					// tempo value to calculate beat length.
 		// tempo change on next beat
@@ -81,27 +81,20 @@ function makeAudioMetro () {
 		osc.stop( time + 0.01 );
 	}
 
-
-	// var updTev = new Event("timeSignature", { "bubbles": true, "cancelable": true });
-	// var updTev = new CustomEvent("timeSignature");
-
 	function updateTimeSignature (){
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
 			nextBeatsPerBar = undefined;
-			
-			updBeatsPerBarGUI(); // hmmm
-		
-			// document.dispatchEvent(updTev);
+// 			updBeatsPerBarGUI(); // gui.js
+			pubsubz.publish('beatsPerBar', beatsPerBar);
 		};
 		if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
 			beatUnit = nextBeatUnit;
-			updBeatUnitGUI();
+// 			updBeatUnitGUI(); // gui.js
+			pubsubz.publish('beatUnit', beatUnit);
 		};
 	}
-
-	// document.addEventListener('timeSignature', function(ev){ console.log(ev) }, false);
-
+	
 	// beatNumber is passed in beatInBar ==> argBeatInBar
 	// new testing argBeats
 	function scheduleNote( argBeatInBar, time, argBeats ) {
@@ -149,7 +142,8 @@ function makeAudioMetro () {
 				nextNote();
 		}
 	}
-
+	
+	// think want 'stop' too ...
 	function play() {
 		isPlaying = !isPlaying;
 	
@@ -162,12 +156,19 @@ function makeAudioMetro () {
 			beatInBar = 0;
 			beats = 0;
 		
-			resetPendulumSwing();
+// 			resetPendulumSwing(); // gui.js
+// 			pubsubz.publish('resetPendulumSwing');
 		
 			nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
+			
+			pubsubz.publish('start');
+			
 			timerWorker.postMessage("start");
 			return "stop";
 		} else {
+			
+			pubsubz.publish('stop');
+			
 			timerWorker.postMessage("stop");
 			return "play";
 		}
@@ -176,6 +177,49 @@ function makeAudioMetro () {
 	function setMainGain(val){
 		gain = val;
 		mainGainNode.gain.value = gain;
+	}
+	
+	// here agin b/c of context, have draw hook
+	function draw() {
+			//  was "currentNote" -- lastBeatInBarDrawn bad name
+			var currentBeatInBar = lastBeatInBarDrawn; 
+			var currentBeats = lastBeatsDrawn; // new (Doppelmoppel ? counter explosion)
+		
+			var currentTime = audioContext.currentTime;
+
+			while (notesInQueue.length && notesInQueue[0].time < currentTime) {
+				currentBeatInBar = notesInQueue[0].beatInBar;
+				currentBeats = notesInQueue[0].beats;
+				notesInQueue.splice(0,1);   // remove note from queue
+			}
+
+			// We only need to draw if the note has moved.
+	//     if (lastBeatInBarDrawn != currentBeatInBar) {
+	//         var x = Math.floor( barView.width / 18 );
+	//         canvasContext.clearRect(0,0,barView.width, barView.height); 
+	//         for (var i=0; i<16; i++) {
+	//             canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
+	//                 ((currentBeatInBar%4 === 0)?"red":"blue") : "black";
+	//             canvasContext.fillRect( x * (i+1), x, x/2, x/2 );
+	//         }
+	//         lastBeatInBarDrawn = currentBeatInBar;
+	//     }
+		
+		
+			// hmm, special case one beatsPerBar !
+			if //(lastBeatInBarDrawn != currentBeatInBar) 
+			( lastBeatsDrawn != currentBeats )
+			{
+// 				if (! barViewHidden) {drawBarView(currentBeatInBar); };
+// 				if (! pendulumHidden) { animatePendulum(currentBeats); } ;
+// 				console.log("draw");
+				pubsubz.publish('drawBeat', [ currentBeatInBar, currentBeats, beatDur ]);
+				
+				lastBeatInBarDrawn = currentBeatInBar;
+				lastBeatsDrawn = currentBeats;        
+			};
+			// set up to draw again
+			requestAnimFrame(draw);
 	}
 
 	function init(){	
@@ -211,14 +255,13 @@ function makeAudioMetro () {
 		setMainGain(gain); // init
 		mainGainNode.connect( audioContext.destination );
 	
-		// hmm, draw in gui.js now
+		// draw gui.js -- but needs many variables from this context here ...
 		requestAnimFrame(draw);    // start the drawing loop.
 
 		timerWorker = new Worker("js/metronomeworker.js");
 
 		timerWorker.onmessage = function(e) {
 				if (e.data == "tick") {
-	//             console.log("tick!"); 
 						scheduler();
 				}
 				else
@@ -227,8 +270,15 @@ function makeAudioMetro () {
 		timerWorker.postMessage({"interval":lookahead});
 	}
 	
+	function getState() {
+		return {
+			"tempo": tempo, "gain": gain, "beatsPerBar": beatsPerBar, "beatUnit": beatUnit
+		}
+	}
+	
 	return {
 		init: init, play: play, 
+		get state(){ return getState() }, 
 		get tempo(){ return tempo }, set tempo(n) { tempo = n }, 
 		get gain() { return gain }, set gain(r) { setMainGain(r) }, 
 		get beatsPerBar() { return beatsPerBar }, set beatsPerBar(n) { beatsPerBar = n }, // immediate (on next beat)
