@@ -6,7 +6,7 @@
 // pubsubz test for the following three
 
 // var updBeatsPerBarGUI = function(){}, updBeatUnitGUI = function(){};
-// var resetPendulumSwing = function(){};
+// var resetPendulum = function(){};
 
 // 	audioContext.onstatechange = function(ev){ // have post, postln funcs ?
 // 		var ele = document.createElement('div');

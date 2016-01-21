@@ -26,7 +26,7 @@ div#controls > div,  div#displays > div {
 
 button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
 	display: inline-block; 
-	font: inherit; /* now everything em-based */
+	font: inherit; /* here everything em-based */
 	height: 2em; /* not select */
 }
 
@@ -51,6 +51,15 @@ input[type="range"] {
 	width: 16em;
 }
 
+/* 
+canvas#barView, div#pendulumContainer {
+	width: 22em;
+}
+ */
+.wideDisplay {
+	width: 22em;
+	/* background-color: #fcc; */
+}
 
 /* nextX changed */
 .notYet {
@@ -58,16 +67,10 @@ input[type="range"] {
 }
 
 
-
-
-
-canvas#barView, div#pendulumContainer {
-	width: 22em;
-}
-
 div#pendulumContainer {
 	position: relative; /* children */
-	border: 0.5px solid gray;
+	/* border: 0.5px solid gray; */
+	outline: 0.5px solid gray;
 }
 /* swing and hits */
 .pendulum {

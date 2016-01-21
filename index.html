@@ -35,11 +35,11 @@
     <div id="displays">
       <div>
         <button id="barViewSwitch">BarView</button>
-        <canvas id="barView"></canvas>
+        <canvas id="barView" class="wideDisplay"></canvas>
       </div>
       <div>
         <button id="pendulumSwitch">Pendulum</button>
-        <div id="pendulumContainer">
+        <div id="pendulumContainer" class="wideDisplay">
           <span id="pendulumSwing" class="pendulum"></span>
           <span id="pendulumHit" class="pendulum"></span>
           <span id="pendulumHit2" class="pendulum"></span>
@@ -59,10 +59,11 @@
     <script src="js/gui.js"></script>
     <!-- <script src="js/storage.js"></script> -->
     <script>
+      'use strict';
 //       readItems(storage);
       var m =  makeAudioMetro();
+      var g = makeMetroGUI(m);
       m.init();
-      g = metroGUI(m);
       g.init();
     </script>
   </body>

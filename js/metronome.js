@@ -27,7 +27,7 @@ function makeAudioMetro () {
 	// var noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
 	var noteLength = 0.05;      // length of "beep" (in seconds)
 	// var canvas;                 // the canvas element -- now in index.html
-	// var canvasContext;          // canvasContext is the canvas' context 2D
+	// var barViewContext2D;          // barViewContext2D is the canvas' context 2D
 	// var last16thNoteDrawn = -1; // the last "box" we drew on the screen
 
 	// var lastBeatDrawn = -1; // the last "box" we drew on the screen
@@ -155,10 +155,7 @@ function makeAudioMetro () {
 		
 			beatInBar = 0;
 			beats = 0;
-		
-// 			resetPendulumSwing(); // gui.js
-// 			pubsubz.publish('resetPendulumSwing');
-		
+			
 			nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
 			
 			pubsubz.publish('start');
@@ -179,7 +176,10 @@ function makeAudioMetro () {
 		mainGainNode.gain.value = gain;
 	}
 	
-	// here agin b/c of context, have draw hook
+	// override
+	function drawHook(currentBeatInBar, currentBeats, beatDur){}
+	
+	// here again b/c of context, have drawHook now
 	function draw() {
 			//  was "currentNote" -- lastBeatInBarDrawn bad name
 			var currentBeatInBar = lastBeatInBarDrawn; 
@@ -194,26 +194,12 @@ function makeAudioMetro () {
 			}
 
 			// We only need to draw if the note has moved.
-	//     if (lastBeatInBarDrawn != currentBeatInBar) {
-	//         var x = Math.floor( barView.width / 18 );
-	//         canvasContext.clearRect(0,0,barView.width, barView.height); 
-	//         for (var i=0; i<16; i++) {
-	//             canvasContext.fillStyle = ( currentBeatInBar == i ) ? 
-	//                 ((currentBeatInBar%4 === 0)?"red":"blue") : "black";
-	//             canvasContext.fillRect( x * (i+1), x, x/2, x/2 );
-	//         }
-	//         lastBeatInBarDrawn = currentBeatInBar;
-	//     }
-		
-		
+
 			// hmm, special case one beatsPerBar !
 			if //(lastBeatInBarDrawn != currentBeatInBar) 
 			( lastBeatsDrawn != currentBeats )
 			{
-// 				if (! barViewHidden) {drawBarView(currentBeatInBar); };
-// 				if (! pendulumHidden) { animatePendulum(currentBeats); } ;
-// 				console.log("draw");
-				pubsubz.publish('drawBeat', [ currentBeatInBar, currentBeats, beatDur ]);
+				drawHook(currentBeatInBar, currentBeats, beatDur);
 				
 				lastBeatInBarDrawn = currentBeatInBar;
 				lastBeatsDrawn = currentBeats;        
@@ -233,7 +219,7 @@ function makeAudioMetro () {
 
 		if (window.AudioContext == undefined || window.Worker == undefined) {
 			console.log("AudioContext or Worker undefined. Return early from 'init' now.");
-			disablePlayCtls();
+// 			disablePlayCtls(); // gui.js
 			return;
 		};
 
@@ -277,13 +263,16 @@ function makeAudioMetro () {
 	}
 	
 	return {
-		init: init, play: play, 
+		init: init, play: play, // want stop too (later)
 		get state(){ return getState() }, 
 		get tempo(){ return tempo }, set tempo(n) { tempo = n }, 
 		get gain() { return gain }, set gain(r) { setMainGain(r) }, 
 		get beatsPerBar() { return beatsPerBar }, set beatsPerBar(n) { beatsPerBar = n }, // immediate (on next beat)
 		get nextBeatsPerBar() { return nextBeatsPerBar }, set nextBeatsPerBar(n) { nextBeatsPerBar = n }, 
 		get beatUnit() { return beatUnit }, set beatUnit(n) { beatUnit = n }, // immediate (on next beat ?)
-		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r }
+		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
+		
+		get drawHook() { return drawHook }, set drawHook(f) { drawHook = f }, 
+		get audioContext() { return audioContext } // debug?
 	}
 }
