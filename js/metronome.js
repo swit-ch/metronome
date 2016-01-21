@@ -1,12 +1,28 @@
 'use strict';
 
-function makeAudioMetro () {
+function makeAudioMetro (storedState) {
 
 	// w/o storage.js need defaults ...
 	var tempo = 60, gain = 0.1; // tempo change active at next beat
 	var beatsPerBar = 4, beatUnit = 1 / 4;
+	
+	var ssm;
+	if (storedState) {
+		if(storedState.metro){
+			ssm = storedState.metro;
+			if (ssm.tempo) { tempo = ssm.tempo; };
+			if (ssm.gain) { gain = ssm.gain; };
+			if (ssm.beatsPerBar) { beatsPerBar = ssm.beatsPerBar; };
+			if (ssm.beatUnit) { beatUnit = ssm.beatUnit; };
+		}
+	};
+	
+	
+	
+	
 	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
-
+	
+	var ready = false;
 
 	var beatInBar; // was 'currentBeat' 
 	var beats; // since last 'play' 
@@ -149,9 +165,7 @@ function makeAudioMetro () {
 	
 		if (isPlaying) { // start playing
 				// iOS hack, otherwise audioContext suspended
-			if (audioContext.state !== 'running'){
-				pseudoSound();
-			};
+			if (audioContext.state !== 'running'){ pseudoSound(); };
 		
 			beatInBar = 0;
 			beats = 0;
@@ -180,7 +194,7 @@ function makeAudioMetro () {
 	function drawHook(currentBeatInBar, currentBeats, beatDur){}
 	
 	// here again b/c of context, have drawHook now
-	function draw() {
+	function drawBeat() {
 			//  was "currentNote" -- lastBeatInBarDrawn bad name
 			var currentBeatInBar = lastBeatInBarDrawn; 
 			var currentBeats = lastBeatsDrawn; // new (Doppelmoppel ? counter explosion)
@@ -197,15 +211,15 @@ function makeAudioMetro () {
 
 			// hmm, special case one beatsPerBar !
 			if //(lastBeatInBarDrawn != currentBeatInBar) 
-			( lastBeatsDrawn != currentBeats )
+			( lastBeatsDrawn != currentBeats ) // ah, if stopped right after beat zero problem ...
 			{
-				drawHook(currentBeatInBar, currentBeats, beatDur);
+				drawHook(currentBeatInBar, currentBeats, beatDur); // defined gui.js
 				
 				lastBeatInBarDrawn = currentBeatInBar;
 				lastBeatsDrawn = currentBeats;        
 			};
 			// set up to draw again
-			requestAnimFrame(draw);
+			requestAnimFrame(drawBeat);
 	}
 
 	function init(){	
@@ -220,7 +234,7 @@ function makeAudioMetro () {
 		if (window.AudioContext == undefined || window.Worker == undefined) {
 			console.log("AudioContext or Worker undefined. Return early from 'init' now.");
 // 			disablePlayCtls(); // gui.js
-			return;
+			return; // but then gui should not init() too !
 		};
 
 		audioContext = new AudioContext();
@@ -241,19 +255,21 @@ function makeAudioMetro () {
 		setMainGain(gain); // init
 		mainGainNode.connect( audioContext.destination );
 	
-		// draw gui.js -- but needs many variables from this context here ...
-		requestAnimFrame(draw);    // start the drawing loop.
+		requestAnimFrame(drawBeat);    // start the drawing loop.
 
 		timerWorker = new Worker("js/metronomeworker.js");
 
 		timerWorker.onmessage = function(e) {
-				if (e.data == "tick") {
-						scheduler();
-				}
-				else
-						console.log("message: " + e.data);
+			var data = e.data;
+			if (data == "tick") {
+				scheduler();
+			} else {
+				console.log("message: " + data);
+			}
 		};
 		timerWorker.postMessage({"interval":lookahead});
+		
+		ready = true;
 	}
 	
 	function getState() {
@@ -273,6 +289,8 @@ function makeAudioMetro () {
 		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
 		
 		get drawHook() { return drawHook }, set drawHook(f) { drawHook = f }, 
-		get audioContext() { return audioContext } // debug?
+		get ready() { return ready }
+// 		get audioContext() { return audioContext }, // debug?
+// 		get timerWorker() { return timerWorker }
 	}
 }

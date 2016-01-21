@@ -1,7 +1,7 @@
 
 // for metronome.js w/o gui.js
 
-// var draw = function(){}; // move back to metronome.js, have draw hook
+// var drawBeat = function(){}; // move back to metronome.js, have drawHook
 
 // pubsubz test for the following three
 
