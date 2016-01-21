@@ -11,7 +11,10 @@ function makeAudioMetro (storedState) {
 		if(storedState.metro){
 			ssm = storedState.metro;
 			if (ssm.tempo) { tempo = ssm.tempo; };
-			if (ssm.gain) { gain = ssm.gain; };
+			// if (ssm.gain) { gain = ssm.gain; }; // might be zero
+			
+			if (ssm.gain >= 0) { gain = ssm.gain; };
+			
 			if (ssm.beatsPerBar) { beatsPerBar = ssm.beatsPerBar; };
 			if (ssm.beatUnit) { beatUnit = ssm.beatUnit; };
 		}
@@ -96,7 +99,8 @@ function makeAudioMetro (storedState) {
 		osc.start( time );
 		osc.stop( time + 0.01 );
 	}
-
+	
+	// was good so far, but now while stopped i want to set directly (from gui)
 	function updateTimeSignature (){
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
@@ -140,7 +144,7 @@ function makeAudioMetro (storedState) {
 	
 		if (argBeatInBar === 0){ // the ONE
 		
-			// here ? works
+			// here ? works.name
 			updateTimeSignature();
 		
 			osc.frequency.value = 880.0;
