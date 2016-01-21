@@ -89,16 +89,24 @@ function makeMetroGUI (metro, storedState) {
 		playCtl.textContent = str;
 	}
 
-	function setBeatsPerBar(n) { // test, constrain ?
-	//         beatsPerBar = n;
+	function setNextBeatsPerBar(n) { // test, constrain ?
 		metro.nextBeatsPerBar = n;
 		beatsPerBarCtl.classList.add('notYet');
 	}
-	function setBeatUnit(x) {
-	//         beatUnit = x;
+	function setNextBeatUnit(x) {
 		metro.nextBeatUnit = x;
 		beatUnitCtl.classList.add('notYet');
 	}
+	
+	
+	// hmm, now need the simple case too
+	function setBeatsPerBar(n) { // test, constrain ?
+		metro.beatsPerBar = n;
+	}
+	function setBeatUnit(x) {
+		metro.beatUnit = x;
+	}	
+	
 	
 	
 	// indexOf tests for strict equality
@@ -184,9 +192,36 @@ function makeMetroGUI (metro, storedState) {
 
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
 	
+	
+// 	beatsPerBarCtl.addEventListener('change', function(ev){
+// 		var ix = this.selectedIndex;
+// 		var val = beatsPerBarObj.values[ix];
+// 		setNextBeatsPerBar(val); 
+// 	}, false);
+// 
+// 	// Firefox special
+// 	beatsPerBarCtl.addEventListener('keyup', function(ev){
+// 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
+// // 			console.log(ev.key);
+// 			var ix = this.selectedIndex;
+// 			var val = beatsPerBarObj.values[ix];
+// 			setNextBeatsPerBar(val);
+// 		}
+// 	}, false);
+// 	
+// 	beatUnitCtl.addEventListener('change', function(ev){
+// 		var ix = this.selectedIndex;
+// 		var val = beatUnitObj.values[ix];
+// 		setNextBeatUnit(val);
+// 	}, false);
+	
+	
+	
+	
 	beatsPerBarCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
-		setBeatsPerBar(beatsPerBarObj.values[ix]); // NB: sets nextBeatsPerBar !
+		var val = beatsPerBarObj.values[ix];
+		if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
 	}, false);
 
 	// Firefox special
@@ -194,18 +229,21 @@ function makeMetroGUI (metro, storedState) {
 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
 // 			console.log(ev.key);
 			var ix = this.selectedIndex;
-			setBeatsPerBar(beatsPerBarObj.values[ix]);
+			var val = beatsPerBarObj.values[ix];
+			if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
 		}
 	}, false);
-
-
-
-	// NB: sets nextBeatUnit !
+	
 	beatUnitCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
-		setBeatUnit(beatUnitObj.values[ix]);
+		var val = beatUnitObj.values[ix];
+		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
 	}, false);
-
+	
+	
+	
+	
+	
 	// constrain keyboard input, verify ?
 	tempoNumCtl.addEventListener('input', 
 	// 'change', 

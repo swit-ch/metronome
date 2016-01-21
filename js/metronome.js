@@ -8,7 +8,7 @@ function makeAudioMetro (storedState) {
 	
 	var ssm;
 	if (storedState) {
-		if(storedState.metro){
+		if(storedState.metro){ // something like this should become setState ...
 			ssm = storedState.metro;
 			if (ssm.tempo) { tempo = ssm.tempo; };
 			// if (ssm.gain) { gain = ssm.gain; }; // might be zero
@@ -105,12 +105,11 @@ function makeAudioMetro (storedState) {
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
 			nextBeatsPerBar = undefined;
-// 			updBeatsPerBarGUI(); // gui.js
 			pubsubz.publish('beatsPerBar', beatsPerBar);
 		};
 		if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
 			beatUnit = nextBeatUnit;
-// 			updBeatUnitGUI(); // gui.js
+			nextBeatUnit = undefined;
 			pubsubz.publish('beatUnit', beatUnit);
 		};
 	}
@@ -287,13 +286,16 @@ function makeAudioMetro (storedState) {
 		get state(){ return getState() }, 
 		get tempo(){ return tempo }, set tempo(n) { tempo = n }, 
 		get gain() { return gain }, set gain(r) { setMainGain(r) }, 
+		
+		// differentiaton setDirectly setNext in gui.js
 		get beatsPerBar() { return beatsPerBar }, set beatsPerBar(n) { beatsPerBar = n }, // immediate (on next beat)
 		get nextBeatsPerBar() { return nextBeatsPerBar }, set nextBeatsPerBar(n) { nextBeatsPerBar = n }, 
 		get beatUnit() { return beatUnit }, set beatUnit(n) { beatUnit = n }, // immediate (on next beat ?)
 		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
 		
 		get drawHook() { return drawHook }, set drawHook(f) { drawHook = f }, 
-		get ready() { return ready }
+		get ready() { return ready }, 
+		get isPlaying () { return isPlaying }
 // 		get audioContext() { return audioContext }, // debug?
 // 		get timerWorker() { return timerWorker }
 	}
