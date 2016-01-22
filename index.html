@@ -4,51 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width user-scalable=no">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Metronome swit-ch testing</title>
-    <!-- <link rel="stylesheet" href="css/main.css"> --><!-- was orig -->
-    <link rel="stylesheet" href="css/style00.css">
+    <!-- <link rel="stylesheet" href="css/normalize.css"> -->
+    <link rel="stylesheet" href="css/em-based.css">
   </head>
   <body>
     <div id="controls">
       <!-- class 'play' rules in main.css, not used currently -->
-      <div><button type="button" id="playCtl" autofocus="true" class="play activeCtl" tabindex="0"> Hä? </button></div>
+      <div><button type="button" id="playCtl" autofocus="true" tabindex="0"> Hä? </button></div>
       
-      <!-- is this a table ? A form? -->
-      <div><span class="ctlLabel">Beats per bar: </span><select id="beatsPerBarCtl" class="activeCtl"></select></div>
-      <div><span class="ctlLabel">Beat unit: </span><select id="beatUnitCtl" class="activeCtl"></select></div>
-      
-      <div class="hasSlider"><span class="ctlLabel">Tempo (1 / 4): </span>
-      <!-- <span id="showTempo"></span> -->
-      <input type="number" id="showTempoCtl"> 
-      <span class="info">BPM</span><input id="tempoCtl" type="range" class="activeCtl"></div>      
-      
-      <div class="hasSlider" id="lastSlider"><span class="ctlLabel">Gain: </span>
-      <!-- <span id="showGain"></span> -->
-      <input type="number" id="showGainCtl">
-      <input type="range" id="gainCtl" class="activeCtl"></div>
+      <!-- is this a table ? A form? Class 'label' (was 'ctlLabel') not used ATM -->
+      <div>
+        <span class="label">Beats per bar: </span>
+        <select id="beatsPerBarCtl"></select>
+      </div>
+      <div>
+        <span class="label">Beat unit: </span>
+        <select id="beatUnitCtl"></select>
+      </div>
+      <div>
+        <span class="label">Tempo (1 / 4): </span>
+        <input type="number" id="tempoNumCtl"> 
+        <input type="range" id="tempoSliderCtl">
+      </div>      
+      <div>
+        <span class="label">Gain: </span>
+        <input type="number" id="gainNumCtl">
+        <input type="range" id="gainSliderCtl">
+      </div>
     </div>
-    <div id="barViewContainer"><canvas id="barView"></canvas></div>
-    <div id="pendulumContainer">
-      <div id="pendulumSwing" class="pendulum"></div>
-      <div id="pendulumHit" class="pendulum"></div>
-      <div id="pendulumHit2" class="pendulum"></div>
+    <div id="displays">
+      <div>
+        <button id="barViewSwitch">BarView</button>
+        <canvas id="barView" class="wideDisplay"></canvas>
+      </div>
+      <div>
+        <button id="pendulumSwitch">Pendulum</button>
+        <div id="pendulumContainer" class="wideDisplay">
+          <span id="pendulumSwing" class="pendulum"></span>
+          <span id="pendulumHit" class="pendulum"></span>
+          <span id="pendulumHit2" class="pendulum"></span>
+        </div>
+      </div>
     </div>
-    
-    <div id="moreControls">
-      <button id="barViewSwitch">BarView</button>
-      <button id="pendulumSwitch">Pendulum</button>
-    </div>
-    
-    <div id="debugContainer">
-      <button type="button" id="trigCtl" class="activeCtl" tabindex="0">Trig 0</button>
-      <button type="button" id="trigCtl1" class="activeCtl" tabindex="0">Trig 1</button>
-      <div id="postView"></div>
-    </div>
-    
+
     <script src="js/AudioContextMonkeyPatch.js"></script> 
-    <script src="js/metronome.js"></script>
+    <script src="js/pubsubz.js"></script> 
+    <script src="js/common-for-now.js"></script> 
     <script src="js/storage.js"></script>
+    <script src="js/metronome.js"></script>
     <script src="js/gui.js"></script>
-   </body>
+    <script>
+      'use strict';
+//       readItems(storage);
+      var o = getStoredState('latest');
+      var m = makeAudioMetro(o);
+      var g = makeMetroGUI(m, o);
+      m.init();
+      if (m.ready) { g.init(); };
+    </script>
+  </body>
 </html>
