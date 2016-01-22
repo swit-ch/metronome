@@ -153,20 +153,17 @@ function makeMetroGUI (metro, storedState) {
 	
 	function resetPendulum() {
 		pendulumSwing.setAttribute(
-			'style', // to the left !
-			'-moz-transform: translate(0px, 0px); -webkit-transform: translate(0px, 0px); transform: translate(0px, 0px); '
-// 				'-moz-transform: none; -webkit-transform: none; transform: none; '
+			'style', // to the left !			
+			'-moz-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); '
 		);
 		pendulumHit.classList.remove('otherHit');
 	}
 
 	function hideBarView(){
-// 		barView.style.visibility = 'hidden';
 		barView.classList.add('hidden');
 		barViewSwitch.textContent = "show BarView";
 	}
 	function showBarView(){
-// 		barView.style.visibility = 'visible';
 		barView.classList.remove('hidden');
 		barViewSwitch.textContent = "hide BarView";
 	}
@@ -186,32 +183,7 @@ function makeMetroGUI (metro, storedState) {
 	}
 
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
-	
-	
-// 	beatsPerBarCtl.addEventListener('change', function(ev){
-// 		var ix = this.selectedIndex;
-// 		var val = beatsPerBarObj.values[ix];
-// 		setNextBeatsPerBar(val); 
-// 	}, false);
-// 
-// 	// Firefox special
-// 	beatsPerBarCtl.addEventListener('keyup', function(ev){
-// 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
-// // 			console.log(ev.key);
-// 			var ix = this.selectedIndex;
-// 			var val = beatsPerBarObj.values[ix];
-// 			setNextBeatsPerBar(val);
-// 		}
-// 	}, false);
-// 	
-// 	beatUnitCtl.addEventListener('change', function(ev){
-// 		var ix = this.selectedIndex;
-// 		var val = beatUnitObj.values[ix];
-// 		setNextBeatUnit(val);
-// 	}, false);
-	
-	
-	
+
 	
 	beatsPerBarCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
@@ -307,8 +279,8 @@ function makeMetroGUI (metro, storedState) {
 	}
 	
 	function transString(dur, x) {
-			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 
-			"-moz-transform: translate(" + x + ", 0px); -webkit-transform: translate(" + x + ", 0px); transform: translate(" + x + ", 0px); "
+			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 			
+			"-moz-transform: translateX(" + x + "); -webkit-transform: translateX(" + x + "); transform: translateX(" + x + "); "
 	}
 	function setAniString(dur){
 		return "-moz-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
@@ -322,6 +294,8 @@ function makeMetroGUI (metro, storedState) {
 		var pendulumSwingX = currentBeatsEven ? ((parseInt(wideDisplayWidth) - parseInt(wideDisplayHeight)) + "px") : 0;
 		var unsetAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 // 		console.log("animatePendulum currentBeats : " + currentBeats + " " + currentBeatsEven);
+		
+// 		console.log(transString(beatDur, pendulumSwingX));
 		
 		pendulumSwing.setAttribute(
 			'style', transString(beatDur, pendulumSwingX)
