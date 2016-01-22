@@ -333,33 +333,34 @@ function makeMetroGUI (metro, storedState) {
 			barViewContext2D.fillRect( x * i * 2, 0, x, parseInt(wideDisplayHeight) );
 		}
 	}
-
+	
+	function transString(dur, x) {
+			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 
+			"-moz-transform: translate(" + x + ", 0px); -webkit-transform: translate(" + x + ", 0px); transform: translate(" + x + ", 0px); "
+	}
+	function setAniString(dur){
+		return "-moz-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
+			"-webkit-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
+			"animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); "
+	}
+	
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
 		var pendulumSwingX = currentBeatsEven ? ((parseInt(wideDisplayWidth) - parseInt(wideDisplayHeight)) + "px") : 0;
-		
-// 		console.log("animatePendulum currentBeats : " + currentBeats + " " +currentBeatsEven);
+		var unsetAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
+// 		console.log("animatePendulum currentBeats : " + currentBeats + " " + currentBeatsEven);
 		
 		pendulumSwing.setAttribute(
-			'style', 
-			"-moz-transition-duration: " + beatDur + "s; -webkit-transition-duration: " + beatDur + "s; transition-duration: " + beatDur + "s; " + 
-			"-moz-transform: translate(" + pendulumSwingX + ", 0px); -webkit-transform: translate(" + pendulumSwingX + ", 0px); transform: translate(" + pendulumSwingX + ", 0px); "
+			'style', transString(beatDur, pendulumSwingX)
 		);
-	
-		var setAni = 
-			"-moz-animation: opa " + beatDur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
-			"-webkit-animation: opa " + beatDur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
-			"animation: opa " + beatDur + "s cubic-bezier(0, 0.62, 0.36, 1); ";
-		
-		var unsetAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
-	
+			
 		if (currentBeatsEven) {
-			pendulumHit.setAttribute('style', setAni);
+			pendulumHit.setAttribute('style', setAniString(beatDur));
 			pendulumHit2.setAttribute('style', unsetAni);
 		} else {
 			pendulumHit.setAttribute('style', unsetAni);
-			pendulumHit2.setAttribute('style', setAni);
+			pendulumHit2.setAttribute('style', setAniString(beatDur));
 		};
 	}
 	
@@ -388,7 +389,7 @@ function makeMetroGUI (metro, storedState) {
 // 	pubsubz.subscribe('start', resetPendulum);
 	pubsubz.subscribe('stop', resetPendulum);
 	
-	metro.drawHook = function(currentBeatInBar, currentBeats, beatDur){
+	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){
 		if (! barViewHidden) { drawBarView(currentBeatInBar); };
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 	};

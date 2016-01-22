@@ -87,7 +87,7 @@ function makeAudioMetro (storedState) {
 	//     };
 	
 		// special case: 1 beatsPerBar !
-		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar (?)
+		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
 		beats++;
 	}
 
@@ -100,7 +100,6 @@ function makeAudioMetro (storedState) {
 		osc.stop( time + 0.01 );
 	}
 	
-	// was good so far, but now while stopped i want to set directly (from gui)
 	function updateTimeSignature (){
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
@@ -143,7 +142,7 @@ function makeAudioMetro (storedState) {
 	
 		if (argBeatInBar === 0){ // the ONE
 		
-			// here ? works.name
+			// here ? works
 			updateTimeSignature();
 		
 			osc.frequency.value = 880.0;
@@ -193,10 +192,10 @@ function makeAudioMetro (storedState) {
 		mainGainNode.gain.value = gain;
 	}
 	
-	// override
-	function drawHook(currentBeatInBar, currentBeats, beatDur){}
+	// override in gui
+	function drawBeatHook(currentBeatInBar, currentBeats, beatDur){}
 	
-	// here again b/c of context, have drawHook now
+	// here again b/c of context, have drawBeatHook now
 	function drawBeat() {
 			//  was "currentNote" -- lastBeatInBarDrawn bad name
 			var currentBeatInBar = lastBeatInBarDrawn; 
@@ -207,7 +206,7 @@ function makeAudioMetro (storedState) {
 			while (notesInQueue.length && notesInQueue[0].time < currentTime) {
 				currentBeatInBar = notesInQueue[0].beatInBar;
 				currentBeats = notesInQueue[0].beats;
-				notesInQueue.splice(0,1);   // remove note from queue
+				notesInQueue.splice(0, 1);   // remove note from queue
 			}
 
 			// We only need to draw if the note has moved.
@@ -216,7 +215,7 @@ function makeAudioMetro (storedState) {
 			if //(lastBeatInBarDrawn != currentBeatInBar) 
 			( lastBeatsDrawn != currentBeats ) // ah, if stopped right after beat zero problem ...
 			{
-				drawHook(currentBeatInBar, currentBeats, beatDur); // defined gui.js
+				drawBeatHook(currentBeatInBar, currentBeats, beatDur); 
 				
 				lastBeatInBarDrawn = currentBeatInBar;
 				lastBeatsDrawn = currentBeats;        
@@ -293,7 +292,7 @@ function makeAudioMetro (storedState) {
 		get beatUnit() { return beatUnit }, set beatUnit(n) { beatUnit = n }, // immediate (on next beat ?)
 		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
 		
-		get drawHook() { return drawHook }, set drawHook(f) { drawHook = f }, 
+		get drawBeatHook() { return drawBeatHook }, set drawBeatHook(f) { drawBeatHook = f }, 
 		get ready() { return ready }, 
 		get isPlaying () { return isPlaying }
 // 		get audioContext() { return audioContext }, // debug?
