@@ -17,7 +17,13 @@ body {
 	}
 }
 
-div#controls, div#displays { max-width: 33em;}
+div#controls, div#displays {
+	max-width: 36em;
+	min-width: 24em;
+	border-top: 0.5px solid #ddd;
+	border-left: 0.5px solid #ddd;
+	padding: 0.4em 1em ;
+}
 
 /* lines */
 div#controls > div,  div#displays > div {
@@ -29,9 +35,22 @@ div#controls > div,  div#displays > div {
 
 button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
 	display: inline-block; 
-	font: inherit; /* here everything em-based */
-	line-height: inherit;
+	/* font: inherit; */ /* here everything em-based */
+	/* line-height: inherit; */
 	height: 2em; /* not select */
+	
+	font-family: inherit;
+	font-size: 100%;
+	
+  -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
+     -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
+          box-sizing: border-box;
+}
+
+/* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
+/* actually Firefox nicer without */
+select {
+	background-color: transparent;
 }
 
 /* not select */
@@ -45,18 +64,18 @@ input, select, #barView, #pendulumContainer {
  */
 
 span, button {
-	width: 8em;
+	width: 9em;
 }
 select, input[type="number"] {
-	width: 5em;
-	text-align: center;
+	width: 6em;
+	text-align: center; /* not select */
 }
 input[type="range"] {
-	width: 16em;
+	width: 17em;
 }
 
 .wideDisplay {
-	width: 22em;
+	width: 24em;
 	/* background-color: #fcc; */
 }
 
@@ -70,7 +89,7 @@ div#pendulumContainer {
 	position: relative; /* children */
 	outline: 0.5px solid gray;
 }
-/* swing and hits */
+/* both swing and hits */
 .pendulum {
 	width: 2em;
 	background-color: #0f0;
@@ -90,7 +109,7 @@ div#pendulumContainer {
 }
 #pendulumHit2 {
 	/* right did not work ? */
-	left: 20em;
+	left: 22em;
 }
 /* animation-name set in gui.js */
 @keyframes opa {
@@ -102,12 +121,3 @@ div#pendulumContainer {
 	}
 }
 
-#debugContainer {
-	margin-top: 1em;
-	font-family: monospace; 
-}
-#postView {
-	margin-top: 0.5em;
-}
-
-#debugContainer > button { display: none; }

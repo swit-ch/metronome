@@ -43,11 +43,6 @@ function makeMetroGUI (metro, storedState) {
 	var pendulumHit = document.getElementById('pendulumHit');
 	var pendulumHit2 = document.getElementById('pendulumHit2');
 	var pendulumSwitch = document.getElementById('pendulumSwitch');
-	var debugContainer = document.getElementById('debugContainer');
-	var trigCtl = document.getElementById('trigCtl');
-	var trigCtl1 = document.getElementById('trigCtl1');
-	var sizeInfoCtl = document.getElementById('sizeInfoCtl');
-	var postView = document.getElementById('postView');
 
 	function prepInputCtl(ctl, spec){
 		ctl.min = spec.min;
@@ -296,29 +291,6 @@ function makeMetroGUI (metro, storedState) {
 			showPendulum();
 		}
 	}, false);
-
-	// debug only
-	
-	// don't have scheduleNote in this context, ATM have metro.audioContext (unused)
-// 	trigCtl.addEventListener('click', function (ev){
-// 		scheduleNote(0, audioContext.currentTime); // beatNumber, time
-// 	}, false);
-// 	trigCtl1.addEventListener('click', function (ev){
-// 		scheduleNote(1, audioContext.currentTime); // beatNumber, time
-// 	}, false);
-
-// 	sizeInfoCtl.addEventListener('click', function (ev) {
-// 		var ele = document.createElement('div');
-// 		ele.textContent = "innerWidth : " + window.innerWidth + " innerHeight : " + window.innerHeight;
-// 		postView.appendChild(ele);
-// 	}, false);
-// 
-// 	// called in init func (on win load) of metronome.js if no audio context etc
-// 	function disablePlayCtls(){
-// 			playCtl.disabled = true;
-// 			trigCtl.disabled = true;
-// 			trigCtl1.disabled = true;
-// 	}
 	
 	function drawBarView(currentBeatInBar){
 		var beatsPerBar = metro.beatsPerBar;
@@ -364,6 +336,12 @@ function makeMetroGUI (metro, storedState) {
 		};
 	}
 	
+	function urlLocal(url) {
+		var m = url.match(/192\.168\.0\./);
+		if (m) { // not null
+			return true; } else { return false; };
+	}
+	
 
 	function init(){
 		barViewContext2D = barView.getContext( '2d' );
@@ -382,6 +360,9 @@ function makeMetroGUI (metro, storedState) {
 		if (! barViewHidden){ showBarView() } else { hideBarView() };
 		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
 		
+		if(urlLocal(document.URL)){
+			document.title = document.title.replace("testing", "LOCAL");
+		};
 	}
 	
 	pubsubz.subscribe('beatsPerBar', updBeatsPerBarGUI);
