@@ -144,6 +144,7 @@ function makeMetroGUI (metro, storedState) {
 		wideDisplayWidth = s.width;
 		wideDisplayHeight = s.height;
 	}
+	// ah, here I need pixels for html width/height
 	// old 'setBarView' also window.scrollTo(0, 0); // onorientationchange
 	function setBarViewSize(){
 		barView.width = parseInt(wideDisplayWidth); // draw func w/ "intrinsic" view, height 

@@ -1,7 +1,4 @@
-/* setBarViewSize() sets canvas intrinsic size from css  */
-
-/* .visible { visibility: visible; } */
-.hidden { visibility: hidden }
+/* setBarViewSize() sets canvas html size from css  */
 
 body {
 	margin: 1em;
@@ -10,18 +7,21 @@ body {
 	line-height: 15pt;
 }
 
-@media screen and (min-device-width: 700px) {
+ @media screen and (min-width: 800px) {
 	body {
 		padding-top: 4em;
 		padding-left: 8em;
+	}
+	
+	div#controls, div#displays {
+		border-top: 0.5px solid #ddd;
+		border-left: 0.5px solid #ddd;
 	}
 }
 
 div#controls, div#displays {
 	max-width: 36em;
 	min-width: 24em;
-	border-top: 0.5px solid #ddd;
-	border-left: 0.5px solid #ddd;
 	padding: 0.4em 1em ;
 }
 
@@ -38,13 +38,19 @@ button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
 	/* font: inherit; */ /* here everything em-based */
 	/* line-height: inherit; */
 	height: 2em; /* not select */
-	
 	font-family: inherit;
 	font-size: 100%;
-	
+}
+
+button, input, select {
   -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
      -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
           box-sizing: border-box;
+}
+
+/* needed */
+input, select, #barView, #pendulumContainer {
+	vertical-align: middle;
 }
 
 /* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
@@ -52,16 +58,6 @@ button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
 select {
 	background-color: transparent;
 }
-
-/* not select */
-input, select, #barView, #pendulumContainer {
-	vertical-align: middle;
-}
-/* 
-.label {
-	vertical-align: baseline;
-}
- */
 
 span, button {
 	width: 9em;
@@ -76,20 +72,13 @@ input[type="range"] {
 
 .wideDisplay {
 	width: 24em;
-	/* background-color: #fcc; */
 }
-
-/* nextX changed */
-.notYet {
-	background-color: #cfc;
-}
-
 
 div#pendulumContainer {
 	position: relative; /* children */
 	outline: 0.5px solid gray;
 }
-/* both swing and hits */
+/* swing and hits */
 .pendulum {
 	width: 2em;
 	background-color: #0f0;
@@ -121,3 +110,8 @@ div#pendulumContainer {
 	}
 }
 
+/* nextX changed */
+.notYet {
+	background-color: #cfc;
+}
+.hidden { visibility: hidden }
