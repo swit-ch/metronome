@@ -169,18 +169,17 @@ function makeMetroGUI (metro, storedState) {
 		barViewSwitch.textContent = "hide BarView";
 	}
 	
-	
 	function hidePendulum(){
 		[ pendulumSwing, pendulumHit, pendulumHit2].forEach(function(item, i){
 			item.classList.add('hidden');
 		});
-		pendulumSwitch.textContent = "show Pendulum";
+		pendulumSwitch.textContent = "show Pendul.";
 	}
 	function showPendulum(){		
 		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
 			item.classList.remove('hidden');
 		});
-		pendulumSwitch.textContent = "hide Pendulum";
+		pendulumSwitch.textContent = "hide Pendul.";
 	}
 
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
@@ -265,6 +264,8 @@ function makeMetroGUI (metro, storedState) {
 		}
 	}, false);
 	
+	// I would rather define the colors in css, not here ...
+	// array of inline-blocks w/ 3 styles: theOne, current beat, other beats (?)
 	function drawBarView(currentBeatInBar){
 		var beatsPerBar = metro.beatsPerBar;
 		var x = barView.width / (beatsPerBar * 2 - 1);
@@ -339,6 +340,17 @@ function makeMetroGUI (metro, storedState) {
 			document.title = document.title.replace("testing", "LOCAL");
 		};
 	}
+	
+	
+// 	window.addEventListener("orientationchange", function() {
+// 	// iOS event emitted but orientation undefined
+// // 		alert("the orientation of the device is now " + window.screen.orientation);
+// 		getWideDisplayLengths();
+// 	});
+	window.addEventListener("resize", function() {
+// 		alert("resize");
+		getWideDisplayLengths();
+	});
 	
 	pubsubz.subscribe('beatsPerBar', updBeatsPerBarGUI);
 	pubsubz.subscribe('beatUnit', updBeatUnitGUI);

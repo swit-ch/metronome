@@ -1,4 +1,5 @@
 /* setBarViewSize() sets canvas html size from css  */
+/* not only em-based anymore ... */
 
 body {
 	margin: 1em;
@@ -7,23 +8,47 @@ body {
 	line-height: 15pt;
 }
 
+div#controls, div#displays {
+/* 
+	max-width: 27em;
+	min-width: 20em;
+ */
+	padding: 0.4em 1em ;
+	/* background-color: yellow; */
+}
+
  @media screen and (min-width: 800px) {
 	body {
-		padding-top: 4em;
+		padding-top: 3em;
 		padding-left: 8em;
 	}
 	
 	div#controls, div#displays {
 		border-top: 0.5px solid #ddd;
 		border-left: 0.5px solid #ddd;
+		
+		max-width: 33em; /* line break 2nd display, better have block display? */
 	}
 }
 
-div#controls, div#displays {
-	max-width: 36em;
-	min-width: 24em;
-	padding: 0.4em 1em ;
+@media screen and (orientation: landscape) {
+	body {
+		background-color: #aaf;
+		
+	}
+	.wideDisplay {
+		width: 32em;
+	}
 }
+@media screen and (orientation: portrait) {
+	body {
+		background-color: orange;
+	}
+	.wideDisplay {
+		width: 18em;
+	}
+}
+
 
 /* lines */
 div#controls > div,  div#displays > div {
@@ -33,13 +58,18 @@ div#controls > div,  div#displays > div {
 	min-height: 2em;
 }
 
-button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
+button, span, input, select, canvas#barView, div#pendulumContainer, .pendulum {
 	display: inline-block; 
 	/* font: inherit; */ /* here everything em-based */
 	/* line-height: inherit; */
 	height: 2em; /* not select */
 	font-family: inherit;
 	font-size: 100%;
+}
+
+canvas#barView, div#pendulumContainer {
+	display: block;
+	width: 100%; /* always break line */
 }
 
 button, input, select {
@@ -56,11 +86,11 @@ input, select, #barView, #pendulumContainer {
 /* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
 /* actually Firefox nicer without */
 select {
-	background-color: transparent;
+	background-color: white;
 }
 
 span, button {
-	width: 9em;
+	width: 7em;
 }
 select, input[type="number"] {
 	width: 6em;
@@ -71,7 +101,8 @@ input[type="range"] {
 }
 
 .wideDisplay {
-	width: 24em;
+	/* width: 24em; */
+	/* width: 100%; */
 }
 
 div#pendulumContainer {
@@ -98,7 +129,8 @@ div#pendulumContainer {
 }
 #pendulumHit2 {
 	/* right did not work ? */
-	left: 22em;
+	/* left: 22em; */ /* hm, trying percentage on parent, now */
+	left: calc(100% - 2em);
 }
 /* animation-name set in gui.js */
 @keyframes opa {
