@@ -1,4 +1,3 @@
-/* setBarViewSize() sets canvas html size from css  */
 /* not only em-based anymore ... */
 
 body {
@@ -58,16 +57,19 @@ div#controls > div,  div#displays > div {
 	min-height: 2em;
 }
 
-button, span, input, select, canvas#barView, div#pendulumContainer, .pendulum {
+button, span, input, select, #barView, 
+div#pendulumContainer, .pendulum {
 	display: inline-block; 
 	/* font: inherit; */ /* here everything em-based */
 	/* line-height: inherit; */
 	height: 2em; /* not select */
 	font-family: inherit;
 	font-size: 100%;
+	
+	vertical-align: middle;
 }
 
-canvas#barView, div#pendulumContainer {
+#barView, div#pendulumContainer {
 	display: block;
 	width: 100%; /* always break line */
 }
@@ -80,7 +82,7 @@ button, input, select {
 
 /* needed */
 input, select, #barView, #pendulumContainer {
-	vertical-align: middle;
+	/* vertical-align: middle; */
 }
 
 /* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
@@ -105,7 +107,7 @@ input[type="range"] {
 	/* width: 100%; */
 }
 
-div#pendulumContainer {
+div#pendulumContainer, #barView {
 	position: relative; /* children */
 	outline: 0.5px solid gray;
 }
@@ -147,3 +149,18 @@ div#pendulumContainer {
 	background-color: #cfc;
 }
 .hidden { visibility: hidden }
+
+
+
+
+
+.barViewBeatBox {
+	display: inline-block;
+	position: absolute;
+	background-color: silver;
+	height: 2em;
+	top: 0;
+}
+.currentBeatInBar {
+	background-color: magenta;
+}

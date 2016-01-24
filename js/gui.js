@@ -2,7 +2,6 @@
 // many variables declared in metronome.js, some defined w/ storage.js
 // here event listeners added, scripts at bottom of html body, no load event
 function makeMetroGUI (metro, storedState) {
-	var barViewContext2D; 
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -37,7 +36,11 @@ function makeMetroGUI (metro, storedState) {
 	var tempoNumCtl = document.getElementById('tempoNumCtl');
 	var gainSliderCtl = document.getElementById('gainSliderCtl');
 	var gainNumCtl = document.getElementById('gainNumCtl');
-	var barView = document.getElementById('barView'); // a canvas
+	
+	var barView = document.getElementById('barView'); // a canvas, no, a div here
+	
+	var wideDisplaysContainer = document.getElementById('wideDisplaysContainer'); // parent
+	
 	var pendulumContainer = document.getElementById('pendulumContainer');
 	var pendulumSwing = document.getElementById('pendulumSwing');
 	var pendulumHit = document.getElementById('pendulumHit');
@@ -110,7 +113,7 @@ function makeMetroGUI (metro, storedState) {
 		// special case: next is set, next bar not reached (?)
 		var val = metro.nextBeatsPerBar || metro.beatsPerBar;
 		beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(val);
-		beatsPerBarCtl.classList.remove('notYet');
+		beatsPerBarCtl.classList.remove('notYet');		
 	}
 	function updBeatUnitGUI(){
 	var val = metro.nextBeatUnit || metro.beatUnit;
@@ -146,10 +149,10 @@ function makeMetroGUI (metro, storedState) {
 	}
 	// ah, here I need pixels for html width/height
 	// old 'setBarView' also window.scrollTo(0, 0); // onorientationchange
-	function setBarViewSize(){
-		barView.width = parseInt(wideDisplayWidth); // draw func w/ "intrinsic" view, height 
-		barView.height = parseInt(wideDisplayHeight);
-	}
+// 	function setBarViewSize(){
+// 		barView.width = parseInt(wideDisplayWidth); // draw func w/ "intrinsic" view, height 
+// 		barView.height = parseInt(wideDisplayHeight);
+// 	}
 	
 	
 	function resetPendulum() {
@@ -188,7 +191,10 @@ function makeMetroGUI (metro, storedState) {
 	beatsPerBarCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
 		var val = beatsPerBarObj.values[ix];
-		if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
+		if (metro.isPlaying) { setNextBeatsPerBar(val); } else {
+			setBeatsPerBar(val);
+			replaceBarView();
+		};
 	}, false);
 
 	// Firefox special
@@ -264,21 +270,54 @@ function makeMetroGUI (metro, storedState) {
 		}
 	}, false);
 	
-	// I would rather define the colors in css, not here ...
-	// array of inline-blocks w/ 3 styles: theOne, current beat, other beats (?)
-	function drawBarView(currentBeatInBar){
+	function replaceBarView() {
 		var beatsPerBar = metro.beatsPerBar;
-		var x = barView.width / (beatsPerBar * 2 - 1);
-		barViewContext2D.clearRect(0, 0, barView.width, barView.height); 
-		for (var i = 0; i < beatsPerBar; i++) {
-			var test = Math.round(Math.random() * 200) + 55;
-			test = "rgb(100, " + test + ", 100)";
+		var x = parseInt(wideDisplayWidth) / (beatsPerBar * 2 - 1);
 		
-			barViewContext2D.fillStyle = ( currentBeatInBar == i ) ? 
-				((currentBeatInBar === 0) ? test : "#abf") : "#ddd";
-			barViewContext2D.fillRect( x * i * 2, 0, x, parseInt(wideDisplayHeight) );
-		}
+		var frag = document.createElement('div');
+		frag.classList.add('wideDisplay');
+		
+		for (var i = 0, ele; i < beatsPerBar; i++) {
+			ele = document.createElement('span');
+			ele.classList.add('barViewBeatBox');
+			
+			ele.setAttribute('style', 
+				"left: " + x * i * 2 + "px; width: " + x + "px;"
+			);
+// 			drawViewBeats.push(ele);
+			frag.appendChild(ele);
+		};
+		frag.id = 'barView';
+		wideDisplaysContainer.replaceChild(frag, barView);
+		barView = frag;
 	}
+	
+	
+	var prevBeat = -123;
+	function updCurrentBeatInBarView(currentBeatInBar){
+		var beatsPerBar = metro.beatsPerBar;
+		var kids = barView.childNodes;
+		if // (prevBeat >= 0) 
+		(prevBeat >= 0 && (prevBeat < beatsPerBar)) // maybe changed from greater numerator
+		{ kids[prevBeat].classList.remove('currentBeatInBar'); };
+		kids[currentBeatInBar].classList.add('currentBeatInBar');
+		prevBeat = currentBeatInBar;
+	}
+	
+	
+	// transform scale !?
+	function adjustBeatBoxesInBarView(){
+		var beatsPerBar = metro.beatsPerBar; // dupl. code
+		var x = parseInt(wideDisplayWidth) / (beatsPerBar * 2 - 1); // dupl. code
+		var kids = barView.childNodes;
+		var forEach = Array.prototype.forEach;
+		
+		forEach.call(kids, function(ele, i){
+			ele.setAttribute('style', // dup. code
+				"left: " + x * i * 2 + "px; width: " + x + "px;"
+			);		})
+	}
+	
 	
 	function transString(dur, x) {
 			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 			
@@ -319,9 +358,7 @@ function makeMetroGUI (metro, storedState) {
 	}
 	
 
-	function init(){
-		barViewContext2D = barView.getContext( '2d' );
-	
+	function init(){	
 		updBeatsPerBarGUI();
 		updBeatUnitGUI();
 	
@@ -331,7 +368,11 @@ function makeMetroGUI (metro, storedState) {
 		updGainSliderCtl();
 	
 		getWideDisplayLengths();
-		setBarViewSize();
+// 		setBarViewSize();
+
+		
+		replaceBarView();
+		
 	
 		if (! barViewHidden){ showBarView() } else { hideBarView() };
 		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
@@ -350,15 +391,23 @@ function makeMetroGUI (metro, storedState) {
 	window.addEventListener("resize", function() {
 // 		alert("resize");
 		getWideDisplayLengths();
+		adjustBeatBoxesInBarView();
 	});
 	
-	pubsubz.subscribe('beatsPerBar', updBeatsPerBarGUI);
+	pubsubz.subscribe('beatsPerBar', function(){
+		updBeatsPerBarGUI();
+		replaceBarView(); // when playing, but not stopped ...
+	});
 	pubsubz.subscribe('beatUnit', updBeatUnitGUI);
 // 	pubsubz.subscribe('start', resetPendulum);
 	pubsubz.subscribe('stop', resetPendulum);
 	
 	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){
-		if (! barViewHidden) { drawBarView(currentBeatInBar); };
+// 		if (! barViewHidden) { drawBarView(currentBeatInBar); };
+		
+// 		if (! barViewHidden) { updCurrentBeatInBarView(currentBeatInBar); };
+		updCurrentBeatInBarView(currentBeatInBar);
+		
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 	};
 	
