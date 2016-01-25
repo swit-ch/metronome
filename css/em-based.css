@@ -1,7 +1,3 @@
-/* setBarViewSize() sets canvas intrinsic size from css  */
-
-/* .visible { visibility: visible; } */
-.hidden { visibility: hidden }
 
 body {
 	margin: 1em;
@@ -10,38 +6,159 @@ body {
 	line-height: 15pt;
 }
 
-@media screen and (min-device-width: 700px) {
-	body {
-		padding-top: 4em;
-		padding-left: 8em;
-	}
-}
-
+/* leave away small screen, but good for layout testing */
 div#controls, div#displays {
-	max-width: 36em;
-	min-width: 24em;
+	padding: 0.4em 1em ;
 	border-top: 0.5px solid #ddd;
 	border-left: 0.5px solid #ddd;
-	padding: 0.4em 1em ;
 }
+
+/* argh, em-based conditions were good webkit, but not Firefox */
+
+@media screen and (min-width: 43em) {
+	body {
+		/* background-color: #bfb; */
+		padding-top: 3em;
+		padding-left: 8em;
+	}
+} /* next condition also true  */
+
+@media screen and (min-width: 35em) {
+	body {
+		/* background-color: #bbf; */
+		
+	}
+	div#controls, div#displays {
+		width: 33em; 
+	}
+	input[type="range"] {
+		width: 18em;
+	}
+	.wideDisplay {
+		width: 32em;
+	}
+	
+	@keyframes swing {
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(30em);
+			-webkit-transform: translateX(30em);
+			transform: translateX(30em);
+		}
+	}
+	@keyframes swingBack {
+		from {
+			-moz-transform: translateX(30em);
+			-webkit-transform: translateX(30em);
+			transform: translateX(30em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
+	}
+	#pendulumHit2 {
+		left: 30em; 
+	}
+/* 
+	#displays::after {
+		content: "layout wide"
+	}
+ */
+
+}
+@media screen and (max-width: 35em)
+{
+	body {
+		/* background-color: #fbb; */
+	}
+	div#controls, div#displays {
+		width: 17em; 
+	}
+	input[type="range"] {
+		width: 16em;
+	}
+	.wideDisplay {
+		width: 16em;
+	}
+	@keyframes swing {
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(14em);
+			-webkit-transform: translateX(14em);
+			transform: translateX(14em);
+		}
+		
+	}
+	@keyframes swingBack {
+		from {
+			-moz-transform: translateX(14em);
+			-webkit-transform: translateX(14em);
+			transform: translateX(14em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
+	}
+	#pendulumHit2 {
+		left: 14em; 
+	}
+
+/* 
+	#displays::after {
+		content: "layout narrow"
+	}
+ */
+}
+
 
 /* lines */
 div#controls > div,  div#displays > div {
-	/* background-color: #eef; */
 	margin: 0.4em 0;
 	/* height: 2em; */ /* ah, no line break if set */
 	min-height: 2em;
 }
 
-button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
+button, span, input, select, #barView, 
+div#pendulumContainer, .pendulum {
 	display: inline-block; 
 	/* font: inherit; */ /* here everything em-based */
 	/* line-height: inherit; */
 	height: 2em; /* not select */
-	
 	font-family: inherit;
 	font-size: 100%;
 	
+	vertical-align: middle;
+}
+
+#barView, div#pendulumContainer {
+	display: block;
+}
+
+button, input, select {
   -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
      -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
           box-sizing: border-box;
@@ -50,74 +167,66 @@ button, span, input, select, canvas#barView, .pendulum, div#pendulumContainer {
 /* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
 /* actually Firefox nicer without */
 select {
-	background-color: transparent;
+	background-color: white;
 }
-
-/* not select */
-input, select, #barView, #pendulumContainer {
-	vertical-align: middle;
-}
-/* 
-.label {
-	vertical-align: baseline;
-}
- */
 
 span, button {
-	width: 9em;
+	width: 7em;
 }
 select, input[type="number"] {
 	width: 6em;
 	text-align: center; /* not select */
 }
-input[type="range"] {
-	width: 17em;
-}
 
-.wideDisplay {
-	width: 24em;
-	/* background-color: #fcc; */
-}
-
-/* nextX changed */
-.notYet {
-	background-color: #cfc;
-}
-
-
-div#pendulumContainer {
+div#pendulumContainer, #barView {
 	position: relative; /* children */
-	outline: 0.5px solid gray;
+	/* outline: 0.5px solid gray; */ /* not visible Safari */
 }
-/* both swing and hits */
+
+.barViewBeatBox {
+	display: inline-block;
+	position: absolute;
+	background-color: silver;
+	height: 2em;
+	top: 0;
+}
+#currentBeatInBarBox {
+	background-color: magenta;
+}
+
+
+/* swing and hits */
 .pendulum {
 	width: 2em;
 	background-color: #0f0;
 	position: absolute;
 	opacity: 0;
 } 
-#pendulumSwing {
-	/* actual transition, transform defined and triggered in gui.js */
-	-moz-transition-timing-function: linear;
-	-webkit-transition-timing-function: linear;
-	transition-timing-function: linear;
+#pendulumSwing {	
 	background-color: #ccc;
 	opacity: 1;
+	left: 0;
 } 
 #pendulumHit {
 	left: 0;
-}
-#pendulumHit2 {
-	/* right did not work ? */
-	left: 22em;
 }
 /* animation-name set in gui.js */
 @keyframes opa {
 	from {
 		opacity: 1;
+		-moz-animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
+		-webkit-animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
+		animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
 	}
 	to {
 		opacity: 0;
 	}
 }
+
+
+/* nextX changed */
+.notYet {
+	background-color: #cfc;
+}
+.hidden { visibility: hidden }
 

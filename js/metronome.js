@@ -45,8 +45,7 @@ function makeAudioMetro (storedState) {
 	var nextNoteTime = 0.0;     // when the next note is due.
 	// var noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
 	var noteLength = 0.05;      // length of "beep" (in seconds)
-	// var canvas;                 // the canvas element -- now in index.html
-	// var barViewContext2D;          // barViewContext2D is the canvas' context 2D
+
 	// var last16thNoteDrawn = -1; // the last "box" we drew on the screen
 
 	// var lastBeatDrawn = -1; // the last "box" we drew on the screen

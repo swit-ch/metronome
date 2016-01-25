@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width user-scalable=no">
+    <!--  <meta name="viewport" content="width=device-width user-scalable=no"> -->
+    <!--  otherwise iOS pretends viewport much bigger : -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metronome swit-ch testing</title>
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
@@ -33,21 +34,22 @@
         <input type="range" id="gainSliderCtl">
       </div>
     </div>
+
     <div id="displays">
-      <div>
-        <button id="barViewSwitch">BarView</button>
-        <canvas id="barView" class="wideDisplay"></canvas>
-      </div>
-      <div>
-        <button id="pendulumSwitch">Pendulum</button>
+      <div id="wideDisplaysContainer">
+        <div id="barView" class="wideDisplay"></div>
         <div id="pendulumContainer" class="wideDisplay">
           <span id="pendulumSwing" class="pendulum"></span>
           <span id="pendulumHit" class="pendulum"></span>
-          <span id="pendulumHit2" class="pendulum"></span>
+          <span id="pendulumHit2" class="pendulum"></span>  
         </div>
       </div>
+      <div>
+        <button id="barViewSwitch">BarView</button>
+        <button id="pendulumSwitch">Pendulum</button>
+      </div>
     </div>
-
+    
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/pubsubz.js"></script> 
     <script src="js/common-for-now.js"></script> 
