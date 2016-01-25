@@ -6,14 +6,14 @@ body {
 	line-height: 15pt;
 }
 
+/* leave away small screen, but good for layout testing */
 div#controls, div#displays {
 	padding: 0.4em 1em ;
-}
-
-div#controls, div#displays {
 	border-top: 0.5px solid #ddd;
 	border-left: 0.5px solid #ddd;
 }
+
+/* argh, em-based conditions were good webkit, but not Firefox */
 
 @media screen and (min-width: 43em) {
 	body {
@@ -21,7 +21,7 @@ div#controls, div#displays {
 		padding-top: 3em;
 		padding-left: 8em;
 	}
-} /* next condition true too */
+} /* next condition also true  */
 
 @media screen and (min-width: 35em) {
 	body {
@@ -32,18 +32,41 @@ div#controls, div#displays {
 		width: 33em; 
 	}
 	input[type="range"] {
-		width: 19em;
+		width: 18em;
 	}
 	.wideDisplay {
 		width: 32em;
 	}
+	
 	@keyframes swing {
-		from { transform: translateX(0); }
-		to { transform: translateX(30em); }
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(30em);
+			-webkit-transform: translateX(30em);
+			transform: translateX(30em);
+		}
 	}
 	@keyframes swingBack {
-		from { transform: translateX(30em); }
-		to { transform: translateX(0); }
+		from {
+			-moz-transform: translateX(30em);
+			-webkit-transform: translateX(30em);
+			transform: translateX(30em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
 	}
 	#pendulumHit2 {
 		left: 30em; 
@@ -70,12 +93,35 @@ div#controls, div#displays {
 		width: 16em;
 	}
 	@keyframes swing {
-		from { transform: translateX(0); }
-		to { transform: translateX(14em); }
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(14em);
+			-webkit-transform: translateX(14em);
+			transform: translateX(14em);
+		}
+		
 	}
 	@keyframes swingBack {
-		from { transform: translateX(14em); }
-		to { transform: translateX(0); }
+		from {
+			-moz-transform: translateX(14em);
+			-webkit-transform: translateX(14em);
+			transform: translateX(14em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
 	}
 	#pendulumHit2 {
 		left: 14em; 
@@ -156,11 +202,7 @@ div#pendulumContainer, #barView {
 	position: absolute;
 	opacity: 0;
 } 
-#pendulumSwing {
-	/* actual transition, transform defined and triggered in gui.js */
-	-moz-transition-timing-function: linear;
-	-webkit-transition-timing-function: linear;
-	transition-timing-function: linear;
+#pendulumSwing {	
 	background-color: #ccc;
 	opacity: 1;
 	left: 0;
@@ -172,16 +214,14 @@ div#pendulumContainer, #barView {
 @keyframes opa {
 	from {
 		opacity: 1;
+		-moz-animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
+		-webkit-animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
+		animation-timing-function:  cubic-bezier(0, 0.62, 0.36, 1);
 	}
 	to {
 		opacity: 0;
 	}
 }
-
-/* Specifying a value other than none for the transform property establishes a new local coordinate system at the element that it is applied to */
-/* but here want relative to parent ... */
-/* so, maybe translate the container? No, the page gets wide, gets horiz scroll-bars ... */
-/* maybe give up percentages, stick to EMs */
 
 
 /* nextX changed */

@@ -263,37 +263,21 @@ function makeMetroGUI (metro, storedState) {
 		prevBox = curBox;
 	}
 	
-	function transString(dur, x) {
-			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 			
-			"-moz-transform: translateX(" + x + "); -webkit-transform: translateX(" + x + "); transform: translateX(" + x + "); "
-	}
 	function setHitAniString(dur){
-		return "-moz-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
-			"-webkit-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
-			"animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); "
+		return "-moz-animation: opa " + dur + "s; -webkit-animation: opa " + dur + "s; animation: opa " + dur + "s; "
 	}
 	function setSwingAniString(dur){
-// 		console.log("setSwingAniString");
-		return "-moz-animation: swing " + dur + "s linear; " +
-			"-webkit-animation: swing " + dur + "s linear; " +
-			"animation: swing " + dur + "s linear; "
+		return "-moz-animation: swing " + dur + "s; -webkit-animation: swing " + dur + "s; animation: swing " + dur + "s; "
 	}
 	function setSwingBackAniString(dur){
-// 		console.log("setSwingBackAniString");
-		return "-moz-animation: swingBack " + dur + "s linear; " +
-			"-webkit-animation: swingBack " + dur + "s linear; " +
-			"animation: swingBack " + dur + "s linear; "
+		return "-moz-animation: swingBack " + dur + "s; -webkit-animation: swingBack " + dur + "s; animation: swingBack " + dur + "s; "
 	}
-// 	function setSwingBackAniString(dur){
-// 		console.log("setSwingBackAniString");
-// 		return "-moz-animation: swing " + dur + "s linear reverse; " +
-// 			"-webkit-animation: swing " + dur + "s linear reverse; " +
-// 			"animation: swing " + dur + "s linear reverse; "
-// 	}
+	// reverse didn't work (?)
+	
+	var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
-		var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 			
 		if (currentBeatsEven) {
 			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
