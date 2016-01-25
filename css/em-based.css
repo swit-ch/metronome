@@ -7,49 +7,90 @@ body {
 }
 
 div#controls, div#displays {
-/* 
-	max-width: 27em;
-	min-width: 20em;
- */
 	padding: 0.4em 1em ;
 }
 
- @media screen and (min-width: 800px) {
+div#controls, div#displays {
+	border-top: 0.5px solid #ddd;
+	border-left: 0.5px solid #ddd;
+}
+
+@media screen and (min-width: 43em) {
 	body {
+		/* background-color: #bfb; */
 		padding-top: 3em;
 		padding-left: 8em;
 	}
-	
-	div#controls, div#displays {
-		border-top: 0.5px solid #ddd;
-		border-left: 0.5px solid #ddd;
-		
-		max-width: 33em; /* line break 2nd display, have block display now anyway */
-	}
-}
+} /* next condition true too */
 
-@media screen and (orientation: landscape) {
+@media screen and (min-width: 35em) {
 	body {
-		background-color: #bbf;
+		/* background-color: #bbf; */
 		
+	}
+	div#controls, div#displays {
+		width: 33em; 
+	}
+	input[type="range"] {
+		width: 19em;
 	}
 	.wideDisplay {
 		width: 32em;
 	}
+	@keyframes swing {
+		from { transform: translateX(0); }
+		to { transform: translateX(30em); }
+	}
+	@keyframes swingBack {
+		from { transform: translateX(30em); }
+		to { transform: translateX(0); }
+	}
+	#pendulumHit2 {
+		left: 30em; 
+	}
+/* 
+	#displays::after {
+		content: "layout wide"
+	}
+ */
+
 }
-@media screen and (orientation: portrait) {
+@media screen and (max-width: 35em)
+{
 	body {
-		background-color: #fbb;
+		/* background-color: #fbb; */
+	}
+	div#controls, div#displays {
+		width: 17em; 
+	}
+	input[type="range"] {
+		width: 16em;
 	}
 	.wideDisplay {
-		width: 18em;
+		width: 16em;
 	}
+	@keyframes swing {
+		from { transform: translateX(0); }
+		to { transform: translateX(14em); }
+	}
+	@keyframes swingBack {
+		from { transform: translateX(14em); }
+		to { transform: translateX(0); }
+	}
+	#pendulumHit2 {
+		left: 14em; 
+	}
+
+/* 
+	#displays::after {
+		content: "layout narrow"
+	}
+ */
 }
 
 
 /* lines */
 div#controls > div,  div#displays > div {
-	/* background-color: #eef; */
 	margin: 0.4em 0;
 	/* height: 2em; */ /* ah, no line break if set */
 	min-height: 2em;
@@ -69,29 +110,12 @@ div#pendulumContainer, .pendulum {
 
 #barView, div#pendulumContainer {
 	display: block;
-	width: 100%; 
 }
-
-/* 
-#pendulumSwinger {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-color: yellow;
-}
- */
 
 button, input, select {
   -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
      -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
           box-sizing: border-box;
-}
-
-/* needed */
-input, select, #barView, #pendulumContainer {
-	/* vertical-align: middle; */
 }
 
 /* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
@@ -107,20 +131,11 @@ select, input[type="number"] {
 	width: 6em;
 	text-align: center; /* not select */
 }
-input[type="range"] {
-	width: 17em;
-}
-
-.wideDisplay {
-	/* width: 24em; */
-	/* width: 100%; */
-}
 
 div#pendulumContainer, #barView {
 	position: relative; /* children */
-	outline: 0.5px solid gray;
+	/* outline: 0.5px solid gray; */ /* not visible Safari */
 }
-
 
 .barViewBeatBox {
 	display: inline-block;
@@ -129,7 +144,6 @@ div#pendulumContainer, #barView {
 	height: 2em;
 	top: 0;
 }
-
 #currentBeatInBarBox {
 	background-color: magenta;
 }
@@ -149,14 +163,10 @@ div#pendulumContainer, #barView {
 	transition-timing-function: linear;
 	background-color: #ccc;
 	opacity: 1;
+	left: 0;
 } 
 #pendulumHit {
 	left: 0;
-}
-#pendulumHit2 {
-	/* right did not work ? */
-	/* left: 22em; */ /* hm, trying percentage on parent, now */
-	left: calc(100% - 2em);
 }
 /* animation-name set in gui.js */
 @keyframes opa {
@@ -172,42 +182,6 @@ div#pendulumContainer, #barView {
 /* but here want relative to parent ... */
 /* so, maybe translate the container? No, the page gets wide, gets horiz scroll-bars ... */
 /* maybe give up percentages, stick to EMs */
-@keyframes swing {
-	from {
-		left: 0;
-	}
-	to {
-		left: calc(100% - 2em);
-	}
-}
-@keyframes swingBack {
-	from {
-		left: calc(100% - 2em);
-	}
-	to {
-		left: 0;
-	}
-}
-/* 
-@keyframes swingCntnr {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translate(calc(100% - 2em));
-	}
-}
-@keyframes swingBackCntnr {
-	from {
-		transform: translate(calc(100% - 2em));
-	}
-	to {
-		transform: translateX(0);
-	}
-}
- */
-
-
 
 
 /* nextX changed */
@@ -215,3 +189,4 @@ div#pendulumContainer, #barView {
 	background-color: #cfc;
 }
 .hidden { visibility: hidden }
+

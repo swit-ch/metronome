@@ -273,27 +273,23 @@ function makeMetroGUI (metro, storedState) {
 			"animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); "
 	}
 	function setSwingAniString(dur){
+// 		console.log("setSwingAniString");
 		return "-moz-animation: swing " + dur + "s linear; " +
 			"-webkit-animation: swing " + dur + "s linear; " +
 			"animation: swing " + dur + "s linear; "
 	}
 	function setSwingBackAniString(dur){
+// 		console.log("setSwingBackAniString");
 		return "-moz-animation: swingBack " + dur + "s linear; " +
 			"-webkit-animation: swingBack " + dur + "s linear; " +
 			"animation: swingBack " + dur + "s linear; "
 	}
-	
-	function setSwingCntnrAniString(dur){
-		return "-moz-animation: swingCntnr " + dur + "s linear; " +
-			"-webkit-animation: swingCntnr " + dur + "s linear; " +
-			"animation: swingCntnr " + dur + "s linear; "
-	}
-	function setSwingBackCntnrAniString(dur){
-		return "-moz-animation: swingBackCntnr " + dur + "s linear; " +
-			"-webkit-animation: swingBackCntnr " + dur + "s linear; " +
-			"animation: swingBackCntnr " + dur + "s linear; "
-	}
-	
+// 	function setSwingBackAniString(dur){
+// 		console.log("setSwingBackAniString");
+// 		return "-moz-animation: swing " + dur + "s linear reverse; " +
+// 			"-webkit-animation: swing " + dur + "s linear reverse; " +
+// 			"animation: swing " + dur + "s linear reverse; "
+// 	}
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
@@ -301,17 +297,10 @@ function makeMetroGUI (metro, storedState) {
 			
 		if (currentBeatsEven) {
 			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
-			
-// 			pendulumSwinger.setAttribute('style', setSwingCntnrAniString(beatDur));
-			
 			pendulumHit.setAttribute('style', setHitAniString(beatDur));
 			pendulumHit2.setAttribute('style', unsetHitAni);
 		} else {
-			
 			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
-			
-// 			pendulumSwinger.setAttribute('style', setSwingBackCntnrAniString(beatDur));
-			
 			pendulumHit.setAttribute('style', unsetHitAni);
 			pendulumHit2.setAttribute('style', setHitAniString(beatDur));
 		};
