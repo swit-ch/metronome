@@ -1,4 +1,3 @@
-/* not only em-based anymore ... */
 
 body {
 	margin: 1em;
@@ -13,7 +12,6 @@ div#controls, div#displays {
 	min-width: 20em;
  */
 	padding: 0.4em 1em ;
-	/* background-color: yellow; */
 }
 
  @media screen and (min-width: 800px) {
@@ -32,7 +30,7 @@ div#controls, div#displays {
 
 @media screen and (orientation: landscape) {
 	body {
-		background-color: #aaf;
+		background-color: #bbf;
 		
 	}
 	.wideDisplay {
@@ -41,7 +39,7 @@ div#controls, div#displays {
 }
 @media screen and (orientation: portrait) {
 	body {
-		background-color: orange;
+		background-color: #fbb;
 	}
 	.wideDisplay {
 		width: 18em;
@@ -111,6 +109,21 @@ div#pendulumContainer, #barView {
 	position: relative; /* children */
 	outline: 0.5px solid gray;
 }
+
+
+.barViewBeatBox {
+	display: inline-block;
+	position: absolute;
+	background-color: silver;
+	height: 2em;
+	top: 0;
+}
+
+#currentBeatInBarBox {
+	background-color: magenta;
+}
+
+
 /* swing and hits */
 .pendulum {
 	width: 2em;
@@ -144,6 +157,9 @@ div#pendulumContainer, #barView {
 	}
 }
 
+/* Specifying a value other than none for the transform property establishes a new local coordinate system at the element that it is applied to */
+/* but here want relative to parent ... */
+/* so, maybe translate the container? */
 @keyframes swing {
 	from {
 		left: 0;
@@ -160,9 +176,22 @@ div#pendulumContainer, #barView {
 		left: 0;
 	}
 }
-
-
-
+@keyframes swingCntnr {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translate(calc(100% - 2em));
+	}
+}
+@keyframes swingBackCntnr {
+	from {
+		transform: translate(calc(100% - 2em));
+	}
+	to {
+		transform: translateX(0);
+	}
+}
 
 
 
@@ -172,18 +201,3 @@ div#pendulumContainer, #barView {
 	background-color: #cfc;
 }
 .hidden { visibility: hidden }
-
-
-
-
-
-.barViewBeatBox {
-	display: inline-block;
-	position: absolute;
-	background-color: silver;
-	height: 2em;
-	top: 0;
-}
-.currentBeatInBar {
-	background-color: magenta;
-}

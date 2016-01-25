@@ -253,16 +253,14 @@ function makeMetroGUI (metro, storedState) {
 		barView = frag;
 	}	
 	
-	var prevBeat = -123;
+	var prevBox = document.createElement('span');
 	function updCurrentBeatInBarView(currentBeatInBar){
 		var beatsPerBar = metro.beatsPerBar;
 		var kids = barView.childNodes;
-		if // (prevBeat >= 0) 
-		(prevBeat >= 0 && (prevBeat < beatsPerBar)) // maybe changed from greater numerator
-		// or better id than class ?
-		{ kids[prevBeat].classList.remove('currentBeatInBar'); };
-		kids[currentBeatInBar].classList.add('currentBeatInBar');
-		prevBeat = currentBeatInBar;
+		var curBox = kids[currentBeatInBar];
+		prevBox.id = 'none';
+		curBox.id = 'currentBeatInBarBox';
+		prevBox = curBox;
 	}
 	
 	function transString(dur, x) {
@@ -285,24 +283,44 @@ function makeMetroGUI (metro, storedState) {
 			"animation: swingBack " + dur + "s linear; "
 	}
 	
+	function setSwingCntnrAniString(dur){
+		return "-moz-animation: swingCntnr " + dur + "s linear; " +
+			"-webkit-animation: swingCntnr " + dur + "s linear; " +
+			"animation: swingCntnr " + dur + "s linear; "
+	}
+	function setSwingBackCntnrAniString(dur){
+		return "-moz-animation: swingBackCntnr " + dur + "s linear; " +
+			"-webkit-animation: swingBackCntnr " + dur + "s linear; " +
+			"animation: swingBackCntnr " + dur + "s linear; "
+	}
+	
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
 		var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 			
 		if (currentBeatsEven) {
-			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
+// 			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
+			
+			pendulumContainer.setAttribute('style', setSwingCntnrAniString(beatDur));
 			
 			pendulumHit.setAttribute('style', setHitAniString(beatDur));
 			pendulumHit2.setAttribute('style', unsetHitAni);
 		} else {
 			
-			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
+// 			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
+			
+			pendulumContainer.setAttribute('style', setSwingBackCntnrAniString(beatDur));
 			
 			pendulumHit.setAttribute('style', unsetHitAni);
 			pendulumHit2.setAttribute('style', setHitAniString(beatDur));
 		};
 	}
+	
+	
+	/*
+	swingCntnr
+	*/
 	
 	function urlLocal(url) {
 		var m = url.match(/192\.168\.0\./);
