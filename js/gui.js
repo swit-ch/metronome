@@ -300,17 +300,17 @@ function makeMetroGUI (metro, storedState) {
 		var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 			
 		if (currentBeatsEven) {
-// 			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
+			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
 			
-			pendulumContainer.setAttribute('style', setSwingCntnrAniString(beatDur));
+// 			pendulumSwinger.setAttribute('style', setSwingCntnrAniString(beatDur));
 			
 			pendulumHit.setAttribute('style', setHitAniString(beatDur));
 			pendulumHit2.setAttribute('style', unsetHitAni);
 		} else {
 			
-// 			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
+			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
 			
-			pendulumContainer.setAttribute('style', setSwingBackCntnrAniString(beatDur));
+// 			pendulumSwinger.setAttribute('style', setSwingBackCntnrAniString(beatDur));
 			
 			pendulumHit.setAttribute('style', unsetHitAni);
 			pendulumHit2.setAttribute('style', setHitAniString(beatDur));

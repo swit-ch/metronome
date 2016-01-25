@@ -24,7 +24,7 @@ div#controls, div#displays {
 		border-top: 0.5px solid #ddd;
 		border-left: 0.5px solid #ddd;
 		
-		max-width: 33em; /* line break 2nd display, better have block display? */
+		max-width: 33em; /* line break 2nd display, have block display now anyway */
 	}
 }
 
@@ -69,8 +69,19 @@ div#pendulumContainer, .pendulum {
 
 #barView, div#pendulumContainer {
 	display: block;
-	width: 100%; /* always break line */
+	width: 100%; 
 }
+
+/* 
+#pendulumSwinger {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: yellow;
+}
+ */
 
 button, input, select {
   -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
@@ -159,7 +170,8 @@ div#pendulumContainer, #barView {
 
 /* Specifying a value other than none for the transform property establishes a new local coordinate system at the element that it is applied to */
 /* but here want relative to parent ... */
-/* so, maybe translate the container? */
+/* so, maybe translate the container? No, the page gets wide, gets horiz scroll-bars ... */
+/* maybe give up percentages, stick to EMs */
 @keyframes swing {
 	from {
 		left: 0;
@@ -176,6 +188,7 @@ div#pendulumContainer, #barView {
 		left: 0;
 	}
 }
+/* 
 @keyframes swingCntnr {
 	from {
 		transform: translateX(0);
@@ -192,6 +205,7 @@ div#pendulumContainer, #barView {
 		transform: translateX(0);
 	}
 }
+ */
 
 
 
