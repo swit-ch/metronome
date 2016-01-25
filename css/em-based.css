@@ -144,6 +144,29 @@ div#pendulumContainer, #barView {
 	}
 }
 
+@keyframes swing {
+	from {
+		left: 0;
+	}
+	to {
+		left: calc(100% - 2em);
+	}
+}
+@keyframes swingBack {
+	from {
+		left: calc(100% - 2em);
+	}
+	to {
+		left: 0;
+	}
+}
+
+
+
+
+
+
+
 /* nextX changed */
 .notYet {
 	background-color: #cfc;

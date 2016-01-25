@@ -26,8 +26,6 @@ function makeMetroGUI (metro, storedState) {
 	var tempoSpec = { min: 10, max: 400, step: 1, pattern: "[0-9]*" };
 	var gainSpec = {  min: 0, max: 1, step: "any", numStep: 0.01 };
 	
-	var wideDisplayWidth, wideDisplayHeight;  // computed, so can change css independently
-
 	// html elements
 	var playCtl = document.getElementById('playCtl');
 	var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
@@ -133,28 +131,7 @@ function makeMetroGUI (metro, storedState) {
 	function updGainSliderCtl(){
 		gainSliderCtl.value = metro.gain;
 	}
-	
-	
-	
-	
-	
-	// hmm, length of barView and pendulumContainer the same ....
-	// pendulum itself and 2 hits are squares
 
-	// string incl "px" -- init()
-	function getWideDisplayLengths(){ // hit length equals height of its container
-		var s = window.getComputedStyle(barView); // css in EM
-		wideDisplayWidth = s.width;
-		wideDisplayHeight = s.height;
-	}
-	// ah, here I need pixels for html width/height
-	// old 'setBarView' also window.scrollTo(0, 0); // onorientationchange
-// 	function setBarViewSize(){
-// 		barView.width = parseInt(wideDisplayWidth); // draw func w/ "intrinsic" view, height 
-// 		barView.height = parseInt(wideDisplayHeight);
-// 	}
-	
-	
 	function resetPendulum() {
 		pendulumSwing.setAttribute(
 			'style', // to the left !			
@@ -214,9 +191,6 @@ function makeMetroGUI (metro, storedState) {
 	}, false);
 	
 	
-	
-	
-	
 	// constrain keyboard input, verify ?
 	tempoNumCtl.addEventListener('input', 
 	// 'change', 
@@ -239,17 +213,6 @@ function makeMetroGUI (metro, storedState) {
 		metro.gain = Number(this.value);
 		updGainNumCtl();
 	}, false);
-	
-	
-	// iOS ? No!
-// 	[ tempoSliderCtl, gainSliderCtl ].forEach(function(item, i){
-// 		item.addEventListener('touchstart', function(ev) { ev.preventDefault(); }, false);
-// 		item.addEventListener('touchmove', function(ev) { ev.preventDefault(); }, false);
-// 	});
-
-	
-	
-	
 
 	barViewSwitch.addEventListener('click', function(ev){
 		if (! barViewHidden){
@@ -272,8 +235,7 @@ function makeMetroGUI (metro, storedState) {
 	
 	function replaceBarView() {
 		var beatsPerBar = metro.beatsPerBar;
-		var x = parseInt(wideDisplayWidth) / (beatsPerBar * 2 - 1);
-		
+		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
 		var frag = document.createElement('div');
 		frag.classList.add('wideDisplay');
 		
@@ -282,16 +244,14 @@ function makeMetroGUI (metro, storedState) {
 			ele.classList.add('barViewBeatBox');
 			
 			ele.setAttribute('style', 
-				"left: " + x * i * 2 + "px; width: " + x + "px;"
+				"left: " + x * i * 2 + "%; width: " + x + "%;"
 			);
-// 			drawViewBeats.push(ele);
 			frag.appendChild(ele);
 		};
 		frag.id = 'barView';
 		wideDisplaysContainer.replaceChild(frag, barView);
 		barView = frag;
-	}
-	
+	}	
 	
 	var prevBeat = -123;
 	function updCurrentBeatInBarView(currentBeatInBar){
@@ -299,55 +259,48 @@ function makeMetroGUI (metro, storedState) {
 		var kids = barView.childNodes;
 		if // (prevBeat >= 0) 
 		(prevBeat >= 0 && (prevBeat < beatsPerBar)) // maybe changed from greater numerator
+		// or better id than class ?
 		{ kids[prevBeat].classList.remove('currentBeatInBar'); };
 		kids[currentBeatInBar].classList.add('currentBeatInBar');
 		prevBeat = currentBeatInBar;
 	}
 	
-	
-	// transform scale !?
-	function adjustBeatBoxesInBarView(){
-		var beatsPerBar = metro.beatsPerBar; // dupl. code
-		var x = parseInt(wideDisplayWidth) / (beatsPerBar * 2 - 1); // dupl. code
-		var kids = barView.childNodes;
-		var forEach = Array.prototype.forEach;
-		
-		forEach.call(kids, function(ele, i){
-			ele.setAttribute('style', // dup. code
-				"left: " + x * i * 2 + "px; width: " + x + "px;"
-			);		})
-	}
-	
-	
 	function transString(dur, x) {
 			return "-moz-transition-duration: " + dur + "s; -webkit-transition-duration: " + dur + "s; transition-duration: " + dur + "s; " + 			
 			"-moz-transform: translateX(" + x + "); -webkit-transform: translateX(" + x + "); transform: translateX(" + x + "); "
 	}
-	function setAniString(dur){
+	function setHitAniString(dur){
 		return "-moz-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
 			"-webkit-animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); " +
 			"animation: opa " + dur + "s cubic-bezier(0, 0.62, 0.36, 1); "
+	}
+	function setSwingAniString(dur){
+		return "-moz-animation: swing " + dur + "s linear; " +
+			"-webkit-animation: swing " + dur + "s linear; " +
+			"animation: swing " + dur + "s linear; "
+	}
+	function setSwingBackAniString(dur){
+		return "-moz-animation: swingBack " + dur + "s linear; " +
+			"-webkit-animation: swingBack " + dur + "s linear; " +
+			"animation: swingBack " + dur + "s linear; "
 	}
 	
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
-		var pendulumSwingX = currentBeatsEven ? ((parseInt(wideDisplayWidth) - parseInt(wideDisplayHeight)) + "px") : 0;
-		var unsetAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
-// 		console.log("animatePendulum currentBeats : " + currentBeats + " " + currentBeatsEven);
-		
-// 		console.log(transString(beatDur, pendulumSwingX));
-		
-		pendulumSwing.setAttribute(
-			'style', transString(beatDur, pendulumSwingX)
-		);
+		var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
 			
 		if (currentBeatsEven) {
-			pendulumHit.setAttribute('style', setAniString(beatDur));
-			pendulumHit2.setAttribute('style', unsetAni);
+			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
+			
+			pendulumHit.setAttribute('style', setHitAniString(beatDur));
+			pendulumHit2.setAttribute('style', unsetHitAni);
 		} else {
-			pendulumHit.setAttribute('style', unsetAni);
-			pendulumHit2.setAttribute('style', setAniString(beatDur));
+			
+			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
+			
+			pendulumHit.setAttribute('style', unsetHitAni);
+			pendulumHit2.setAttribute('style', setHitAniString(beatDur));
 		};
 	}
 	
@@ -367,12 +320,7 @@ function makeMetroGUI (metro, storedState) {
 		updGainNumCtl();
 		updGainSliderCtl();
 	
-		getWideDisplayLengths();
-// 		setBarViewSize();
-
-		
 		replaceBarView();
-		
 	
 		if (! barViewHidden){ showBarView() } else { hideBarView() };
 		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
@@ -382,18 +330,6 @@ function makeMetroGUI (metro, storedState) {
 		};
 	}
 	
-	
-// 	window.addEventListener("orientationchange", function() {
-// 	// iOS event emitted but orientation undefined
-// // 		alert("the orientation of the device is now " + window.screen.orientation);
-// 		getWideDisplayLengths();
-// 	});
-	window.addEventListener("resize", function() {
-// 		alert("resize");
-		getWideDisplayLengths();
-		adjustBeatBoxesInBarView();
-	});
-	
 	pubsubz.subscribe('beatsPerBar', function(){
 		updBeatsPerBarGUI();
 		replaceBarView(); // when playing, but not stopped ...
@@ -402,10 +338,7 @@ function makeMetroGUI (metro, storedState) {
 // 	pubsubz.subscribe('start', resetPendulum);
 	pubsubz.subscribe('stop', resetPendulum);
 	
-	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){
-// 		if (! barViewHidden) { drawBarView(currentBeatInBar); };
-		
-// 		if (! barViewHidden) { updCurrentBeatInBarView(currentBeatInBar); };
+	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
 		updCurrentBeatInBarView(currentBeatInBar);
 		
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
