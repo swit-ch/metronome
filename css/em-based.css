@@ -190,7 +190,11 @@ div#pendulumContainer, #barView {
 	top: 0;
 }
 #currentBeatInBarBox {
-	background-color: magenta;
+	background-color: green;
+	
+	-moz-animation-name: opa;
+	-webkit-animation-name: opa;
+	animation-name: opa;
 }
 
 .barViewBeatBox, #pendulumSwing {
@@ -229,7 +233,6 @@ div#pendulumContainer, #barView {
 }
 
 
-/* animation-name set in gui.js */
 @keyframes opa {
 	from {
 		opacity: 1;

@@ -134,24 +134,24 @@ function makeMetroGUI (metro, storedState) {
 
 	function hideBarView(){
 		barView.classList.add('hidden');
-		barViewSwitch.textContent = "show BarView";
+		barViewSwitch.textContent = "show ...";
 	}
 	function showBarView(){
 		barView.classList.remove('hidden');
-		barViewSwitch.textContent = "hide BarView";
+		barViewSwitch.textContent = "hide ...";
 	}
 	
 	function hidePendulum(){
 		[ pendulumSwing, pendulumHit, pendulumHit2].forEach(function(item, i){
 			item.classList.add('hidden');
 		});
-		pendulumSwitch.textContent = "show Pendul.";
+		pendulumSwitch.textContent = "show <-->";
 	}
 	function showPendulum(){		
 		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
 			item.classList.remove('hidden');
 		});
-		pendulumSwitch.textContent = "hide Pendul.";
+		pendulumSwitch.textContent = "hide <-->";
 	}
 
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
@@ -246,12 +246,13 @@ function makeMetroGUI (metro, storedState) {
 	}	
 	
 	var prevBox = document.createElement('span');
-	function updCurrentBeatInBarView(currentBeatInBar){
+	
+	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
 		var beatsPerBar = metro.beatsPerBar;
 		var kids = barView.childNodes;
 		var curBox = kids[currentBeatInBar];
 		prevBox.id = 'none';
-		curBox.id = 'currentBeatInBarBox';
+		if (beatsPerBar > 1) { curBox.id = 'currentBeatInBarBox';		};
 		prevBox = curBox;
 	}
 	
@@ -278,7 +279,7 @@ function makeMetroGUI (metro, storedState) {
 		var pscl = pendulumSwing.classList;
 		var phcl = pendulumHit.classList;
 		var ph2cl = pendulumHit2.classList;
-		
+				
 		if (currentBeatsEven) {
 			pscl.remove('swingBack');
 			pscl.add('swing');
@@ -292,6 +293,7 @@ function makeMetroGUI (metro, storedState) {
 			ph2cl.add('hit');
 			pendulumHit2.setAttribute('style', durString(beatDur));
 		};
+		
 		pendulumSwing.setAttribute('style', durString(beatDur));
 	}
 
@@ -332,7 +334,7 @@ function makeMetroGUI (metro, storedState) {
 	pubsubz.subscribe('stop', resetPendulum);
 	
 	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-		updCurrentBeatInBarView(currentBeatInBar);
+		updCurrentBeatInBarView(currentBeatInBar, beatDur);
 		
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 	};
