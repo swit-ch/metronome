@@ -92,6 +92,7 @@ div#controls, div#displays {
 	.wideDisplay {
 		width: 16em;
 	}
+	
 	@keyframes swing {
 		from {
 			-moz-transform: translateX(0);
@@ -106,7 +107,6 @@ div#controls, div#displays {
 			-webkit-transform: translateX(14em);
 			transform: translateX(14em);
 		}
-		
 	}
 	@keyframes swingBack {
 		from {
@@ -211,6 +211,24 @@ div#pendulumContainer, #barView {
 #pendulumHit {
 	left: 0;
 }
+
+.swing {
+	-moz-animation-name: swing;
+	-webkit-animation-name: swing;
+	animation-name: swing;
+}
+.swingBack {
+	-moz-animation-name: swingBack;
+	-webkit-animation-name: swingBack;
+	animation-name: swingBack;
+}
+.hit {
+	-moz-animation-name: opa;
+	-webkit-animation-name: opa;
+	animation-name: opa;
+}
+
+
 /* animation-name set in gui.js */
 @keyframes opa {
 	from {

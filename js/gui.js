@@ -132,14 +132,6 @@ function makeMetroGUI (metro, storedState) {
 		gainSliderCtl.value = metro.gain;
 	}
 
-	function resetPendulum() {
-		pendulumSwing.setAttribute(
-			'style', // to the left !			
-			'-moz-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); '
-		);
-		pendulumHit.classList.remove('otherHit');
-	}
-
 	function hideBarView(){
 		barView.classList.add('hidden');
 		barViewSwitch.textContent = "show BarView";
@@ -263,37 +255,47 @@ function makeMetroGUI (metro, storedState) {
 		prevBox = curBox;
 	}
 	
-	function setHitAniString(dur){
-		return "-moz-animation: opa " + dur + "s; -webkit-animation: opa " + dur + "s; animation: opa " + dur + "s; "
+	/* needed at all ? */
+	function resetPendulum() {
+		pendulumSwing.setAttribute(
+			'style', // to the left !			
+			'-moz-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); '
+		);
 	}
-	function setSwingAniString(dur){
-		return "-moz-animation: swing " + dur + "s; -webkit-animation: swing " + dur + "s; animation: swing " + dur + "s; "
-	}
-	function setSwingBackAniString(dur){
-		return "-moz-animation: swingBack " + dur + "s; -webkit-animation: swingBack " + dur + "s; animation: swingBack " + dur + "s; "
-	}
-	// reverse didn't work (?)
 	
-	var unsetHitAni = '-moz-animation-name: none; -webkit-animation-name: none; animation-name: none';
+	// or, can I write the duration into the classes until it's changed again ?!
+	function durString(dur){
+		var str = "-moz-animation-duration: " + dur + "s; -webkit-animation-duration: " + dur + "s; animation-duration: " + dur + "s";
+		return str;
+	}
+	
+		// reverse swing didn't work (?), ah, it probably needs the new name to trigger anew, same name ani already ended
+		// set class now for animation-name	
+	
 	// 'beatDur' from context metronome.js (function 'nextNote')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
-			
+		var pscl = pendulumSwing.classList;
+		var phcl = pendulumHit.classList;
+		var ph2cl = pendulumHit2.classList;
+		
 		if (currentBeatsEven) {
-			pendulumSwing.setAttribute('style', setSwingAniString(beatDur));
-			pendulumHit.setAttribute('style', setHitAniString(beatDur));
-			pendulumHit2.setAttribute('style', unsetHitAni);
+			pscl.remove('swingBack');
+			pscl.add('swing');
+			ph2cl.remove('hit');
+			phcl.add('hit');
+			pendulumHit.setAttribute('style', durString(beatDur));
 		} else {
-			pendulumSwing.setAttribute('style', setSwingBackAniString(beatDur));
-			pendulumHit.setAttribute('style', unsetHitAni);
-			pendulumHit2.setAttribute('style', setHitAniString(beatDur));
+			pscl.remove('swing');
+			pscl.add('swingBack');
+			phcl.remove('hit');
+			ph2cl.add('hit');
+			pendulumHit2.setAttribute('style', durString(beatDur));
 		};
+		pendulumSwing.setAttribute('style', durString(beatDur));
 	}
+
 	
-	
-	/*
-	swingCntnr
-	*/
 	
 	function urlLocal(url) {
 		var m = url.match(/192\.168\.0\./);
