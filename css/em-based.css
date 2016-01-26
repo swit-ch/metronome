@@ -186,7 +186,6 @@ div#pendulumContainer, #barView {
 .barViewBeatBox {
 	display: inline-block;
 	position: absolute;
-	background-color: silver;
 	height: 2em;
 	top: 0;
 }
@@ -194,6 +193,9 @@ div#pendulumContainer, #barView {
 	background-color: magenta;
 }
 
+.barViewBeatBox, #pendulumSwing {
+	background-color: silver;
+}
 
 /* swing and hits */
 .pendulum {
@@ -203,7 +205,6 @@ div#pendulumContainer, #barView {
 	opacity: 0;
 } 
 #pendulumSwing {	
-	background-color: #ccc;
 	opacity: 1;
 	left: 0;
 } 
