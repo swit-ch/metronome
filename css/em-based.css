@@ -92,6 +92,7 @@ div#controls, div#displays {
 	.wideDisplay {
 		width: 16em;
 	}
+	
 	@keyframes swing {
 		from {
 			-moz-transform: translateX(0);
@@ -106,7 +107,6 @@ div#controls, div#displays {
 			-webkit-transform: translateX(14em);
 			transform: translateX(14em);
 		}
-		
 	}
 	@keyframes swingBack {
 		from {
@@ -186,14 +186,20 @@ div#pendulumContainer, #barView {
 .barViewBeatBox {
 	display: inline-block;
 	position: absolute;
-	background-color: silver;
 	height: 2em;
 	top: 0;
 }
 #currentBeatInBarBox {
-	background-color: magenta;
+	background-color: green;
+	
+	-moz-animation-name: opa;
+	-webkit-animation-name: opa;
+	animation-name: opa;
 }
 
+.barViewBeatBox, #pendulumSwing {
+	background-color: silver;
+}
 
 /* swing and hits */
 .pendulum {
@@ -203,14 +209,30 @@ div#pendulumContainer, #barView {
 	opacity: 0;
 } 
 #pendulumSwing {	
-	background-color: #ccc;
 	opacity: 1;
 	left: 0;
 } 
 #pendulumHit {
 	left: 0;
 }
-/* animation-name set in gui.js */
+
+.swing {
+	-moz-animation-name: swing;
+	-webkit-animation-name: swing;
+	animation-name: swing;
+}
+.swingBack {
+	-moz-animation-name: swingBack;
+	-webkit-animation-name: swingBack;
+	animation-name: swingBack;
+}
+.hit {
+	-moz-animation-name: opa;
+	-webkit-animation-name: opa;
+	animation-name: opa;
+}
+
+
 @keyframes opa {
 	from {
 		opacity: 1;
