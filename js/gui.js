@@ -1,7 +1,9 @@
 'use strict';
 // many variables declared in metronome.js, some defined w/ storage.js
 // here event listeners added, scripts at bottom of html body, no load event
-function makeMetroGUI (metro, storedState) {
+function makeMetroGUI ( /*metro, */ storedState) {
+	
+	var metro;
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -44,6 +46,8 @@ function makeMetroGUI (metro, storedState) {
 	var pendulumHit = document.getElementById('pendulumHit');
 	var pendulumHit2 = document.getElementById('pendulumHit2');
 	var pendulumSwitch = document.getElementById('pendulumSwitch');
+	
+	var postView = document.getElementById('postView'); // again ...
 
 	function prepInputCtl(ctl, spec){
 		ctl.min = spec.min;
@@ -84,7 +88,8 @@ function makeMetroGUI (metro, storedState) {
 		var str = metro.play(); // metronome.js
 		playCtl.textContent = str;
 	}
-
+	
+	
 	function setNextBeatsPerBar(n) { // test, constrain ?
 		metro.nextBeatsPerBar = n;
 		beatsPerBarCtl.classList.add('notYet');
@@ -93,8 +98,6 @@ function makeMetroGUI (metro, storedState) {
 		metro.nextBeatUnit = x;
 		beatUnitCtl.classList.add('notYet');
 	}
-	
-	
 	// hmm, now need the simple case too
 	function setBeatsPerBar(n) { // test, constrain ?
 		metro.beatsPerBar = n;
@@ -118,7 +121,8 @@ function makeMetroGUI (metro, storedState) {
 		beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
 		beatUnitCtl.classList.remove('notYet');
 	}
-
+	
+	
 	function updTempoNumCtl(){
 		tempoNumCtl.value = metro.tempo;
 	}
@@ -131,7 +135,8 @@ function makeMetroGUI (metro, storedState) {
 	function updGainSliderCtl(){
 		gainSliderCtl.value = metro.gain;
 	}
-
+	
+	
 	function hideBarView(){
 		barView.classList.add('hidden');
 		barViewSwitch.textContent = "show ...";
@@ -305,11 +310,13 @@ function makeMetroGUI (metro, storedState) {
 			return true; } else { return false; };
 	}
 	
-
+	// maybe not pass on construction but on setting call init (?)
+	
 	function init(){	
 		updBeatsPerBarGUI();
 		updBeatUnitGUI();
-	
+		
+		// have ez !!
 		updTempoNumCtl();
 		updTempoCtl();
 		updGainNumCtl();
@@ -323,21 +330,34 @@ function makeMetroGUI (metro, storedState) {
 		if(urlLocal(document.URL)){
 			document.title = document.title.replace("testing", "LOCAL");
 		};
-	}
-	
-	pubsubz.subscribe('beatsPerBar', function(){
-		updBeatsPerBarGUI();
-		replaceBarView(); // when playing, but not stopped ...
-	});
-	pubsubz.subscribe('beatUnit', updBeatUnitGUI);
-// 	pubsubz.subscribe('start', resetPendulum);
-	pubsubz.subscribe('stop', resetPendulum);
-	
-	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-		updCurrentBeatInBarView(currentBeatInBar, beatDur);
 		
-		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-	};
+		// where ?
+		metro.audioContext.onstatechange = function(ev){
+			var ac = metro.audioContext; // this ?
+// 			postln(ac.currentTime + " event type : " + ev.type + " state : " + ac.state);
+			console.log(this, this.currentTime, ev.type, ac.state);
+		};
+		
+		metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
+			updCurrentBeatInBarView(currentBeatInBar, beatDur);
+		
+			if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+		};
+		
+	// maybe pub/sub nextBeatsPerBar etc. (name?) too (special gui update)
+	
+		pubsubz.subscribe('beatsPerBar', function(){
+			updBeatsPerBarGUI();
+			replaceBarView(); // when playing, but not stopped ...
+		});
+		pubsubz.subscribe('beatUnit', updBeatUnitGUI);
+	// 	pubsubz.subscribe('start', resetPendulum);
+		pubsubz.subscribe('stop', resetPendulum);
+		
+	} // init
+	
+	
+	
 	
 	function getState() {
 		return {
@@ -346,6 +366,11 @@ function makeMetroGUI (metro, storedState) {
 	}
 	
 	return {
-		init: init, get state() { return getState() }
+// 		init: init, 
+		get state() { return getState() }, 
+		set metro(m) {
+			metro = m;
+			init();
+		}
 	}
 }

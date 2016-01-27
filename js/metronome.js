@@ -25,8 +25,6 @@ function makeAudioMetro (storedState) {
 	
 	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
 	
-	var ready = false;
-
 	var beatInBar; // was 'currentBeat' 
 	var beats; // since last 'play' 
 	var beatDur; // new, for pendulum
@@ -223,7 +221,7 @@ function makeAudioMetro (storedState) {
 			requestAnimFrame(drawBeat);
 	}
 
-	function init(){	
+	function init(){
 	
 		// NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
 		// Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
@@ -233,7 +231,7 @@ function makeAudioMetro (storedState) {
 		// swit-ch: forked it too to link locally (offline)
 
 		if (window.AudioContext == undefined || window.Worker == undefined) {
-			console.log("AudioContext or Worker undefined. Return early from 'init' now.");
+			console.log("AudioContext and/or Worker undefined. Return early from 'init' now.");
 // 			disablePlayCtls(); // gui.js
 			return; // but then gui should not init() too !
 		};
@@ -269,8 +267,6 @@ function makeAudioMetro (storedState) {
 			}
 		};
 		timerWorker.postMessage({"interval":lookahead});
-		
-		ready = true;
 	}
 	
 	function getState() {
@@ -279,8 +275,11 @@ function makeAudioMetro (storedState) {
 		}
 	}
 	
+	init();
+	
 	return {
-		init: init, play: play, // want stop too (later)
+// 		init: init, 
+		play: play, // want stop too (later)
 		get state(){ return getState() }, 
 		get tempo(){ return tempo }, set tempo(n) { tempo = n }, 
 		get gain() { return gain }, set gain(r) { setMainGain(r) }, 
@@ -292,9 +291,8 @@ function makeAudioMetro (storedState) {
 		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
 		
 		get drawBeatHook() { return drawBeatHook }, set drawBeatHook(f) { drawBeatHook = f }, 
-		get ready() { return ready }, 
-		get isPlaying () { return isPlaying }
-// 		get audioContext() { return audioContext }, // debug?
+		get isPlaying () { return isPlaying }, 
+		get audioContext() { return audioContext } // debug?
 // 		get timerWorker() { return timerWorker }
 	}
 }
