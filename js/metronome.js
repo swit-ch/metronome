@@ -5,30 +5,34 @@ function makeAudioMetro (storedState) {
 	// w/o storage.js need defaults ...
 	var tempo = 60, gain = 0.1; // tempo change active at next beat
 	var beatsPerBar = 4, beatUnit = 1 / 4;
+	function setState(obj){
+			if (obj.tempo) { tempo = obj.tempo; };
+			// if (obj.gain) { gain = obj.gain; }; // might be zero
+			
+			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
+			
+			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
+			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
+	}
 	
 	var ssm;
 	if (storedState) {
-		if(storedState.metro){ // something like this should become setState ...
+		if(storedState.metro){
 			ssm = storedState.metro;
-			if (ssm.tempo) { tempo = ssm.tempo; };
-			// if (ssm.gain) { gain = ssm.gain; }; // might be zero
-			
-			if (ssm.gain >= 0) { gain = ssm.gain; };
-			
-			if (ssm.beatsPerBar) { beatsPerBar = ssm.beatsPerBar; };
-			if (ssm.beatUnit) { beatUnit = ssm.beatUnit; };
+			setState(ssm);
 		}
 	};
 	
-	
-	
+	var prevTempo = tempo; // new test (upd) -- need more of them, change emitted here ...
+	var prevBeatsPerBar = beatsPerBar;
+	var prevBeatUnit = beatUnit;
 	
 	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
 	
 	var beatInBar; // was 'currentBeat' 
 	var beats; // since last 'play' 
 	var beatDur; // new, for pendulum
-
+	
 	var mainGainNode; 
 
 	var audioContext = null;
@@ -70,7 +74,7 @@ function makeAudioMetro (storedState) {
 	})();
 
 	function nextNote() {
-		// Advance current note and time by a 16th note... No, one beat unit
+		// Advance current note and time by a 16th note... No, one beat unit here
 		var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
 																					// tempo value to calculate beat length.
 		// tempo change on next beat
@@ -86,6 +90,10 @@ function makeAudioMetro (storedState) {
 		// special case: 1 beatsPerBar !
 		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
 		beats++;
+		
+		// here ?
+		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
+		prevTempo = tempo;
 	}
 
 	// iOS Safari hack
@@ -108,6 +116,11 @@ function makeAudioMetro (storedState) {
 			nextBeatUnit = undefined;
 			pubsubz.publish('beatUnit', beatUnit);
 		};
+		
+		if (beatsPerBar != prevBeatsPerBar) { pubsubz.publish('beatsPerBar', beatsPerBar); };
+		if (beatUnit != prevBeatUnit) { pubsubz.publish('beatUnit', beatUnit); };
+		prevBeatsPerBar = beatsPerBar;
+		prevBeatUnit = beatUnit;
 	}
 	
 	// beatNumber is passed in beatInBar ==> argBeatInBar
@@ -128,17 +141,7 @@ function makeAudioMetro (storedState) {
 		osc.connect(eg);
 		eg.connect( mainGainNode );
 	
-	//     if (argBeatInBar % 16 === 0)    // beat 0 == low pitch
-	//         osc.frequency.value = 880.0;
-	//     else if (argBeatInBar % 4 === 0 )    // quarter notes = medium pitch
-	//         osc.frequency.value = 440.0;
-	//     else                        // other 16th notes = high pitch
-	//         osc.frequency.value = 220.0;
-	
-	//     console.log("scheduleNote argBeatInBar : " + argBeatInBar + " argBeats : " + argBeats);
-	
 		if (argBeatInBar === 0){ // the ONE
-		
 			// here ? works
 			updateTimeSignature();
 		
@@ -281,14 +284,31 @@ function makeAudioMetro (storedState) {
 // 		init: init, 
 		play: play, // want stop too (later)
 		get state(){ return getState() }, 
+		set state(obj) { setState(obj) },
+		
 		get tempo(){ return tempo }, set tempo(n) { tempo = n }, 
 		get gain() { return gain }, set gain(r) { setMainGain(r) }, 
 		
+// 		get tempo(){ return tempo }, 
+// 		set tempo(n) { tempo = n; pubsubz.publish('tempo', tempo);  }, 
+// 		get gain() { return gain }, 
+// 		set gain(r) { setMainGain(r); pubsubz.publish('gain', gain);  }, 
+		
 		// differentiaton setDirectly setNext in gui.js
-		get beatsPerBar() { return beatsPerBar }, set beatsPerBar(n) { beatsPerBar = n }, // immediate (on next beat)
-		get nextBeatsPerBar() { return nextBeatsPerBar }, set nextBeatsPerBar(n) { nextBeatsPerBar = n }, 
-		get beatUnit() { return beatUnit }, set beatUnit(n) { beatUnit = n }, // immediate (on next beat ?)
-		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r },
+		
+// 		get beatsPerBar() { return beatsPerBar }, 
+// 		set beatsPerBar(n) { beatsPerBar = n; pubsubz.publish('beatsPerBar', beatsPerBar); }, // on next beat
+// 		get nextBeatsPerBar() { return nextBeatsPerBar }, 
+// 		set nextBeatsPerBar(n) { nextBeatsPerBar = n; pubsubz.publish('nextBeatsPerBar', nextBeatsPerBar); },  // on next bar
+// 		get beatUnit() { return beatUnit }, 
+// 		set beatUnit(n) { beatUnit = n; pubsubz.publish('beatUnit', beatUnit); }, // on next beat
+// 		get nextBeatUnit() { return nextBeatUnit }, 
+// 		set nextBeatUnit(r) { nextBeatUnit = r; pubsubz.publish('nextBeatUnit', nextBeatUnit); }, // on next bar
+		
+		get beatsPerBar() { return beatsPerBar }, set beatsPerBar(n) { beatsPerBar = n }, // on next beat
+		get nextBeatsPerBar() { return nextBeatsPerBar }, set nextBeatsPerBar(n) { nextBeatsPerBar = n },  // on next bar
+		get beatUnit() { return beatUnit }, set beatUnit(n) { beatUnit = n }, // on next beat
+		get nextBeatUnit() { return nextBeatUnit }, set nextBeatUnit(r) { nextBeatUnit = r }, // on next bar
 		
 		get drawBeatHook() { return drawBeatHook }, set drawBeatHook(f) { drawBeatHook = f }, 
 		get isPlaying () { return isPlaying }, 

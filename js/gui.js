@@ -1,9 +1,8 @@
 'use strict';
-// many variables declared in metronome.js, some defined w/ storage.js
-// here event listeners added, scripts at bottom of html body, no load event
+// html exists. Here event listeners added
 function makeMetroGUI ( /*metro, */ storedState) {
 	
-	var metro;
+	var metro = null; // gui should work w/o model, EG composite "ez" views, defaults from specs
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -126,7 +125,7 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	function updTempoNumCtl(){
 		tempoNumCtl.value = metro.tempo;
 	}
-	function updTempoCtl(){
+	function updTempoSliderCtl(){
 		tempoSliderCtl.value = metro.tempo;
 	}
 	function updGainNumCtl(){
@@ -187,13 +186,13 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
 	}, false);
 	
-	
+	// ez !
 	// constrain keyboard input, verify ?
 	tempoNumCtl.addEventListener('input', 
 	// 'change', 
 	function (ev){
 		metro.tempo = Number(this.value); // string not number
-		updTempoCtl();
+		updTempoSliderCtl();
 	}, false);
 	tempoSliderCtl.addEventListener('input', function (ev){
 		metro.tempo = Number(this.value);
@@ -210,7 +209,8 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		metro.gain = Number(this.value);
 		updGainNumCtl();
 	}, false);
-
+	
+	
 	barViewSwitch.addEventListener('click', function(ev){
 		if (! barViewHidden){
 			barViewHidden = true;
@@ -251,6 +251,9 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	}	
 	
 	var prevBox = document.createElement('span');
+	
+	// sometimes 
+	// gui.js:260 Uncaught TypeError: Cannot set property 'id' of undefined
 	
 	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
 		var beatsPerBar = metro.beatsPerBar;
@@ -318,7 +321,7 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		
 		// have ez !!
 		updTempoNumCtl();
-		updTempoCtl();
+		updTempoSliderCtl();
 		updGainNumCtl();
 		updGainSliderCtl();
 	
@@ -343,21 +346,38 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		
 			if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 		};
-		
-	// maybe pub/sub nextBeatsPerBar etc. (name?) too (special gui update)
-	
-		pubsubz.subscribe('beatsPerBar', function(){
-			updBeatsPerBarGUI();
-			replaceBarView(); // when playing, but not stopped ...
-		});
-		pubsubz.subscribe('beatUnit', updBeatUnitGUI);
-	// 	pubsubz.subscribe('start', resetPendulum);
-		pubsubz.subscribe('stop', resetPendulum);
-		
 	} // init
 	
 	
+	/// would like to update gui only if changes not caused by gui itself...
+	var testSubscriber = function( topics , data ){
+			console.log( topics + ": " + data );
+	};
 	
+	pubsubz.subscribe('beatsPerBar', testSubscriber
+	
+// 	function(){
+// 		updBeatsPerBarGUI();
+// 		replaceBarView(); // when playing, but not stopped ...
+// 	}
+	);
+	
+	
+	pubsubz.subscribe('beatUnit', updBeatUnitGUI);
+// 	pubsubz.subscribe('start', resetPendulum);
+	pubsubz.subscribe('stop', resetPendulum);
+			
+	
+	pubsubz.subscribe('tempo', function(){
+		updTempoNumCtl();
+		updTempoSliderCtl();
+	});
+	
+	pubsubz.subscribe('gain', testSubscriber);
+// maybe pub/sub nextBeatsPerBar etc. (name?) too (special gui update)
+	pubsubz.subscribe('nextBeatsPerBar', testSubscriber);
+	pubsubz.subscribe('nextBeatUnit', testSubscriber);
+	/////////////////////////////////////////////////////////
 	
 	function getState() {
 		return {
