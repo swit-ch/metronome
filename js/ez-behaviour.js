@@ -1,5 +1,4 @@
-// requires warp.js
-// find out if useful in metronome project
+// requires warp.js // see NumberSlider project
 
 "use strict";
 /*
@@ -29,9 +28,11 @@ function EZbehaviour (argControlSpec, argNumberView, argSliderView) {
 	// actually for linear warps min, max, step from spec are fine, no mapping ...
 	function setValueDirect (ev){
 		ez.value = ev.target.value; // call value setter
+		ez.action(ez);
 	}
 	function setValueMapped (ev){
 		ez.value = ez.controlSpec.map(ev.target.value);  // call value setter
+		ez.action(ez);
 	}
 	
 	var setSlider; // declaration outside func scope
@@ -67,7 +68,7 @@ function EZbehaviour (argControlSpec, argNumberView, argSliderView) {
 		nv.addEventListener('input', setValueDirect, false);
 	}
 	
-	this.onValueChange = function(){}; // override w/ action, arg this
+	this.action = function(){}; // override, evaluated w/ arg this	
 	
 	// should setters return object ?
 	Object.defineProperties(this, { // "pseudo properties" getters, setters
@@ -78,9 +79,14 @@ function EZbehaviour (argControlSpec, argNumberView, argSliderView) {
 				this.numberView.value = snap(val, this.round);
 				setSlider(val); // cond. in prepSlider
 				value = val; // not to this, looooooop
-				this.onValueChange(this); // action
 			}
-		} 
+		}, 
+		'valueAction': {
+			set: function(val) {
+				this.value = val;
+				this.action(this);
+			}
+		}
 	});
 	
 	prepSlider();

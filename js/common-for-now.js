@@ -12,6 +12,7 @@
 	// only for old iOS 5 iPad (gui, layout, no audio anyway, but storage !)
 	// http://stackoverflow.com/questions/1729501/javascript-overriding-alert
 	// MDN arguments
+/*
 	(function(proxied) {
 		console.log = function() {
 			// do something here // this is object Console
@@ -27,3 +28,4 @@
 			return proxied.apply(this, arguments);
 		};
 	})(console.log);
+*/

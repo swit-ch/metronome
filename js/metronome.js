@@ -73,29 +73,6 @@ function makeAudioMetro (storedState) {
 		};
 	})();
 
-	function nextNote() {
-		// Advance current note and time by a 16th note... No, one beat unit here
-		var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
-																					// tempo value to calculate beat length.
-		// tempo change on next beat
-		beatDur = beatUnit * 4 * secondsPerBeat;
-	
-		nextNoteTime += beatDur;    // Add beat length to last beat time
-
-	//     beatInBar++;    // Advance the beat number, wrap to zero
-	//     if (beatInBar == beatsPerBar) {
-	//         beatInBar = 0;
-	//     };
-	
-		// special case: 1 beatsPerBar !
-		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
-		beats++;
-		
-		// here ?
-		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
-		prevTempo = tempo;
-	}
-
 	// iOS Safari hack
 	function pseudoSound(){
 		// create an oscillator, connecting not necessary
@@ -105,7 +82,7 @@ function makeAudioMetro (storedState) {
 		osc.stop( time + 0.01 );
 	}
 	
-	function updateTimeSignature (){
+	function updateMeterAtBarLine (){
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
 			nextBeatsPerBar = undefined;
@@ -116,16 +93,51 @@ function makeAudioMetro (storedState) {
 			nextBeatUnit = undefined;
 			pubsubz.publish('beatUnit', beatUnit);
 		};
-		
+	}
+	function updateMeterAtBeat(){
 		if (beatsPerBar != prevBeatsPerBar) { pubsubz.publish('beatsPerBar', beatsPerBar); };
 		if (beatUnit != prevBeatUnit) { pubsubz.publish('beatUnit', beatUnit); };
 		prevBeatsPerBar = beatsPerBar;
 		prevBeatUnit = beatUnit;
 	}
 	
-	// beatNumber is passed in beatInBar ==> argBeatInBar
-	// new testing argBeats
-	function scheduleNote( argBeatInBar, time, argBeats ) {
+	
+	// scheduling other things here now? Tooo early ? By up to scheduleAheadTime ? Even one beat ?
+	// called right after scheduleBeat(), here already preparing the next beat ...
+	 
+	function nextBeat() { // former name nextNote
+		// Advance current note and time by a 16th note... No, one beat unit here
+		var secondsPerBeat = 60.0 / tempo;    // Notice this picks up the CURRENT 
+																					// tempo value to calculate beat length.
+		// tempo change on next beat
+		beatDur = beatUnit * 4 * secondsPerBeat;
+		nextNoteTime += beatDur;    // Add beat length to last beat time
+	
+		// special case: 1 beatsPerBar !
+		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
+		beats++;
+		
+		// EG for gui if set by someone else ..../////////////////////////
+		if (beatInBar === 0){ // the ONE
+			updateMeterAtBarLine();
+		};
+		updateMeterAtBeat();
+		
+// 		tempo++; // ha !
+// 		tempo = tempo + (1 / 3);
+		
+// 		if (tempo < 160) {
+// 			tempo = tempo + 0.5;
+// 		};
+				
+		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
+		prevTempo = tempo;
+		
+// 		console.log("metronome nextBeat " + Date.now()); ////////////////
+	}
+	
+	// beatNumber is now passed in beatInBar, now argBeatInBar 	
+	function scheduleBeat( argBeatInBar, time, argBeats ) { // former name scheduleNote
 		// push the note on the queue, even if we're not playing.
 		notesInQueue.push( { beatInBar: argBeatInBar, time: time, beats: argBeats } );
 
@@ -142,22 +154,21 @@ function makeAudioMetro (storedState) {
 		eg.connect( mainGainNode );
 	
 		if (argBeatInBar === 0){ // the ONE
-			// here ? works
-			updateTimeSignature();
-		
 			osc.frequency.value = 880.0;
 		};
 		osc.start( time );
 		osc.stop( time + noteLength );
+		
+// 		console.log("metronome scheduleBeat " + Date.now());
 	}
 
 	function scheduler() {
 		// while there are notes that will need to play before the next interval, 
 		// schedule them and advance the pointer.
 		while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-	//         scheduleNote( beatInBar, nextNoteTime );
-				scheduleNote( beatInBar, nextNoteTime, beats );
-				nextNote();
+	//         scheduleBeat( beatInBar, nextNoteTime );
+				scheduleBeat( beatInBar, nextNoteTime, beats );
+				nextBeat();
 		}
 	}
 	
@@ -241,13 +252,9 @@ function makeAudioMetro (storedState) {
 
 		audioContext = new AudioContext();
 	
-		////////////////////////////////////// knows about gui .........
-	// 	audioContext.onstatechange = function(ev){ // have post, postln funcs ?
-	// 		var ele = document.createElement('div');
-	// 		ele.textContent = audioContext.currentTime + " event type : " + ev.type + " state : " + audioContext.state;
-	// 		postView.appendChild(ele);
-	// 	};
-		////////////////////////////////////////
+		audioContext.onstatechange = function(ev){
+			pubsubz.publish('audioContext_statechange', ev);
+		};
 	
 	
 	
