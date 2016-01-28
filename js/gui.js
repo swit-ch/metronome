@@ -24,8 +24,14 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
 	};
 	// hmm, pattern useful for input type number newer iOS
-	var tempoSpec = { min: 10, max: 400, step: 1, pattern: "[0-9]*" };
-	var gainSpec = {  min: 0, max: 1, step: "any", numStep: 0.01 };
+	var tempoSpec /* = { min: 10, max: 400, step: 1, pattern: "[0-9]*" } */ ;
+	var gainSpec /* = {  min: 0, max: 1, step: "any", numStep: 0.01 } */ ;
+	
+	// minval, maxval, warp, step, defval, units
+	tempoSpec = new ControlSpec(10, 400, 'lin',  1);
+	tempoSpec.pattern = '[0-9]';
+	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj
+	
 	
 	// html elements
 	var playCtl = document.getElementById('playCtl');
@@ -47,7 +53,14 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	var pendulumSwitch = document.getElementById('pendulumSwitch');
 	
 	var postView = document.getElementById('postView'); // again ...
-
+	
+	
+	
+	var tempoEZ = new EZbehaviour(tempoSpec, tempoNumCtl, tempoSliderCtl);
+	var gainEZ = new EZbehaviour(gainSpec, gainNumCtl, gainSliderCtl);
+	gainEZ.round = 0.01;
+	
+/*	
 	function prepInputCtl(ctl, spec){
 		ctl.min = spec.min;
 		ctl.max = spec.max;
@@ -63,6 +76,11 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	prepInputCtl(tempoSliderCtl, tempoSpec);
 	prepInputCtl(gainNumCtl, gainSpec);
 	prepInputCtl(gainSliderCtl, gainSpec);
+*/	
+	
+	
+	
+	
 
 	beatsPerBarObj.labels = beatsPerBarObj.values;
 	beatsPerBarObj.len = beatsPerBarObj.values.length;
@@ -122,6 +140,13 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	}
 	
 	
+	function updTempoEZ(){
+		tempoEZ.value = metro.tempo;
+	}
+	function updGainEZ(){
+		gainEZ.value = metro.gain;
+	}
+/*	
 	function updTempoNumCtl(){
 		tempoNumCtl.value = metro.tempo;
 	}
@@ -134,6 +159,10 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	function updGainSliderCtl(){
 		gainSliderCtl.value = metro.gain;
 	}
+*/	
+	
+	
+	
 	
 	
 	function hideBarView(){
@@ -186,8 +215,17 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
 	}, false);
 	
+	
+	tempoEZ.onValueChange = function(ez){
+		metro.tempo = ez.value;
+	}
+	gainEZ.onValueChange = function(ez){
+		metro.gain = ez.value;
+	}
+	
 	// ez !
 	// constrain keyboard input, verify ?
+/*
 	tempoNumCtl.addEventListener('input', 
 	// 'change', 
 	function (ev){
@@ -209,7 +247,7 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		metro.gain = Number(this.value);
 		updGainNumCtl();
 	}, false);
-	
+*/	
 	
 	barViewSwitch.addEventListener('click', function(ev){
 		if (! barViewHidden){
@@ -320,10 +358,15 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		updBeatUnitGUI();
 		
 		// have ez !!
-		updTempoNumCtl();
-		updTempoSliderCtl();
-		updGainNumCtl();
-		updGainSliderCtl();
+// 		updTempoNumCtl();
+// 		updTempoSliderCtl();
+// 		updGainNumCtl();
+// 		updGainSliderCtl();
+		
+		updTempoEZ();
+		updGainEZ();
+		
+		
 	
 		replaceBarView();
 	
@@ -354,12 +397,12 @@ function makeMetroGUI ( /*metro, */ storedState) {
 			console.log( topics + ": " + data );
 	};
 	
-	pubsubz.subscribe('beatsPerBar', testSubscriber
+	pubsubz.subscribe('beatsPerBar', //testSubscriber
 	
-// 	function(){
-// 		updBeatsPerBarGUI();
-// 		replaceBarView(); // when playing, but not stopped ...
-// 	}
+	function(){
+		updBeatsPerBarGUI();
+		replaceBarView(); // when playing, but not stopped ...
+	}
 	);
 	
 	
@@ -369,8 +412,10 @@ function makeMetroGUI ( /*metro, */ storedState) {
 			
 	
 	pubsubz.subscribe('tempo', function(){
-		updTempoNumCtl();
-		updTempoSliderCtl();
+// 		updTempoNumCtl();
+// 		updTempoSliderCtl();
+		updTempoEZ();
+		
 	});
 	
 	pubsubz.subscribe('gain', testSubscriber);
