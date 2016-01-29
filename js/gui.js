@@ -1,9 +1,12 @@
 'use strict';
-// html exists. Here event listeners added
-function makeMetroGUI ( /*metro, */ storedState) {
+// html layout (CSS) exists. Here behaviour added
+function MetroGUI
+( /*metro, */ storedState) {
 	
 	var metro = null; // gui should work w/o model, EG composite "ez" views, defaults from specs
-	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test
+// 	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test
+	
+	var inited = false;
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -279,30 +282,36 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	}
 		
 	function init(){	
-		updBeatsPerBarGUI();
-		updBeatUnitGUI();
-		updTempoEZ();
-		updGainEZ();
-		replaceBarView();
+		if (! inited){
+		
+			updBeatsPerBarGUI();
+			updBeatUnitGUI();
+			updTempoEZ();
+			updGainEZ();
+			replaceBarView();
 	
-		if (! barViewHidden){ showBarView() } else { hideBarView() };
-		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+			if (! barViewHidden){ showBarView() } else { hideBarView() };
+			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
 		
-		if (urlLocal(document.URL)){
-			document.title = document.title.replace("testing", "LOCAL");
-		};
+			if (urlLocal(document.URL)){
+				document.title = document.title.replace("testing", "LOCAL");
+			};
 		
-		// where ?
-// 		metro.audioContext.onstatechange = function(ev){
-// 			var ac = metro.audioContext; // this ?
-// // 			postln(ac.currentTime + " event type : " + ev.type + " state : " + ac.state);
-// 			console.log(this, this.currentTime, ev.type, ac.state);
-// 		};
+			// where ?
+	// 		metro.audioContext.onstatechange = function(ev){
+	// 			var ac = metro.audioContext; // this ?
+	// // 			postln(ac.currentTime + " event type : " + ev.type + " state : " + ac.state);
+	// 			console.log(this, this.currentTime, ev.type, ac.state);
+	// 		};
 		
-		metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-			updCurrentBeatInBarView(currentBeatInBar, beatDur);
-			if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-		};
+			metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
+				updCurrentBeatInBarView(currentBeatInBar, beatDur);
+				if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+			};
+			inited = true;
+	} else {
+		console.log(this + " already inited");
+	}
 	} // init
 	
 	
@@ -340,12 +349,26 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		}
 	}
 	
-	return {
-// 		init: init, 
-		get state() { return getState() }, 
-		set metro(m) {
-			metro = m;
-			init();
+// 	return {
+// // 		init: init, 
+// 		get state() { return getState() }, 
+// 		set metro(m) {
+// 			metro = m;
+// 			init();
+// 		}
+// 	}
+	Object.defineProperties(this, {
+		
+		
+		'init': { value: init, enumerable: true }, 
+		'state': {
+			get: function() { return getState() }, 
+// 			set: function(obj) { return setState(obj) }, 
+			enumerable: true
+		}, 
+		'metro': {
+			get: function() { return metro }, 
+			set: function(aMetro) { metro = aMetro }
 		}
-	}
+	});
 }

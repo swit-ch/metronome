@@ -244,7 +244,7 @@ function WebAudio_Metro (storedState) {
 	}
 
 	function init(){
-	
+		if (! inited){
 		// NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
 		// Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
 		// TO WORK ON CURRENT CHROME!!  But this means our code can be properly
@@ -287,6 +287,7 @@ function WebAudio_Metro (storedState) {
 		timerWorker.postMessage({"interval":lookahead});
 		
 		inited = true;
+		} else { console.log(this + " already inited"); }
 	}
 	
 	function getState() {
@@ -303,42 +304,51 @@ function WebAudio_Metro (storedState) {
 // 	this.isPlaying = isPlaying; // nono
 	
 	Object.defineProperties(this, {
-		'init': { value: init }, 
-		'play': { value: play }, 
+// 		'inited': { get: function() { return inited }, enumerable: true }, 
+		'isPlaying': { get: function(){ return isPlaying }, enumerable: true }, 
 		
-		'isPlaying': { get: function(){ return isPlaying } }, 
+		'init': { value: init, enumerable: true }, 
+		'play': { value: play, enumerable: true }, 
 		
 		'beatsPerBar': { 
 			get: function(){ return beatsPerBar }, 
-			set: function(n) { beatsPerBar = n } // on next beat
+			set: function(n) { beatsPerBar = n }, // on next beat
+			enumerable: true
 		},
 		'nextBeatsPerBar': {
 		 	get: function() { return nextBeatsPerBar }, 
-		 	set: function(n) { nextBeatsPerBar = n }  // on next bar
+		 	set: function(n) { nextBeatsPerBar = n },  // on next bar
+		 	enumerable: true
 		}, 
 		'beatUnit': {
 		 	get: function() { return beatUnit }, 
 		 	set: function(n) { beatUnit = n }, // on next beat
+		 	enumerable: true
 		},
 		'nextBeatUnit': {
 		 	get: function() { return nextBeatUnit }, 
-		 	set: function(r) { nextBeatUnit = r } // on next bar
+		 	set: function(r) { nextBeatUnit = r }, // on next bar
+		 	enumerable: true
 		}, 
 		'tempo': { // have nextTempo too ?
 			get: function() { return tempo }, 
-			set: function(n) { tempo = n } // next beat
+			set: function(n) { tempo = n }, // next beat
+			enumerable: true
 		}, 
 		'gain': {
 			get: function() { return gain }, 
-			set: function(r) { setMainGain(r) }
+			set: function(r) { setMainGain(r) }, 
+			enumerable: true
 		},
 		'state': {
 			get: function() { return getState() }, 
-			set: function(obj) { return setState(obj) }
+			set: function(obj) { return setState(obj) }, 
+			enumerable: true
 		}, 
 		'drawBeatHook': {
 			get: function() { return drawBeatHook }, 
-			set: function(f) { drawBeatHook = f }
+			set: function(f) { drawBeatHook = f }, 
+			enumerable: true
 		}
 	});
 }
