@@ -1,7 +1,9 @@
 'use strict';
-// many variables declared in metronome.js, some defined w/ storage.js
-// here event listeners added, scripts at bottom of html body, no load event
-function makeMetroGUI (metro, storedState) {
+// html exists. Here event listeners added
+function makeMetroGUI ( /*metro, */ storedState) {
+	
+	var metro = null; // gui should work w/o model, EG composite "ez" views, defaults from specs
+	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -23,8 +25,13 @@ function makeMetroGUI (metro, storedState) {
 		labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
 	};
 	// hmm, pattern useful for input type number newer iOS
-	var tempoSpec = { min: 10, max: 400, step: 1, pattern: "[0-9]*" };
-	var gainSpec = {  min: 0, max: 1, step: "any", numStep: 0.01 };
+	var tempoSpec /* = { min: 10, max: 400, step: 1, pattern: "[0-9]*" } */ ;
+	var gainSpec /* = {  min: 0, max: 1, step: "any", numStep: 0.01 } */ ;
+	// minval, maxval, warp, step, defval, units
+	tempoSpec = new ControlSpec(10, 400, 'lin',  1);
+	tempoSpec.pattern = '[0-9]'; // not used currently, find out ...
+	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj
+	
 	
 	// html elements
 	var playCtl = document.getElementById('playCtl');
@@ -44,23 +51,15 @@ function makeMetroGUI (metro, storedState) {
 	var pendulumHit = document.getElementById('pendulumHit');
 	var pendulumHit2 = document.getElementById('pendulumHit2');
 	var pendulumSwitch = document.getElementById('pendulumSwitch');
-
-	function prepInputCtl(ctl, spec){
-		ctl.min = spec.min;
-		ctl.max = spec.max;
-		ctl.step = spec.step;
-		if (spec.numStep && (ctl.type == "number")){
-			ctl.step = spec.numStep;
-		};
-		if (spec.pattern && (ctl.type == "range")){
-			ctl.pattern = spec.pattern;
-		};
-	}
-	prepInputCtl(tempoNumCtl, tempoSpec);
-	prepInputCtl(tempoSliderCtl, tempoSpec);
-	prepInputCtl(gainNumCtl, gainSpec);
-	prepInputCtl(gainSliderCtl, gainSpec);
-
+	
+	var postView = document.getElementById('postView'); // again ...
+	
+	// had put extra key value 'pattern'. How to use it ?
+	var tempoEZ = new EZbehaviour(tempoSpec, tempoNumCtl, tempoSliderCtl);
+	var gainEZ = new EZbehaviour(gainSpec, gainNumCtl, gainSliderCtl);
+	gainEZ.round = 0.01;
+	
+	
 	beatsPerBarObj.labels = beatsPerBarObj.values;
 	beatsPerBarObj.len = beatsPerBarObj.values.length;
 	for(var i = 0; i < beatsPerBarObj.len; i++){
@@ -84,7 +83,8 @@ function makeMetroGUI (metro, storedState) {
 		var str = metro.play(); // metronome.js
 		playCtl.textContent = str;
 	}
-
+	
+	
 	function setNextBeatsPerBar(n) { // test, constrain ?
 		metro.nextBeatsPerBar = n;
 		beatsPerBarCtl.classList.add('notYet');
@@ -93,8 +93,6 @@ function makeMetroGUI (metro, storedState) {
 		metro.nextBeatUnit = x;
 		beatUnitCtl.classList.add('notYet');
 	}
-	
-	
 	// hmm, now need the simple case too
 	function setBeatsPerBar(n) { // test, constrain ?
 		metro.beatsPerBar = n;
@@ -114,24 +112,18 @@ function makeMetroGUI (metro, storedState) {
 		beatsPerBarCtl.classList.remove('notYet');		
 	}
 	function updBeatUnitGUI(){
-	var val = metro.nextBeatUnit || metro.beatUnit;
+		var val = metro.nextBeatUnit || metro.beatUnit;
 		beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
 		beatUnitCtl.classList.remove('notYet');
 	}
-
-	function updTempoNumCtl(){
-		tempoNumCtl.value = metro.tempo;
+	
+	function updTempoEZ(){
+		tempoEZ.value = metro.tempo; // value now passive, have also valueAction setter
 	}
-	function updTempoCtl(){
-		tempoSliderCtl.value = metro.tempo;
+	function updGainEZ(){
+		gainEZ.value = metro.gain;
 	}
-	function updGainNumCtl(){
-		gainNumCtl.value = Math.round(metro.gain * 100) / 100;
-	}
-	function updGainSliderCtl(){
-		gainSliderCtl.value = metro.gain;
-	}
-
+	
 	function hideBarView(){
 		barView.classList.add('hidden');
 		barViewSwitch.textContent = "show ...";
@@ -182,30 +174,13 @@ function makeMetroGUI (metro, storedState) {
 		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
 	}, false);
 	
+	tempoEZ.action = function(ez){
+		metro.tempo = ez.value;
+	}
+	gainEZ.action = function(ez){
+		metro.gain = ez.value;
+	}
 	
-	// constrain keyboard input, verify ?
-	tempoNumCtl.addEventListener('input', 
-	// 'change', 
-	function (ev){
-		metro.tempo = Number(this.value); // string not number
-		updTempoCtl();
-	}, false);
-	tempoSliderCtl.addEventListener('input', function (ev){
-		metro.tempo = Number(this.value);
-		updTempoNumCtl();
-	}, false);
-
-	gainNumCtl.addEventListener('input', 
-	// 'change', 
-	function (ev){
-		metro.gain = Number(this.value);
-		updGainSliderCtl();
-	}, false);
-	gainSliderCtl.addEventListener('input', function (ev){
-		metro.gain = Number(this.value);
-		updGainNumCtl();
-	}, false);
-
 	barViewSwitch.addEventListener('click', function(ev){
 		if (! barViewHidden){
 			barViewHidden = true;
@@ -246,7 +221,7 @@ function makeMetroGUI (metro, storedState) {
 	}	
 	
 	var prevBox = document.createElement('span');
-	
+		
 	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
 		var beatsPerBar = metro.beatsPerBar;
 		var kids = barView.childNodes;
@@ -273,7 +248,7 @@ function makeMetroGUI (metro, storedState) {
 		// reverse swing didn't work (?), ah, it probably needs the new name to trigger anew, same name ani already ended
 		// set class now for animation-name	
 	
-	// 'beatDur' from context metronome.js (function 'nextNote')
+	// 'beatDur' from context metronome.js (function 'nextBeat')
 	function animatePendulum (currentBeats, beatDur) {
 		var currentBeatsEven = currentBeats % 2 == 0;
 		var pscl = pendulumSwing.classList;
@@ -296,48 +271,68 @@ function makeMetroGUI (metro, storedState) {
 		
 		pendulumSwing.setAttribute('style', durString(beatDur));
 	}
-
-	
-	
+		
 	function urlLocal(url) {
 		var m = url.match(/192\.168\.0\./);
 		if (m) { // not null
 			return true; } else { return false; };
 	}
-	
-
+		
 	function init(){	
 		updBeatsPerBarGUI();
 		updBeatUnitGUI();
-	
-		updTempoNumCtl();
-		updTempoCtl();
-		updGainNumCtl();
-		updGainSliderCtl();
-	
+		updTempoEZ();
+		updGainEZ();
 		replaceBarView();
 	
 		if (! barViewHidden){ showBarView() } else { hideBarView() };
 		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
 		
-		if(urlLocal(document.URL)){
+		if (urlLocal(document.URL)){
 			document.title = document.title.replace("testing", "LOCAL");
 		};
-	}
+		
+		// where ?
+// 		metro.audioContext.onstatechange = function(ev){
+// 			var ac = metro.audioContext; // this ?
+// // 			postln(ac.currentTime + " event type : " + ev.type + " state : " + ac.state);
+// 			console.log(this, this.currentTime, ev.type, ac.state);
+// 		};
+		
+		metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
+			updCurrentBeatInBarView(currentBeatInBar, beatDur);
+			if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+		};
+	} // init
+	
+	
+	/// would like to update gui only if changes not caused by gui itself...
+	var testSubscriber = function( topics , data ){
+			console.log( topics + ": " + data );
+	};
+	
+// 	pubsubz.subscribe('start', resetPendulum);
+	pubsubz.subscribe('stop', resetPendulum);	
 	
 	pubsubz.subscribe('beatsPerBar', function(){
 		updBeatsPerBarGUI();
 		replaceBarView(); // when playing, but not stopped ...
 	});
-	pubsubz.subscribe('beatUnit', updBeatUnitGUI);
-// 	pubsubz.subscribe('start', resetPendulum);
-	pubsubz.subscribe('stop', resetPendulum);
+	pubsubz.subscribe('beatUnit', updBeatUnitGUI);	
 	
-	metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-		updCurrentBeatInBarView(currentBeatInBar, beatDur);
-		
-		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-	};
+	pubsubz.subscribe('tempo', updTempoEZ);
+	pubsubz.subscribe('gain', updGainEZ);
+
+
+// maybe pub/sub nextBeatsPerBar etc. (name?) too (special gui update)
+	pubsubz.subscribe('nextBeatsPerBar', testSubscriber);
+	pubsubz.subscribe('nextBeatUnit', testSubscriber);
+	
+// 	pubsubz.subscribe('audioContext_statechange', testSubscriber);
+	pubsubz.subscribe('audioContext_statechange', function(){
+		console.log(arguments);
+	});
+	/////////////////////////////////////////////////////////
 	
 	function getState() {
 		return {
@@ -346,6 +341,11 @@ function makeMetroGUI (metro, storedState) {
 	}
 	
 	return {
-		init: init, get state() { return getState() }
+// 		init: init, 
+		get state() { return getState() }, 
+		set metro(m) {
+			metro = m;
+			init();
+		}
 	}
 }

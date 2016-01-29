@@ -50,20 +50,16 @@
       </div>
     </div>
     
+    <div id="postView"></div>
+    
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/pubsubz.js"></script> 
     <script src="js/common-for-now.js"></script> 
     <script src="js/storage.js"></script>
     <script src="js/metronome.js"></script>
+    <script src="js/warp.js"></script>
+    <script src="js/ez-behaviour.js"></script>
     <script src="js/gui.js"></script>
-    <script>
-      'use strict';
-//       readItems(storage);
-      var o = getStoredState('latest');
-      var m = makeAudioMetro(o);
-      var g = makeMetroGUI(m, o);
-      m.init();
-      if (m.ready) { g.init(); };
-    </script>
+    <script src="js/app.js"></script>
   </body>
 </html>

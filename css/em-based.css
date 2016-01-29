@@ -164,10 +164,10 @@ button, input, select {
           box-sizing: border-box;
 }
 
-/* with this suddenly accepts other rules like height (found by concidence), well, not text-align ... */
+/* with this suddenly accepts other rules like height (found by concidence), Safari not white?, not text-align ... */
 /* actually Firefox nicer without */
 select {
-	background-color: white;
+	background-color: transparent;
 }
 
 span, button {
@@ -175,7 +175,7 @@ span, button {
 }
 select, input[type="number"] {
 	width: 6em;
-	text-align: center; /* not select */
+	text-align: center; /* not select webkit, but Firefox */
 }
 
 div#pendulumContainer, #barView {
@@ -252,3 +252,7 @@ div#pendulumContainer, #barView {
 }
 .hidden { visibility: hidden }
 
+#postView {
+	font-family: monospace;
+	font-size: 0.8em;
+}
