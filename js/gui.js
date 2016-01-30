@@ -9,9 +9,12 @@ function MetroGUI
 // 	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test (proxy?)
 	
 	var inited = false;
+	var subscriptions = [];
+	
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
+	
 	var ssg;
 	if (storedState){
 		if (storedState.gui){
@@ -90,6 +93,9 @@ function MetroGUI
 	}
 	
 	
+	
+	// set the model ////////
+	
 	function setNextBeatsPerBar(n) { // test, constrain ?
 		metro.nextBeatsPerBar = n;
 		beatsPerBarCtl.classList.add('notYet');
@@ -106,7 +112,8 @@ function MetroGUI
 		metro.beatUnit = x;
 	}	
 	
-	
+	////// to next 5 (6) could be delegated my (not yet) own beatsPerBar etc. setters, take val as arg  //////////
+	// for manual gui-only testing as well as updating automatically from metro (status quo)
 	
 	// indexOf tests for strict equality
 	// hmm, beatsPerBar, beatUnit no setters b/c nextX preference !
@@ -116,6 +123,7 @@ function MetroGUI
 		beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(val);
 		beatsPerBarCtl.classList.remove('notYet');		
 	}
+	
 	function updBeatUnitGUI(){
 		var val = metro.nextBeatUnit || metro.beatUnit;
 		beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
@@ -130,13 +138,16 @@ function MetroGUI
 	}
 	
 	
-
+	// maybe still better graphical (svg, canvas) instead of text elements ...
+	// ah ... w/ svg have a whole lot of beatBoxes always existing and scale into the viewBox accordingly !
+	// background static (till beatsPerBar changed), foreground current beat on top
+	// less elements, no DOM manipulation-- remember came to html eles b/c of CSS:
+	// colors from style sheet, sizes relative ...
 	function replaceBarView() {
 		var beatsPerBar = metro.beatsPerBar;
 		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
 		var frag = document.createElement('div');
 		frag.classList.add('wideDisplay');
-		
 		
 // 		console.log("replaceBarView called");
 		
@@ -154,18 +165,18 @@ function MetroGUI
 		barView = frag;
 	}	
 	
-	var prevBox = document.createElement('span');
+	var prevBeatBox = document.createElement('span');
 		
 	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
 		var beatsPerBar = metro.beatsPerBar;
 		var kids = barView.childNodes;
-		var curBox = kids[currentBeatInBar];
-		prevBox.id = 'none';
+		var curBeatBox = kids[currentBeatInBar];
+		prevBeatBox.id = 'none';
 		
-// 		console.log("updCurrentBeatInBarView currentBeatInBar : " + currentBeatInBar + " curBox: " + curBox); // bug in master !
+// 		console.log("updCurrentBeatInBarView currentBeatInBar : " + currentBeatInBar + " curBeatBox: " + curBeatBox); 
 		
-		if (beatsPerBar > 1) { curBox.id = 'currentBeatInBarBox';		}; /* still BUG ! */
-		prevBox = curBox;
+		if (beatsPerBar > 1) { curBeatBox.id = 'currentBeatInBarBox';		}; 
+		prevBeatBox = curBeatBox;
 	}
 	
 	/* needed at all ? */
@@ -322,32 +333,35 @@ function MetroGUI
 	} // init
 	
 	
-	/// would like to update gui only if changes not caused by gui itself...
 	var testSubscriber = function( topics , data ){
 			console.log( topics + ": " + data );
 	};
 	
-// 	pubsubz.subscribe('start', resetPendulum);
-	pubsubz.subscribe('stop', resetPendulum);	
+	[
+	// 	pubsubz.subscribe('start', resetPendulum),
+		pubsubz.subscribe('stop', resetPendulum), 
 	
-	pubsubz.subscribe('beatsPerBar', function(){
-		updBeatsPerBarGUI();
-		replaceBarView(); // when playing, but not stopped ...
-	});
-	pubsubz.subscribe('beatUnit', updBeatUnitGUI);	
-	
-	pubsubz.subscribe('tempo', updTempoEZ);
-	pubsubz.subscribe('gain', updGainEZ);
+		pubsubz.subscribe('beatsPerBar', function(){
+			updBeatsPerBarGUI();
+			replaceBarView(); // when playing, but not stopped ...
+		}), 
+		pubsubz.subscribe('beatUnit', updBeatUnitGUI), 
+		pubsubz.subscribe('tempo', updTempoEZ), 
+		pubsubz.subscribe('gain', updGainEZ), 
 
-
-// maybe pub/sub nextBeatsPerBar etc. (name?) too (special gui update)
-	pubsubz.subscribe('nextBeatsPerBar', testSubscriber);
-	pubsubz.subscribe('nextBeatUnit', testSubscriber);
+	// maybe for special gui update?
+		pubsubz.subscribe('nextBeatsPerBar', testSubscriber), 
+		pubsubz.subscribe('nextBeatUnit', testSubscriber), 
 	
-// 	pubsubz.subscribe('audioContext_statechange', testSubscriber);
-	pubsubz.subscribe('audioContext_statechange', function(){
-		console.log(arguments);
+		pubsubz.subscribe('audioContext_statechange', testSubscriber), 
+	// 	pubsubz.subscribe('audioContext_statechange', function(){
+	// 		console.log(arguments);
+	// 	}), 
+	] .forEach(function(item, i){
+		subscriptions.push(item)
 	});
+	
+	console.log(subscriptions);
 	/////////////////////////////////////////////////////////
 	
 	function getState() {
@@ -365,8 +379,6 @@ function MetroGUI
 // 		}
 // 	}
 	Object.defineProperties(this, {
-		
-		
 		'init': { value: init, enumerable: true }, 
 		'state': {
 			get: function() { return getState() }, 
