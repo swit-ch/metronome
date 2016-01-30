@@ -1,9 +1,14 @@
 'use strict';
-// html exists. Here event listeners added
-function makeMetroGUI ( /*metro, */ storedState) {
+// html layout (CSS) exists. Here behaviour added
+function MetroGUI
+( /*metro, */ storedState) {
 	
 	var metro = null; // gui should work w/o model, EG composite "ez" views, defaults from specs
-	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test
+	// gui could have similar interface like model (beatsPerBar, tempo ... isPlaying)
+	
+// 	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test (proxy?)
+	
+	var inited = false;
 	
 	var barViewHidden = false;
 	var pendulumHidden = false;
@@ -124,6 +129,89 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		gainEZ.value = metro.gain;
 	}
 	
+	
+
+	function replaceBarView() {
+		var beatsPerBar = metro.beatsPerBar;
+		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
+		var frag = document.createElement('div');
+		frag.classList.add('wideDisplay');
+		
+		
+// 		console.log("replaceBarView called");
+		
+		for (var i = 0, ele; i < beatsPerBar; i++) {
+			ele = document.createElement('span');
+			ele.classList.add('barViewBeatBox');
+			
+			ele.setAttribute('style', 
+				"left: " + x * i * 2 + "%; width: " + x + "%;"
+			);
+			frag.appendChild(ele);
+		};
+		frag.id = 'barView';
+		wideDisplaysContainer.replaceChild(frag, barView);
+		barView = frag;
+	}	
+	
+	var prevBox = document.createElement('span');
+		
+	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
+		var beatsPerBar = metro.beatsPerBar;
+		var kids = barView.childNodes;
+		var curBox = kids[currentBeatInBar];
+		prevBox.id = 'none';
+		
+// 		console.log("updCurrentBeatInBarView currentBeatInBar : " + currentBeatInBar + " curBox: " + curBox); // bug in master !
+		
+		if (beatsPerBar > 1) { curBox.id = 'currentBeatInBarBox';		}; /* still BUG ! */
+		prevBox = curBox;
+	}
+	
+	/* needed at all ? */
+	function resetPendulum() {
+		pendulumSwing.setAttribute(
+			'style', // to the left !			
+			'-moz-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); '
+		);
+	}
+	
+	// or, can I write the duration into the classes until it's changed again ?!
+	function durString(dur){
+		var str = "-moz-animation-duration: " + dur + "s; -webkit-animation-duration: " + dur + "s; animation-duration: " + dur + "s";
+		return str;
+	}
+	
+		// reverse swing didn't work (?), ah, it probably needs the new name to trigger anew, same name ani already ended
+		// set class now for animation-name	
+	
+	// 'beatDur' from context metronome.js (function 'nextBeat')
+	function animatePendulum (currentBeats, beatDur) {
+		var currentBeatsEven = currentBeats % 2 == 0;
+		var pscl = pendulumSwing.classList;
+		var phcl = pendulumHit.classList;
+		var ph2cl = pendulumHit2.classList;
+				
+		if (currentBeatsEven) {
+			pscl.remove('swingBack');
+			pscl.add('swing');
+			ph2cl.remove('hit');
+			phcl.add('hit');
+			pendulumHit.setAttribute('style', durString(beatDur));
+		} else {
+			pscl.remove('swing');
+			pscl.add('swingBack');
+			phcl.remove('hit');
+			ph2cl.add('hit');
+			pendulumHit2.setAttribute('style', durString(beatDur));
+		};
+		
+		pendulumSwing.setAttribute('style', durString(beatDur));
+	}
+
+	
+	
+	
 	function hideBarView(){
 		barView.classList.add('hidden');
 		barViewSwitch.textContent = "show ...";
@@ -200,78 +288,7 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		}
 	}, false);
 	
-	function replaceBarView() {
-		var beatsPerBar = metro.beatsPerBar;
-		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
-		var frag = document.createElement('div');
-		frag.classList.add('wideDisplay');
-		
-		for (var i = 0, ele; i < beatsPerBar; i++) {
-			ele = document.createElement('span');
-			ele.classList.add('barViewBeatBox');
 			
-			ele.setAttribute('style', 
-				"left: " + x * i * 2 + "%; width: " + x + "%;"
-			);
-			frag.appendChild(ele);
-		};
-		frag.id = 'barView';
-		wideDisplaysContainer.replaceChild(frag, barView);
-		barView = frag;
-	}	
-	
-	var prevBox = document.createElement('span');
-		
-	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
-		var beatsPerBar = metro.beatsPerBar;
-		var kids = barView.childNodes;
-		var curBox = kids[currentBeatInBar];
-		prevBox.id = 'none';
-		if (beatsPerBar > 1) { curBox.id = 'currentBeatInBarBox';		};
-		prevBox = curBox;
-	}
-	
-	/* needed at all ? */
-	function resetPendulum() {
-		pendulumSwing.setAttribute(
-			'style', // to the left !			
-			'-moz-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); '
-		);
-	}
-	
-	// or, can I write the duration into the classes until it's changed again ?!
-	function durString(dur){
-		var str = "-moz-animation-duration: " + dur + "s; -webkit-animation-duration: " + dur + "s; animation-duration: " + dur + "s";
-		return str;
-	}
-	
-		// reverse swing didn't work (?), ah, it probably needs the new name to trigger anew, same name ani already ended
-		// set class now for animation-name	
-	
-	// 'beatDur' from context metronome.js (function 'nextBeat')
-	function animatePendulum (currentBeats, beatDur) {
-		var currentBeatsEven = currentBeats % 2 == 0;
-		var pscl = pendulumSwing.classList;
-		var phcl = pendulumHit.classList;
-		var ph2cl = pendulumHit2.classList;
-				
-		if (currentBeatsEven) {
-			pscl.remove('swingBack');
-			pscl.add('swing');
-			ph2cl.remove('hit');
-			phcl.add('hit');
-			pendulumHit.setAttribute('style', durString(beatDur));
-		} else {
-			pscl.remove('swing');
-			pscl.add('swingBack');
-			phcl.remove('hit');
-			ph2cl.add('hit');
-			pendulumHit2.setAttribute('style', durString(beatDur));
-		};
-		
-		pendulumSwing.setAttribute('style', durString(beatDur));
-	}
-		
 	function urlLocal(url) {
 		var m = url.match(/192\.168\.0\./);
 		if (m) { // not null
@@ -279,30 +296,29 @@ function makeMetroGUI ( /*metro, */ storedState) {
 	}
 		
 	function init(){	
-		updBeatsPerBarGUI();
-		updBeatUnitGUI();
-		updTempoEZ();
-		updGainEZ();
-		replaceBarView();
+		if (! inited){
+		
+			updBeatsPerBarGUI();
+			updBeatUnitGUI();
+			updTempoEZ();
+			updGainEZ();
+			replaceBarView();
 	
-		if (! barViewHidden){ showBarView() } else { hideBarView() };
-		if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+			if (! barViewHidden){ showBarView() } else { hideBarView() };
+			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
 		
-		if (urlLocal(document.URL)){
-			document.title = document.title.replace("testing", "LOCAL");
-		};
+			if (urlLocal(document.URL)){
+				document.title = document.title.replace("testing", "LOCAL");
+			};
 		
-		// where ?
-// 		metro.audioContext.onstatechange = function(ev){
-// 			var ac = metro.audioContext; // this ?
-// // 			postln(ac.currentTime + " event type : " + ev.type + " state : " + ac.state);
-// 			console.log(this, this.currentTime, ev.type, ac.state);
-// 		};
-		
-		metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-			updCurrentBeatInBarView(currentBeatInBar, beatDur);
-			if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-		};
+			metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
+				updCurrentBeatInBarView(currentBeatInBar, beatDur);
+				if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+			};
+			inited = true;
+	} else {
+		console.log(this + " already inited");
+	}
 	} // init
 	
 	
@@ -340,12 +356,27 @@ function makeMetroGUI ( /*metro, */ storedState) {
 		}
 	}
 	
-	return {
-// 		init: init, 
-		get state() { return getState() }, 
-		set metro(m) {
-			metro = m;
-			init();
+// 	return {
+// // 		init: init, 
+// 		get state() { return getState() }, 
+// 		set metro(m) {
+// 			metro = m;
+// 			init();
+// 		}
+// 	}
+	Object.defineProperties(this, {
+		
+		
+		'init': { value: init, enumerable: true }, 
+		'state': {
+			get: function() { return getState() }, 
+// 			set: function(obj) { return setState(obj) }, 
+			enumerable: true
+		}, 
+		'metro': {
+			get: function() { return metro }, 
+			set: function(aMetro) { metro = aMetro }, 
+			enumerable: true
 		}
-	}
+	});
 }

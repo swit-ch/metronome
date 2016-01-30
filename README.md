@@ -1,27 +1,18 @@
-Hi, just playing around with a fork of original code by Chris Wilson (thanks!).  
+Hi, this was a fork of original code by Chris Wilson, now detached.  
 https://github.com/cwilso/metronome  
+His live app is at  
+http://webaudiodemos.appspot.com/metronome/index.html  
+View also:  
 http://www.html5rocks.com/en/tutorials/audio/scheduling/
 
+#Metronome
 Trying to understand git, GitHub and web technologies, almost privately here. 
+Playing around.
 
-Metronome:  
-Probably I won't be interested in divisions of 8th, 16th notes, if at all there should be other tuplets too. 
-But time signatures might be useful to me, greater range of BPMs ...
+I won't be interested in divisions of 8th, 16th notes, if at all there should be other tuplets too. 
+But time signatures are useful to me (no subdivisions yet), greater range of BPMs ...
 
-Current state:  
+Current state -- probably BUGGY ! --   
 http://swit-ch.github.io/metronome/
 
-Stephan
-
-
-Here the original readme text of the forked metronome:
-
-# Web Audio Metronome
-
-This application shows how to use a collaboration between a setTimeout scheduler and the Web Audio scheduler to properly implement rock-solid timing for audio applications.
-
-Check it out, feel free to submit issues or requests, fork, submit pull requests, etc.
-
-The live app is at http://webaudiodemos.appspot.com/metronome/index.html.
-
--Chris
+swit-ch
