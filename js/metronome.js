@@ -89,11 +89,15 @@ function WebAudio_Metro (storedState) {
 			beatsPerBar = nextBeatsPerBar;
 			nextBeatsPerBar = undefined;
 			pubsubz.publish('beatsPerBar', beatsPerBar);
+			
+			prevBeatsPerBar = beatsPerBar; // for updateMeterAtBeat
 		};
 		if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
 			beatUnit = nextBeatUnit;
 			nextBeatUnit = undefined;
 			pubsubz.publish('beatUnit', beatUnit);
+			
+			prevBeatUnit = beatUnit; // for updateMeterAtBeat
 		};
 	}
 	function updateMeterAtBeat(){
@@ -119,27 +123,14 @@ function WebAudio_Metro (storedState) {
 		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
 		beats++;
 		
-		// EG for gui if set by someone else ..../////////////////////////
-		if (beatInBar === 0){ // the ONE
-			updateMeterAtBarLine();
-		};
-		updateMeterAtBeat();
-		
-// 		tempo++; // ha !
-// 		tempo = tempo + (1 / 3);
-		
-// 		if (tempo < 160) {
-// 			tempo = tempo + 0.5;
-// 		};
-				
-		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
-		prevTempo = tempo;
-		
-// 		console.log("metronome nextBeat " + Date.now()); ////////////////
+// 		console.log("metronome nextBeat beatInBar : " + beatInBar + " beats : " + beats);
 	}
 	
 	// beatNumber is now passed in beatInBar, now argBeatInBar 	
 	function scheduleBeat( argBeatInBar, time, argBeats ) { // former name scheduleNote
+		
+		var theOne = argBeatInBar === 0;
+		
 		// push the note on the queue, even if we're not playing.
 		notesInQueue.push( { beatInBar: argBeatInBar, time: time, beats: argBeats } );
 
@@ -155,11 +146,26 @@ function WebAudio_Metro (storedState) {
 		osc.connect(eg);
 		eg.connect( mainGainNode );
 	
-		if (argBeatInBar === 0){ // the ONE
-			osc.frequency.value = 880.0;
-		};
+		if (theOne){ osc.frequency.value = 880.0; };
+		
 		osc.start( time );
 		osc.stop( time + noteLength );
+		
+		
+		////////////
+		if (theOne){ updateMeterAtBarLine(); };
+		updateMeterAtBeat();
+		
+// 		tempo++; // ha !
+// 		tempo = tempo + (1 / 3);
+		
+// 		if (tempo < 160) {
+// 			tempo = tempo + 0.5;
+// 		};
+		
+		// tempo from outer context (okay?)
+		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
+		prevTempo = tempo;
 		
 // 		console.log("metronome scheduleBeat " + Date.now());
 	}
@@ -214,7 +220,7 @@ function WebAudio_Metro (storedState) {
 	// override in gui
 	function drawBeatHook(currentBeatInBar, currentBeats, beatDur){}
 	
-	// here again b/c of context, have drawBeatHook now
+	// have drawBeatHook now
 	function drawBeat() {
 			//  was "currentNote" -- lastBeatInBarDrawn bad name
 			var currentBeatInBar = lastBeatInBarDrawn; 
