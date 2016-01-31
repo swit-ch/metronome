@@ -23,13 +23,13 @@ var mSets = {
 	}
 };
 
-var g = new MetroGUI();
-g.setState(mSets.hubba);
+// var g = new MetroGUI();
+// g.setState(mSets.hubba);
 /////////////////////////////////
 
 
-
-
+// metro alone /////////////
+var m = new WebAudio_Metro();
 
 
 

@@ -9,18 +9,9 @@ function MetroGUI
 	
 	var metro = {}; // dummy for (active) controls
 	
-	var inited = false; // stays private ?
+	var inited = false; 
 	var subscriptions = [];
-/*	
-	var ssg;
-	if (storedState){
-		if (storedState.gui){
-			ssg = storedState.gui;
-			if (typeof ssg.barViewHidden == 'boolean') { barViewHidden = ssg.barViewHidden; };
-			if (typeof ssg.pendulumHidden == 'boolean') { pendulumHidden = ssg.pendulumHidden; };
-		}
-	};
-*/
+	
 	var beatsPerBarObj = {
 		values: [
 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
@@ -419,7 +410,7 @@ function MetroGUI
 			}}, 
 			enumerable: true
 		}, 
-		'setState': {
+		'setState': { // metronome setState does some checking, use specs ?!
 			value: function(obj) { 
 				for(var prop in obj){
 					if (this.hasOwnProperty(prop)){

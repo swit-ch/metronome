@@ -1,29 +1,13 @@
 'use strict';
 /* motivation for constructor: pass this obj to publishing */
 
-function WebAudio_Metro (storedState) {
+function WebAudio_Metro ( /* storedState */) {
+	var THIS = this;
 	var inited = false;
 	
 	// w/o storage.js need defaults ...
 	var tempo = 60, gain = 0.1; // tempo change active at next beat
 	var beatsPerBar = 4, beatUnit = 1 / 4;
-	function setState(obj){
-			if (obj.tempo) { tempo = obj.tempo; };
-			// if (obj.gain) { gain = obj.gain; }; // might be zero
-			
-			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
-			
-			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
-			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
-	}
-	
-	var ssm;
-	if (storedState) {
-		if(storedState.metro){
-			ssm = storedState.metro;
-			setState(ssm);
-		}
-	};
 	
 	var prevTempo = tempo; // new test (upd) -- need more of them, change emitted here ...
 	var prevBeatsPerBar = beatsPerBar;
@@ -181,10 +165,39 @@ function WebAudio_Metro (storedState) {
 	}
 	
 	// think want 'stop' too ...
-	function play() {
+	function play(){
+		if (! inited) {
+			console.log(THIS + " not inited");
+			return;
+		};		
+		if (isPlaying) { console.log(THIS + " _already_ playing" ); return };
+		
+			// iOS hack, otherwise audioContext suspended
+		if (audioContext.state !== 'running'){ pseudoSound(); };
+	
+		beatInBar = 0;
+		beats = 0;
+		nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
+		
+		timerWorker.postMessage("start");
+		pubsubz.publish('start');
+		isPlaying = true;
+	}
+	
+	function stop(){
+		if (! isPlaying) { console.log(THIS + " _not_ playing" ); return };
+		
+		timerWorker.postMessage("stop");
+		pubsubz.publish('stop');
+		isPlaying = false;
+	}
+	
+	
+/*
+	function togglePlay() {
 		
 		if (! inited) {
-			console.log(this + " not inited");
+			console.log(THIS + " not inited");
 			return;
 		};
 		
@@ -211,7 +224,21 @@ function WebAudio_Metro (storedState) {
 			return "play";
 		}
 	}
-
+*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	function setMainGain(val){
 		gain = val;
 		mainGainNode.gain.value = gain;
@@ -261,7 +288,7 @@ function WebAudio_Metro (storedState) {
 		if (window.AudioContext == undefined || window.Worker == undefined) {
 			console.log("AudioContext and/or Worker undefined. Return early from 'init' now.");
 // 			disablePlayCtls(); // gui.js
-			return; // but then gui should not init() too !
+			return; 
 		};
 
 		audioContext = new AudioContext();
@@ -293,28 +320,33 @@ function WebAudio_Metro (storedState) {
 		timerWorker.postMessage({"interval":lookahead});
 		
 		inited = true;
-		} else { console.log(this + " already inited"); }
+		} else { console.log(THIS + " already inited"); }
 	}
 	
 	function getState() {
 		return {
-			"tempo": tempo, "gain": gain, "beatsPerBar": beatsPerBar, "beatUnit": beatUnit
+			tempo: tempo, gain: gain, beatsPerBar: beatsPerBar, beatUnit: beatUnit
 		}
 	}
-	
-// 	init();
-	
-	
-	
-// 	this.play = play; // good enough for functions, not for get/set proprs, or: have interface obj?!
-// 	this.isPlaying = isPlaying; // nono
-	
+	function setState(obj){
+			if (obj.tempo) { tempo = obj.tempo; };
+			// if (obj.gain) { gain = obj.gain; }; // might be zero
+			
+			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
+			
+			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
+			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
+	}
+			
 	Object.defineProperties(this, {
-// 		'inited': { get: function() { return inited }, enumerable: true }, 
 		'isPlaying': { get: function(){ return isPlaying }, enumerable: true }, 
 		
 		'init': { value: init, enumerable: true }, 
 		'play': { value: play, enumerable: true }, 
+		'stop': { value: stop, enumerable: true }, 
+		
+		'getState': { value: getState, enumerable: true }, 
+		'setState': { value: setState, enumerable: true }, 
 		
 		'beatsPerBar': { 
 			get: function(){ return beatsPerBar }, 
@@ -345,12 +377,14 @@ function WebAudio_Metro (storedState) {
 			get: function() { return gain }, 
 			set: function(r) { setMainGain(r) }, 
 			enumerable: true
-		},
-		'state': {
-			get: function() { return getState() }, 
-			set: function(obj) { return setState(obj) }, 
-			enumerable: true
 		}, 
+		
+// 		'state': {
+// 			get: function() { return getState() }, 
+// 			set: function(obj) { return setState(obj) }, 
+// 			enumerable: true
+// 		}, 
+		
 		'drawBeatHook': {
 			get: function() { return drawBeatHook }, 
 			set: function(f) { drawBeatHook = f }, 
