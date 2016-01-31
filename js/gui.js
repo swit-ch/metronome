@@ -1,20 +1,17 @@
 'use strict';
 // html layout (CSS) exists. Here behaviour added
 function MetroGUI
-( /*metro, */ storedState) {
+( /*metro, storedState */ ) {
+	var THIS = this; 
 	
-	var metro = null; // gui should work w/o model, EG composite "ez" views, defaults from specs
-	// gui could have similar interface like model (beatsPerBar, tempo ... isPlaying)
+	// private b/c of special setters, gui
+	var beatsPerBar, beatUnit, tempo, gain, barViewHidden, pendulumHidden;
 	
-// 	metro = { beatsPerBar: 3, beatUnit: 1 / 3, tempo: 90, gain: 0.1 }; // dummy test (proxy?)
+	var metro = {}; // dummy for (active) controls
 	
-	var inited = false;
+	var inited = false; // stays private ?
 	var subscriptions = [];
-	
-	
-	var barViewHidden = false;
-	var pendulumHidden = false;
-	
+/*	
 	var ssg;
 	if (storedState){
 		if (storedState.gui){
@@ -23,7 +20,7 @@ function MetroGUI
 			if (typeof ssg.pendulumHidden == 'boolean') { pendulumHidden = ssg.pendulumHidden; };
 		}
 	};
-
+*/
 	var beatsPerBarObj = {
 		values: [
 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 
@@ -41,14 +38,14 @@ function MetroGUI
 	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj
 	
 	
-	// html elements
+	// html elements ////////////////////////////////////////
 	var playCtl = document.getElementById('playCtl');
 	var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
 	var beatUnitCtl = document.getElementById('beatUnitCtl');
-	var tempoSliderCtl = document.getElementById('tempoSliderCtl');
-	var tempoNumCtl = document.getElementById('tempoNumCtl');
-	var gainSliderCtl = document.getElementById('gainSliderCtl');
-	var gainNumCtl = document.getElementById('gainNumCtl');
+	var tempoSliderCtl = document.getElementById('tempoSliderCtl'); // => ez
+	var tempoNumCtl = document.getElementById('tempoNumCtl'); // => ez
+	var gainSliderCtl = document.getElementById('gainSliderCtl'); // => ez
+	var gainNumCtl = document.getElementById('gainNumCtl'); // => ez
 	
 	var barView = document.getElementById('barView'); // a canvas, no, a div here
 	
@@ -85,7 +82,8 @@ function MetroGUI
 		o.textContent = beatUnitObj.labels[i];
 		beatUnitCtl.add(o);
 	};
-	
+	////////////////////////////////////////////////////////
+
 	
 	function togglePlay(ev){
 		var str = metro.play(); // metronome.js
@@ -112,29 +110,25 @@ function MetroGUI
 		metro.beatUnit = x;
 	}	
 	
+	
 	////// to next 5 (6) could be delegated my (not yet) own beatsPerBar etc. setters, take val as arg  //////////
 	// for manual gui-only testing as well as updating automatically from metro (status quo)
 	
 	// indexOf tests for strict equality
 	// hmm, beatsPerBar, beatUnit no setters b/c nextX preference !
 	function updBeatsPerBarGUI(){
-		// special case: next is set, next bar not reached (?)
-		var val = metro.nextBeatsPerBar || metro.beatsPerBar;
-		beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(val);
+		beatsPerBarCtl.selectedIndex = beatsPerBarObj.values.indexOf(beatsPerBar);
 		beatsPerBarCtl.classList.remove('notYet');		
 	}
-	
-	function updBeatUnitGUI(){
-		var val = metro.nextBeatUnit || metro.beatUnit;
-		beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(val);
+	function updBeatUnitGUI(){		
+		beatUnitCtl.selectedIndex = beatUnitObj.values.indexOf(beatUnit);
 		beatUnitCtl.classList.remove('notYet');
 	}
-	
 	function updTempoEZ(){
-		tempoEZ.value = metro.tempo; // value now passive, have also valueAction setter
+		tempoEZ.value = tempo; // value now passive, have also valueAction setter
 	}
 	function updGainEZ(){
-		gainEZ.value = metro.gain;
+		gainEZ.value = gain;
 	}
 	
 	
@@ -144,7 +138,6 @@ function MetroGUI
 	// less elements, no DOM manipulation-- remember came to html eles b/c of CSS:
 	// colors from style sheet, sizes relative ...
 	function replaceBarView() {
-		var beatsPerBar = metro.beatsPerBar;
 		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
 		var frag = document.createElement('div');
 		frag.classList.add('wideDisplay');
@@ -167,8 +160,7 @@ function MetroGUI
 	
 	var prevBeatBox = document.createElement('span');
 		
-	function updCurrentBeatInBarView(currentBeatInBar, beatDur){
-		var beatsPerBar = metro.beatsPerBar;
+	function updCurrentBeatInBarView(currentBeatInBar){
 		var kids = barView.childNodes;
 		var curBeatBox = kids[currentBeatInBar];
 		prevBeatBox.id = 'none';
@@ -222,14 +214,15 @@ function MetroGUI
 
 	
 	
-	
 	function hideBarView(){
-		barView.classList.add('hidden');
+		barView.classList.add('hidden'); // test ? can add twice ?
 		barViewSwitch.textContent = "show ...";
+		barViewHidden = true;
 	}
 	function showBarView(){
 		barView.classList.remove('hidden');
 		barViewSwitch.textContent = "hide ...";
+		barViewHidden = false;
 	}
 	
 	function hidePendulum(){
@@ -237,22 +230,27 @@ function MetroGUI
 			item.classList.add('hidden');
 		});
 		pendulumSwitch.textContent = "show <-->";
+		pendulumHidden= true;
 	}
 	function showPendulum(){		
 		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
 			item.classList.remove('hidden');
 		});
 		pendulumSwitch.textContent = "hide <-->";
+		pendulumHidden= false;
 	}
+	
+	// gui controls actions (now not only to metro, but self too) ////
 
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
-
 	
+	
+	// aahh, currently no own nextBeat...
 	beatsPerBarCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
-		var val = beatsPerBarObj.values[ix];
-		if (metro.isPlaying) { setNextBeatsPerBar(val); } else {
-			setBeatsPerBar(val);
+		beatsPerBar = beatsPerBarObj.values[ix];
+		if (metro.isPlaying) { setNextBeatsPerBar(beatsPerBar); } else {
+			setBeatsPerBar(beatsPerBar);
 			replaceBarView();
 		};
 	}, false);
@@ -262,27 +260,64 @@ function MetroGUI
 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
 // 			console.log(ev.key);
 			var ix = this.selectedIndex;
-			var val = beatsPerBarObj.values[ix];
-			if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
+			beatsPerBar = beatsPerBarObj.values[ix];
+			if (metro.isPlaying) { setNextBeatsPerBar(beatsPerBar); } else { setBeatsPerBar(beatsPerBar);  };
 		}
 	}, false);
 	
 	beatUnitCtl.addEventListener('change', function(ev){
 		var ix = this.selectedIndex;
-		var val = beatUnitObj.values[ix];
-		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
+		beatUnit = beatUnitObj.values[ix];
+		if (metro.isPlaying) { setNextBeatUnit(beatUnit); } else { setBeatUnit(beatUnit);  };
 	}, false);
 	
 	tempoEZ.action = function(ez){
-		metro.tempo = ez.value;
+		tempo = ez.value;
+		metro.tempo = tempo;
 	}
 	gainEZ.action = function(ez){
-		metro.gain = ez.value;
+		gain = ez.value;
+		metro.gain = gain;
 	}
+	
+// 	beatsPerBarCtl.addEventListener('change', function(ev){
+// 		var ix = this.selectedIndex;
+// 		var val = beatsPerBarObj.values[ix];
+// 		if (metro.isPlaying) { setNextBeatsPerBar(val); } else {
+// 			setBeatsPerBar(val);
+// 			replaceBarView();
+// 		};
+// 	}, false);
+// 
+// 	// Firefox special
+// 	beatsPerBarCtl.addEventListener('keyup', function(ev){
+// 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
+// // 			console.log(ev.key);
+// 			var ix = this.selectedIndex;
+// 			var val = beatsPerBarObj.values[ix];
+// 			if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
+// 		}
+// 	}, false);
+// 	
+// 	beatUnitCtl.addEventListener('change', function(ev){
+// 		var ix = this.selectedIndex;
+// 		var val = beatUnitObj.values[ix];
+// 		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
+// 	}, false);
+// 	
+// 	tempoEZ.action = function(ez){
+// 		metro.tempo = ez.value;
+// 	}
+// 	gainEZ.action = function(ez){
+// 		metro.gain = ez.value;
+// 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////
+	
+	
 	
 	barViewSwitch.addEventListener('click', function(ev){
 		if (! barViewHidden){
-			barViewHidden = true;
 			hideBarView();
 		} else {
 			barViewHidden = false;
@@ -291,13 +326,23 @@ function MetroGUI
 	}, false);
 	pendulumSwitch.addEventListener('click', function(ev){
 		if (! pendulumHidden){
-			pendulumHidden = true;
+			pendulumHidden= true;
 			hidePendulum();
 		} else {
-			pendulumHidden = false;
+			pendulumHidden= false;
 			showPendulum();
 		}
 	}, false);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 			
 	function urlLocal(url) {
@@ -313,19 +358,19 @@ function MetroGUI
 			updBeatUnitGUI();
 			updTempoEZ();
 			updGainEZ();
-			replaceBarView();
-	
-			if (! barViewHidden){ showBarView() } else { hideBarView() };
-			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
-		
-			if (urlLocal(document.URL)){
-				document.title = document.title.replace("testing", "LOCAL");
-			};
-		
-			metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-				updCurrentBeatInBarView(currentBeatInBar, beatDur);
-				if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-			};
+// 			replaceBarView();
+// 	
+// 			if (! barViewHidden){ showBarView() } else { hideBarView() };
+// 			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+// 		
+// 			if (urlLocal(document.URL)){
+// 				document.title = document.title.replace("testing", "LOCAL");
+// 			};
+// 		
+// 			metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
+// 				updCurrentBeatInBarView(currentBeatInBar);
+// 				if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+// 			};
 			inited = true;
 	} else {
 		console.log(this + " already inited");
@@ -364,27 +409,81 @@ function MetroGUI
 	console.log(subscriptions);
 	/////////////////////////////////////////////////////////
 	
-	function getState() {
-		return {
-			"barViewHidden": barViewHidden, "pendulumHidden": pendulumHidden
-		}
-	}
-	
-// 	return {
-// // 		init: init, 
-// 		get state() { return getState() }, 
-// 		set metro(m) {
-// 			metro = m;
-// 			init();
-// 		}
-// 	}
 	Object.defineProperties(this, {
 		'init': { value: init, enumerable: true }, 
-		'state': {
-			get: function() { return getState() }, 
-// 			set: function(obj) { return setState(obj) }, 
+		
+		'getState': {
+			value: function() { return {
+				beatsPerBar: beatsPerBar, beatUnit: beatUnit, tempo: tempo, gain: gain, 
+				barViewHidden: barViewHidden, pendulumHidden: pendulumHidden
+			}}, 
 			enumerable: true
 		}, 
+		'setState': {
+			value: function(obj) { 
+				for(var prop in obj){
+					if (this.hasOwnProperty(prop)){
+						this[prop] = obj[prop];
+					}
+				};
+				console.log(this);
+				if (barViewHidden) { hideBarView() } else { showBarView() };
+				if (pendulumHidden) { hidePendulum() } else { showPendulum() };
+			}, 
+			enumerable: true
+		}, 
+		
+		'beatsPerBar': {
+			get: function() { return beatsPerBar }, 
+			set: function(n) {
+				beatsPerBar = n;
+				updBeatsPerBarGUI();
+				replaceBarView();
+			}, 
+			enumerable: true
+		},
+		'beatUnit': {
+			get: function() { return beatUnit }, 
+			set: function(n) {
+				beatUnit = n;
+				updBeatUnitGUI();
+			}, 
+			enumerable: true
+		},
+		'tempo': {
+			get: function() { return tempo }, 
+			set: function(n) {
+				tempo = n;
+				updTempoEZ();
+			}, 
+			enumerable: true
+		},
+		'gain': {
+			get: function() { return gain }, 
+			set: function(q) {
+				gain = q;
+				updGainEZ();
+			}, 
+			enumerable: true
+		},
+		
+		'hideBarView': { value: hideBarView, enumerable: true }, 
+		'showBarView': { value: showBarView, enumerable: true }, 
+		'hidePendulum': { value: hidePendulum, enumerable: true }, 
+		'showPendulum': { value: showPendulum, enumerable: true }, 
+		
+		// hide somehow following 2 ? user set not useful
+		'barViewHidden': {
+			get: function() { return barViewHidden }, 
+			set: function(bool) { barViewHidden = bool }, 
+			enumerable: true
+		}, 
+		'pendulumHidden': {
+			get: function() { return pendulumHidden }, 
+			set: function(bool) { pendulumHidden = bool }, 
+			enumerable: true
+		},
+		
 		'metro': {
 			get: function() { return metro }, 
 			set: function(aMetro) { metro = aMetro }, 
@@ -392,3 +491,5 @@ function MetroGUI
 		}
 	});
 }
+
+// MetroGUI.prototype = commonInterface;

@@ -65,7 +65,7 @@ var getStoredState = (function(){
 		return parent.name;
 	}
 
-	initStore(storage);
+// 	initStore(storage);
 
 	// arghh, spent much time only to find out 'unload' is supported by Safari mobile unlike 'beforeunload'
 	if (storage){
