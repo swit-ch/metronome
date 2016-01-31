@@ -11,7 +11,6 @@ g.init();
 */
 
 
-// gui alone /////////////////
 var mSets = {
 	huh: {
 		beatsPerBar: 5, beatUnit: 1 / 8, tempo: 133, gain: 0.13, 
@@ -23,13 +22,14 @@ var mSets = {
 	}
 };
 
-// var g = new MetroGUI();
+// gui alone /////////////////
+var g = new MetroGUI();
 // g.setState(mSets.hubba);
 /////////////////////////////////
 
 
 // metro alone /////////////
-var m = new WebAudio_Metro();
+// var m = new WebAudio_Metro();
 
 
 

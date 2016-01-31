@@ -7,7 +7,11 @@ function MetroGUI
 	// private b/c of special setters, gui
 	var beatsPerBar, beatUnit, tempo, gain, barViewHidden, pendulumHidden;
 	
-	var metro = {}; // dummy for (active) controls
+	var metro = { // dummy (proxy) for (active) controls
+		isPlaying: false, 
+		play: function(){ this.isPlaying = true }, stop: function(){ this.isPlaying = false }
+	
+	};
 	
 	var inited = false; 
 	var subscriptions = [];
@@ -76,12 +80,22 @@ function MetroGUI
 	////////////////////////////////////////////////////////
 
 	
+// 	function togglePlay(ev){
+// 		var str = metro.play(); // metronome.js
+// 		playCtl.textContent = str; // that was practical
+// 	}
+	
 	function togglePlay(ev){
-		var str = metro.play(); // metronome.js
-		playCtl.textContent = str;
+		var str;
+		if (metro.isPlaying) {
+			metro.stop(); 
+			str = "play";
+		} else {
+			metro.play();
+			str = "stop";
+		}
+		playCtl.textContent = str; 
 	}
-	
-	
 	
 	// set the model ////////
 	
@@ -232,7 +246,8 @@ function MetroGUI
 	}
 	
 	// gui controls actions (now not only to metro, but self too) ////
-
+	
+	// would be nice to have button w/ states like SC
 	playCtl.addEventListener('click', togglePlay, false); // touch ? click ev received iOS
 	
 	
