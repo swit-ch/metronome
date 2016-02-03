@@ -13,7 +13,10 @@
         pubsubz ={};
 
     pubsubz.publish = function ( topic, args ) {
-
+				
+// 				console.log("pubsubz publish called", topic, args);
+// 				console.log("pubsubz", topics[topic]);
+				
         if (!topics[topic]) {
             return false;
         }
@@ -21,8 +24,16 @@
         setTimeout(function () {
             var subscribers = topics[topic],
                 len = subscribers ? subscribers.length : 0;
-
+						
+// 						console.log("pubsubz", subscribers);
+						
             while (len--) {
+                
+                console.log("pubsubz", //subscribers[len], subscribers[len].func, 
+                	
+                	topic, args
+                );
+                
                 subscribers[len].func(topic, args);
             }
         }, 0);

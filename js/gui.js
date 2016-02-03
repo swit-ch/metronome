@@ -1,11 +1,11 @@
 'use strict';
 // html layout (CSS) exists. Here behaviour added
-function MetroGUI
-( /*metro, storedState */ ) {
+function MetroGUI () {
 	var THIS = this; 
 	
 	// private b/c of special setters, gui
-	var beatsPerBar, beatUnit, tempo, gain, barViewHidden, pendulumHidden;
+	var beatsPerBar, beatUnit, tempo, gain;
+	var barViewHidden, pendulumHidden;
 	
 	var metro = { // dummy (proxy) for (active) controls
 		isPlaying: false, 
@@ -13,7 +13,7 @@ function MetroGUI
 	
 	};
 	
-	var inited = false; 
+// 	var inited = false; // hasMetro ?
 	var subscriptions = [];
 	
 	var beatsPerBarObj = {
@@ -147,7 +147,9 @@ function MetroGUI
 		var frag = document.createElement('div');
 		frag.classList.add('wideDisplay');
 		
-// 		console.log("replaceBarView called");
+		if (barViewHidden) { frag.classList.add('hidden'); };
+		
+// 		console.log("gui.js replaceBarView called");
 		
 		for (var i = 0, ele; i < beatsPerBar; i++) {
 			ele = document.createElement('span');
@@ -216,8 +218,6 @@ function MetroGUI
 		
 		pendulumSwing.setAttribute('style', durString(beatDur));
 	}
-
-	
 	
 	function hideBarView(){
 		barView.classList.add('hidden'); // test ? can add twice ?
@@ -320,103 +320,71 @@ function MetroGUI
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	
-	
-	
 	barViewSwitch.addEventListener('click', function(ev){
-		if (! barViewHidden){
-			hideBarView();
-		} else {
-			barViewHidden = false;
-			showBarView();
-		}
+		barViewHidden ? showBarView() : hideBarView();
 	}, false);
 	pendulumSwitch.addEventListener('click', function(ev){
-		if (! pendulumHidden){
-			pendulumHidden= true;
-			hidePendulum();
-		} else {
-			pendulumHidden= false;
-			showPendulum();
-		}
-	}, false);
+		pendulumHidden ? showPendulum() : hidePendulum();
+	}, false);	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 			
 	function urlLocal(url) {
 		var m = url.match(/192\.168\.0\./);
 		if (m) { // not null
 			return true; } else { return false; };
 	}
+	
+	if (urlLocal(document.URL)){
+		document.title = document.title.replace("testing", "LOCAL");
+	};	
+	
+	
+	function drawBeatHook (currentBeatInBar, currentBeats, beatDur){		
 		
-	function init(){	
-		if (! inited){
+// 		console.log("drawBeatHook as defined in gui.js");
 		
-			updBeatsPerBarGUI();
-			updBeatUnitGUI();
-			updTempoEZ();
-			updGainEZ();
-// 			replaceBarView();
-// 	
-// 			if (! barViewHidden){ showBarView() } else { hideBarView() };
-// 			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+		updCurrentBeatInBarView(currentBeatInBar);
+		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
+	};	
+	
+	
+	
+	// now, with setState different
+// 	function init(){	
+// 		if (! inited){
 // 		
-// 			if (urlLocal(document.URL)){
-// 				document.title = document.title.replace("testing", "LOCAL");
-// 			};
-// 		
-// 			metro.drawBeatHook = function(currentBeatInBar, currentBeats, beatDur){		
-// 				updCurrentBeatInBarView(currentBeatInBar);
-// 				if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
-// 			};
-			inited = true;
-	} else {
-		console.log(this + " already inited");
-	}
-	} // init
+// 			updBeatsPerBarGUI();
+// 			updBeatUnitGUI();
+// 			updTempoEZ();
+// 			updGainEZ();
+// // 			replaceBarView();
+// // 	
+// // 			if (! barViewHidden){ showBarView() } else { hideBarView() };
+// // 			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
+// // 		
+// 
+// // 		
+// 
+// 			inited = true;
+// 	} else {
+// 		console.log(this + " already inited");
+// 	}
+// 	} // init
 	
 	
 	var testSubscriber = function( topics , data ){
-			console.log( topics + ": " + data );
+			console.log("testSubscriber" , topics, data );
 	};
 	
-	[
-	// 	pubsubz.subscribe('start', resetPendulum),
-		pubsubz.subscribe('stop', resetPendulum), 
 	
-		pubsubz.subscribe('beatsPerBar', function(){
-			updBeatsPerBarGUI();
-			replaceBarView(); // when playing, but not stopped ...
-		}), 
-		pubsubz.subscribe('beatUnit', updBeatUnitGUI), 
-		pubsubz.subscribe('tempo', updTempoEZ), 
-		pubsubz.subscribe('gain', updGainEZ), 
 
-	// maybe for special gui update?
-		pubsubz.subscribe('nextBeatsPerBar', testSubscriber), 
-		pubsubz.subscribe('nextBeatUnit', testSubscriber), 
 	
-		pubsubz.subscribe('audioContext_statechange', testSubscriber), 
-	// 	pubsubz.subscribe('audioContext_statechange', function(){
-	// 		console.log(arguments);
-	// 	}), 
-	] .forEach(function(item, i){
-		subscriptions.push(item)
-	});
-	
-	console.log(subscriptions);
 	/////////////////////////////////////////////////////////
 	
 	Object.defineProperties(this, {
-		'init': { value: init, enumerable: true }, 
+// 		'init': { value: init, enumerable: true }, 
 		
 		'getState': {
 			value: function() { return {
@@ -432,9 +400,8 @@ function MetroGUI
 						this[prop] = obj[prop];
 					}
 				};
-				console.log(this);
-				if (barViewHidden) { hideBarView() } else { showBarView() };
-				if (pendulumHidden) { hidePendulum() } else { showPendulum() };
+				barViewHidden ? hideBarView() : showBarView(); 
+				pendulumHidden ? hidePendulum() : showPendulum();
 			}, 
 			enumerable: true
 		}, 
@@ -492,7 +459,37 @@ function MetroGUI
 		
 		'metro': {
 			get: function() { return metro }, 
-			set: function(aMetro) { metro = aMetro }, 
+			set: function(aMetro) {
+				var mState;
+				metro = aMetro;				
+	[
+	// 	pubsubz.subscribe('start', resetPendulum),
+		pubsubz.subscribe('stop', resetPendulum), 
+		
+		pubsubz.subscribe('beatsPerBar', function(topic, args){ // only one arg
+			THIS.beatsPerBar = arguments[1];
+		}), 
+		pubsubz.subscribe('beatUnit', function(){
+			THIS.beatUnit = arguments[1];
+		}), 
+		pubsubz.subscribe('tempo', function(){
+			THIS.tempo = arguments[1];
+		}), 
+		pubsubz.subscribe('gain', function(){
+			THIS.gain = arguments[1];
+		}), 
+
+	// maybe for special gui update? both nextX questionable anyway, more flexible later ...
+		pubsubz.subscribe('nextBeatsPerBar', testSubscriber), 
+		pubsubz.subscribe('nextBeatUnit', testSubscriber), 
+	
+		pubsubz.subscribe('audioContext_statechange', testSubscriber)
+	] .forEach(function(item, i){
+		subscriptions.push(item)
+	});
+				
+				metro.drawBeatHook = drawBeatHook;
+			}, 
 			enumerable: true
 		}
 	});
