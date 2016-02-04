@@ -44,6 +44,9 @@ function MetroGUI () {
 	
 	var barView = document.getElementById('barView'); // a canvas, no, a div here
 	
+	var beatBoxGroup = document.getElementById('beatBoxGroup'); // SVG
+	var currentBeatInBarBox = document.getElementById('currentBeatInBarBox'); // SVG
+	
 	var wideDisplaysContainer = document.getElementById('wideDisplaysContainer'); // parent
 	
 	var pendulumContainer = document.getElementById('pendulumContainer');
@@ -137,46 +140,17 @@ function MetroGUI () {
 	}
 	
 	
-	// maybe still better graphical (svg, canvas) instead of text elements ...
-	// ah ... w/ svg have a whole lot of beatBoxes always existing and scale into the viewBox accordingly !
-	// background static (till beatsPerBar changed), foreground current beat on top
-	// less elements, no DOM manipulation-- remember came to html eles b/c of CSS:
-	// colors from style sheet, sizes relative ...
 	function updBarView() {
-		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
-		var frag = document.createElement('div');
-		frag.classList.add('wideDisplay');
-		
-		if (barViewHidden) { frag.classList.add('hidden'); };
-		
-// 		console.log("gui.js updBarView called");
-		
-		for (var i = 0, ele; i < beatsPerBar; i++) {
-			ele = document.createElement('span');
-			ele.classList.add('barViewBeatBox');
-			
-			ele.setAttribute('style', 
-				"left: " + x * i * 2 + "%; width: " + x + "%;"
-			);
-			frag.appendChild(ele);
-		};
-		frag.id = 'barView';
-		wideDisplaysContainer.replaceChild(frag, barView);
-		barView = frag;
+		// viewBox="0 0 49 4"
+		var scale = 49 / (beatsPerBar * 2 - 1); 		
+		beatBoxGroup.setAttribute("transform", "scale(" + scale + ", 1)");
 	}	
-	
-	var prevBeatBox = document.createElement('span');
-		
+			
 	function updCurrentBeatInBarView(currentBeatInBar){
-		var kids = barView.childNodes;
-		var curBeatBox = kids[currentBeatInBar];
-		prevBeatBox.id = 'none';
-		
-// 		console.log("updCurrentBeatInBarView currentBeatInBar : " + currentBeatInBar + " curBeatBox: " + curBeatBox); 
-		
-		if (beatsPerBar > 1) { curBeatBox.id = 'currentBeatInBarBox';		}; 
-		prevBeatBox = curBeatBox;
+		var x = currentBeatInBar * 2;
+		currentBeatInBarBox.setAttribute("transform", "translate(" + x + ", 0)");
 	}
+	
 	
 	/* needed at all ? */
 	function resetPendulum() {

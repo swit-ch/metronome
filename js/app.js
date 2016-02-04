@@ -19,6 +19,10 @@ var presets = {
 	hubba: {
 		beatsPerBar: 3, beatUnit: 1 / 2, tempo: 100, gain: 0.099, 
 		barViewHidden: true, pendulumHidden: true
+	}, 
+	sibe: { 
+		beatsPerBar: 7, beatUnit: 0.125, tempo: 85, gain: 0.099, 
+		barViewHidden: false, pendulumHidden: false 
 	}
 };
 
@@ -37,13 +41,13 @@ var presets = {
 
 // gui alone /////////////////
 var g = new MetroGUI();
-g.setState(presets.hubba);
+g.setState(presets.sibe);
 /////////////////////////////////
 
 
 // metro alone /////////////
 var m = new WebAudio_Metro();
-m.setState(presets.hubba);
+m.setState(presets.sibe);
 m.init(); // assumes some state, error
 g.metro = m;
 
