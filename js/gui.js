@@ -142,14 +142,14 @@ function MetroGUI () {
 	// background static (till beatsPerBar changed), foreground current beat on top
 	// less elements, no DOM manipulation-- remember came to html eles b/c of CSS:
 	// colors from style sheet, sizes relative ...
-	function replaceBarView() {
+	function updBarView() {
 		var x = 100 / (beatsPerBar * 2 - 1); // percentage		
 		var frag = document.createElement('div');
 		frag.classList.add('wideDisplay');
 		
 		if (barViewHidden) { frag.classList.add('hidden'); };
 		
-// 		console.log("gui.js replaceBarView called");
+// 		console.log("gui.js updBarView called");
 		
 		for (var i = 0, ele; i < beatsPerBar; i++) {
 			ele = document.createElement('span');
@@ -257,7 +257,7 @@ function MetroGUI () {
 		beatsPerBar = beatsPerBarObj.values[ix];
 		if (metro.isPlaying) { setNextBeatsPerBar(beatsPerBar); } else {
 			setBeatsPerBar(beatsPerBar);
-			replaceBarView();
+			updBarView();
 		};
 	}, false);
 
@@ -291,7 +291,7 @@ function MetroGUI () {
 // 		var val = beatsPerBarObj.values[ix];
 // 		if (metro.isPlaying) { setNextBeatsPerBar(val); } else {
 // 			setBeatsPerBar(val);
-// 			replaceBarView();
+// 			updBarView();
 // 		};
 // 	}, false);
 // 
@@ -359,7 +359,7 @@ function MetroGUI () {
 // 			updBeatUnitGUI();
 // 			updTempoEZ();
 // 			updGainEZ();
-// // 			replaceBarView();
+// // 			updBarView();
 // // 	
 // // 			if (! barViewHidden){ showBarView() } else { hideBarView() };
 // // 			if (! pendulumHidden){ showPendulum() } else { hidePendulum() };
@@ -374,10 +374,12 @@ function MetroGUI () {
 // 	} // init
 	
 	
-	var testSubscriber = function( topics , data ){
-			console.log("testSubscriber" , topics, data );
+// 	var testSubscriber = function( topics , data ){
+// 			console.log("testSubscriber" , topics, data );
+// 	};
+	var testSubscriber = function(){
+			console.log("testSubscriber" , arguments );
 	};
-	
 	
 
 	
@@ -411,7 +413,7 @@ function MetroGUI () {
 			set: function(n) {
 				beatsPerBar = n;
 				updBeatsPerBarGUI();
-				replaceBarView();
+				updBarView();
 			}, 
 			enumerable: true
 		},

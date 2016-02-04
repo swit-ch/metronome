@@ -9,13 +9,11 @@ function WebAudio_Metro () {
 	
 // 	var beatsPerBar = 4, beatUnit = 1 / 4, tempo = 60, gain = 0.1; // tempo change active at next beat
 	var beatsPerBar, beatUnit, tempo, gain; // 'init' will need state eventually...
-	// also notifications on beat
+	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
 	
 	// change emitted here, not any, but "sample and hold" on beat or bar
 	var prevBeatsPerBar = beatsPerBar, prevBeatUnit = beatUnit, prevTempo = tempo, prevGain = gain;
-	
-	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
-	
+		
 	var beatInBar; // was 'currentBeat' 
 	var beats; // since last 'play' 
 	var beatDur; // new, for gui pendulum
@@ -47,7 +45,10 @@ function WebAudio_Metro () {
 	var timerWorker = null;     // The Web Worker used to fire timer messages
 	
 	function notify() {
+// 		console.log("metronome notify", THIS);
 		pubsubz.publish.apply(null, arguments);
+// 		pubsubz.publish.apply(null, [THIS, arguments[0], arguments[1]]); // untested, for ===
+		
 	}
 
 	// First, let's shim the requestAnimationFrame API, with a setTimeout fallback

@@ -37,13 +37,15 @@ var presets = {
 
 // gui alone /////////////////
 var g = new MetroGUI();
-// g.setState(presets.hubba);
+g.setState(presets.hubba);
 /////////////////////////////////
 
 
 // metro alone /////////////
 var m = new WebAudio_Metro();
-//m.init(); // assumes some state, error
+m.setState(presets.hubba);
+m.init(); // assumes some state, error
+g.metro = m;
 
 /*
 separate testing, code, doc where? props of constructors ? Tests in browser console 
