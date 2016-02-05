@@ -29,9 +29,10 @@ function MetroGUI () {
 	var gainSpec /* = {  min: 0, max: 1, step: "any", numStep: 0.01 } */ ;
 	// minval, maxval, warp, step, defval, units
 	tempoSpec = new ControlSpec(10, 400, 'lin',  1);
-	tempoSpec.pattern = '[0-9]'; // not used currently, find out ...
+	tempoSpec.pattern = '[0-9]*'; // not used currently, find out ...
 	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj
 	
+	gainSpec.pattern = '[0-9\\.]*';
 	
 	// html elements ////////////////////////////////////////
 	var playCtl = document.getElementById('playCtl');
