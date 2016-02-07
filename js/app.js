@@ -1,15 +1,45 @@
 'use strict';
 
+var theMetro, theGUI;
 
-/*
-var o = getStoredState('latest');      
-var m = new WebAudio_Metro(o); 
-m.init();
-var g = new MetroGUI(o);
-g.metro = m; 
-g.init();
-*/
 
+var getStoredState = (function(){
+	var storage = window.localStorage; // possibly undefined // storage per origin
+	var key = 'metro_gui_swit-ch';
+
+	function initStore(store){
+		if (! store.getItem(key)) {
+			store.setItem(key, JSON.stringify({}));
+		}
+	}
+	function setStore(store, name){
+		var obj = {}, parent;
+		parent = store.getItem(key);
+		parent = JSON.parse(parent);
+		obj.metro = theMetro.getState(); 
+		obj.gui = theGUI.getState(); 
+		parent.name = obj;
+		parent = JSON.stringify(parent);
+		store.setItem(key, parent);
+	}
+	function getStore(store, name){
+		var parent = store.getItem(key);
+		parent = JSON.parse(parent);
+		return parent.name;
+	}
+
+	initStore(storage);
+
+	if (storage){
+		window.addEventListener('unload', function(ev) {
+			setStore(storage, 'latest');
+		}, false);
+	};
+
+	return function (name) {
+		return getStore(storage, name);
+	};
+})()
 
 var presets = {
 	huh: {
@@ -26,41 +56,15 @@ var presets = {
 	}
 };
 
+theMetro = new WebAudio_Metro();
+theGUI = new MetroGUI();
+var theStore = getStoredState('latest');
 
-// var m = new WebAudio_Metro(); 
-// var g = new MetroGUI();
-// 
-// m.setState(presets.hubba); 
-// g.setState(presets.hubba); // actually metro part of state ! ah, now set metro sets state too ...
-// 
-// m.init(); // worker, audio
-// g.metro = m; // set side effects, no more init
+// theGUI.setState(presets.sibe);
+theGUI.setState(theStore.gui);
 
+// theMetro.setState(presets.sibe);
+theMetro.setState(theStore.metro);
+theMetro.init(); // assumes some state, error
+theGUI.metro = theMetro;
 
-
-
-// gui alone /////////////////
-var g = new MetroGUI();
-g.setState(presets.sibe);
-/////////////////////////////////
-
-
-// metro alone /////////////
-var m = new WebAudio_Metro();
-m.setState(presets.sibe);
-m.init(); // assumes some state, error
-g.metro = m;
-
-/*
-separate testing, code, doc where? props of constructors ? Tests in browser console 
-metro alone 
-gui alone (proxy, or maybe a not "inited" metro)
-new gui w/ existing metro
-new metro to existing gui
-
-(would need destructors? unsubscribe pub sub, what else, audio context, worker)
-
-
-find out if useful if both could share a common state object (in their constructor's prototypes ...)
-?
-*/
