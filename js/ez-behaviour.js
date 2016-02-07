@@ -65,6 +65,9 @@ function EZbehaviour (argControlSpec, argNumberView, argSliderView) {
 		nv.min = spec.minval;
 		nv.max = spec.maxval;
 		nv.step = numberStep;
+		
+		if (spec.pattern) { nv.pattern = spec.pattern; };
+		
 		nv.addEventListener('input', setValueDirect, false);
 	}
 	

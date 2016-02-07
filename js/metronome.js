@@ -1,39 +1,22 @@
 'use strict';
-/* motivation for constructor: pass this obj to publishing */
 
-function WebAudio_Metro (storedState) {
+/* motivation for constructor: pass this obj to publishing (?) */
+
+
+function WebAudio_Metro () {
+	var THIS = this;
 	var inited = false;
 	
-	// w/o storage.js need defaults ...
-	var tempo = 60, gain = 0.1; // tempo change active at next beat
-	var beatsPerBar = 4, beatUnit = 1 / 4;
-	function setState(obj){
-			if (obj.tempo) { tempo = obj.tempo; };
-			// if (obj.gain) { gain = obj.gain; }; // might be zero
-			
-			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
-			
-			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
-			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
-	}
-	
-	var ssm;
-	if (storedState) {
-		if(storedState.metro){
-			ssm = storedState.metro;
-			setState(ssm);
-		}
-	};
-	
-	var prevTempo = tempo; // new test (upd) -- need more of them, change emitted here ...
-	var prevBeatsPerBar = beatsPerBar;
-	var prevBeatUnit = beatUnit;
-	
+// 	var beatsPerBar = 4, beatUnit = 1 / 4, tempo = 60, gain = 0.1; // tempo change active at next beat
+	var beatsPerBar, beatUnit, tempo, gain; // 'init' will need state eventually...
 	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
 	
+	// change emitted here, not any, but "sample and hold" on beat or bar
+	var prevBeatsPerBar = beatsPerBar, prevBeatUnit = beatUnit, prevTempo = tempo, prevGain = gain;
+		
 	var beatInBar; // was 'currentBeat' 
 	var beats; // since last 'play' 
-	var beatDur; // new, for pendulum
+	var beatDur; // new, for gui pendulum
 	
 	var mainGainNode; 
 
@@ -46,7 +29,7 @@ function WebAudio_Metro (storedState) {
 	var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
 															// This is calculated from lookahead, and overlaps 
 															// with next interval (in case the timer is late)
-	var nextNoteTime = 0.0;     // when the next note is due.
+	var nextBeatTime = 0.0;     // when the next note is due. -- was nextNoteTime, now less versatile
 	// var noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
 	var noteLength = 0.05;      // length of "beep" (in seconds)
 
@@ -60,8 +43,13 @@ function WebAudio_Metro (storedState) {
 															// and may or may not have played yet. {note, time}
 	// note becomes beatInBar, added beats
 	var timerWorker = null;     // The Web Worker used to fire timer messages
-
-
+	
+	function notify() {
+// 		console.log("metronome notify", THIS);
+		pubsubz.publish.apply(null, arguments);
+// 		pubsubz.publish.apply(null, [THIS, arguments[0], arguments[1]]); // untested, for ===
+		
+	}
 
 	// First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 	window.requestAnimFrame = (function(){
@@ -85,24 +73,28 @@ function WebAudio_Metro (storedState) {
 	}
 	
 	function updateMeterAtBarLine (){
+// 		console.log("metronome updateMeterAtBarLine");
+		
 		if ( nextBeatsPerBar && (nextBeatsPerBar != beatsPerBar) ) {
 			beatsPerBar = nextBeatsPerBar;
 			nextBeatsPerBar = undefined;
-			pubsubz.publish('beatsPerBar', beatsPerBar);
+			notify('beatsPerBar', beatsPerBar);
 			
 			prevBeatsPerBar = beatsPerBar; // for updateMeterAtBeat
 		};
 		if ( nextBeatUnit && (nextBeatUnit != beatUnit) ) {
 			beatUnit = nextBeatUnit;
 			nextBeatUnit = undefined;
-			pubsubz.publish('beatUnit', beatUnit);
+			notify('beatUnit', beatUnit);
 			
 			prevBeatUnit = beatUnit; // for updateMeterAtBeat
 		};
 	}
 	function updateMeterAtBeat(){
-		if (beatsPerBar != prevBeatsPerBar) { pubsubz.publish('beatsPerBar', beatsPerBar); };
-		if (beatUnit != prevBeatUnit) { pubsubz.publish('beatUnit', beatUnit); };
+// 		console.log("metronome updateMeterAtBeat");
+		
+		if (beatsPerBar != prevBeatsPerBar) { notify('beatsPerBar', beatsPerBar); };
+		if (beatUnit != prevBeatUnit) { notify('beatUnit', beatUnit); };
 		prevBeatsPerBar = beatsPerBar;
 		prevBeatUnit = beatUnit;
 	}
@@ -117,7 +109,7 @@ function WebAudio_Metro (storedState) {
 																					// tempo value to calculate beat length.
 		// tempo change on next beat
 		beatDur = beatUnit * 4 * secondsPerBeat;
-		nextNoteTime += beatDur;    // Add beat length to last beat time
+		nextBeatTime += beatDur;    // Add beat length to last beat time
 	
 		// special case: 1 beatsPerBar !
 		beatInBar = (beatInBar + 1) % beatsPerBar; // allow beatsPerBar change in bar 
@@ -164,27 +156,55 @@ function WebAudio_Metro (storedState) {
 // 		};
 		
 		// tempo from outer context (okay?)
-		if (tempo != prevTempo) { pubsubz.publish('tempo', tempo); };
-		prevTempo = tempo;
-		
+		if (tempo != prevTempo) { notify('tempo', tempo); prevTempo = tempo; };
+		if (gain != prevGain) { notify('gain', gain); prevGain = gain; };
 // 		console.log("metronome scheduleBeat " + Date.now());
 	}
 
 	function scheduler() {
 		// while there are notes that will need to play before the next interval, 
 		// schedule them and advance the pointer.
-		while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-	//         scheduleBeat( beatInBar, nextNoteTime );
-				scheduleBeat( beatInBar, nextNoteTime, beats );
+		while (nextBeatTime < audioContext.currentTime + scheduleAheadTime ) {
+	//         scheduleBeat( beatInBar, nextBeatTime );
+				scheduleBeat( beatInBar, nextBeatTime, beats );
 				nextBeat();
 		}
 	}
 	
-	// think want 'stop' too ...
-	function play() {
+	// always wanted 'stop' too ;-)
+	function play(){
+		if (! inited) {
+			console.log(THIS + " not inited");
+			return;
+		};		
+		if (isPlaying) { console.log(THIS + " _already_ playing" ); return };
+		
+			// iOS hack, otherwise audioContext suspended
+		if (audioContext.state !== 'running'){ pseudoSound(); };
+	
+		beatInBar = 0;
+		beats = 0;
+		nextBeatTime = audioContext.currentTime + 0.04; // now can hear first beat !
+		
+		timerWorker.postMessage("start");
+		notify('start');
+		isPlaying = true;
+	}
+	
+	function stop(){
+		if (! isPlaying) { console.log(THIS + " _not_ playing" ); return };
+		
+		timerWorker.postMessage("stop");
+		notify('stop');
+		isPlaying = false;
+	}
+	
+	
+/*
+	function togglePlay() {
 		
 		if (! inited) {
-			console.log(this + " not inited");
+			console.log(THIS + " not inited");
 			return;
 		};
 		
@@ -197,21 +217,35 @@ function WebAudio_Metro (storedState) {
 			beatInBar = 0;
 			beats = 0;
 			
-			nextNoteTime = audioContext.currentTime + 0.04; // now can hear first beat !
+			nextBeatTime = audioContext.currentTime + 0.04; // now can hear first beat !
 			
-			pubsubz.publish('start');
+			notify('start');
 			
 			timerWorker.postMessage("start");
 			return "stop";
 		} else {
 			
-			pubsubz.publish('stop');
+			notify('stop');
 			
 			timerWorker.postMessage("stop");
 			return "play";
 		}
 	}
-
+*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	function setMainGain(val){
 		gain = val;
 		mainGainNode.gain.value = gain;
@@ -261,13 +295,13 @@ function WebAudio_Metro (storedState) {
 		if (window.AudioContext == undefined || window.Worker == undefined) {
 			console.log("AudioContext and/or Worker undefined. Return early from 'init' now.");
 // 			disablePlayCtls(); // gui.js
-			return; // but then gui should not init() too !
+			return; 
 		};
 
 		audioContext = new AudioContext();
 	
 		audioContext.onstatechange = function(ev){
-			pubsubz.publish('audioContext_statechange', ev);
+			notify('audioContext_statechange', ev);
 		};
 	
 	
@@ -293,49 +327,45 @@ function WebAudio_Metro (storedState) {
 		timerWorker.postMessage({"interval":lookahead});
 		
 		inited = true;
-		} else { console.log(this + " already inited"); }
+		} else { console.log(THIS + " already inited"); }
 	}
 	
 	function getState() {
 		return {
-			"tempo": tempo, "gain": gain, "beatsPerBar": beatsPerBar, "beatUnit": beatUnit
+			tempo: tempo, gain: gain, beatsPerBar: beatsPerBar, beatUnit: beatUnit
 		}
 	}
-	
-// 	init();
-	
-	
-	
-// 	this.play = play; // good enough for functions, not for get/set proprs, or: have interface obj?!
-// 	this.isPlaying = isPlaying; // nono
-	
+	function setState(obj){
+			if (obj.tempo) { tempo = obj.tempo; };
+			// if (obj.gain) { gain = obj.gain; }; // might be zero
+			
+			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
+			
+			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
+			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
+	}
+			
 	Object.defineProperties(this, {
-// 		'inited': { get: function() { return inited }, enumerable: true }, 
 		'isPlaying': { get: function(){ return isPlaying }, enumerable: true }, 
 		
 		'init': { value: init, enumerable: true }, 
 		'play': { value: play, enumerable: true }, 
+		'stop': { value: stop, enumerable: true }, 
+		
+		'getState': { value: getState, enumerable: true }, 
+		'setState': { value: setState, enumerable: true }, 
 		
 		'beatsPerBar': { 
 			get: function(){ return beatsPerBar }, 
 			set: function(n) { beatsPerBar = n }, // on next beat
 			enumerable: true
 		},
-		'nextBeatsPerBar': {
-		 	get: function() { return nextBeatsPerBar }, 
-		 	set: function(n) { nextBeatsPerBar = n },  // on next bar
-		 	enumerable: true
-		}, 
+
 		'beatUnit': {
 		 	get: function() { return beatUnit }, 
 		 	set: function(n) { beatUnit = n }, // on next beat
 		 	enumerable: true
 		},
-		'nextBeatUnit': {
-		 	get: function() { return nextBeatUnit }, 
-		 	set: function(r) { nextBeatUnit = r }, // on next bar
-		 	enumerable: true
-		}, 
 		'tempo': { // have nextTempo too ?
 			get: function() { return tempo }, 
 			set: function(n) { tempo = n }, // next beat
@@ -345,12 +375,19 @@ function WebAudio_Metro (storedState) {
 			get: function() { return gain }, 
 			set: function(r) { setMainGain(r) }, 
 			enumerable: true
-		},
-		'state': {
-			get: function() { return getState() }, 
-			set: function(obj) { return setState(obj) }, 
-			enumerable: true
 		}, 
+		
+		'nextBeatsPerBar': {
+		 	get: function() { return nextBeatsPerBar }, 
+		 	set: function(n) { nextBeatsPerBar = n },  // on next bar
+		 	enumerable: true
+		}, 
+		'nextBeatUnit': {
+		 	get: function() { return nextBeatUnit }, 
+		 	set: function(r) { nextBeatUnit = r }, // on next bar
+		 	enumerable: true
+		}, 
+		
 		'drawBeatHook': {
 			get: function() { return drawBeatHook }, 
 			set: function(f) { drawBeatHook = f }, 
