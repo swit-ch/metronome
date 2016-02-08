@@ -3,29 +3,24 @@ body {
 	margin: 1em;
 	font-family: sans-serif;
 	font-size: 12pt;
-	line-height: 15pt;
 }
 
-/* leave away small screen, but good for layout testing */
 div#controls, div#displays {
 	padding: 0.4em 1em ;
 	border-top: 0.5px solid #ddd;
 	border-left: 0.5px solid #ddd;
+	
+	margin: 0 auto;
 }
-
-/* argh, em-based conditions were good webkit, but not Firefox */
 
 @media screen and (min-width: 43em) {
 	body {
-		/* background-color: #bfb; */
-		padding-top: 3em;
-		padding-left: 8em;
+		font-size: 13pt;
 	}
 } /* next condition also true  */
 
 @media screen and (min-width: 35em) {
 	body {
-		/* background-color: #bbf; */
 		
 	}
 	div#controls, div#displays {
@@ -81,7 +76,6 @@ div#controls, div#displays {
 @media screen and (max-width: 35em)
 {
 	body {
-		/* background-color: #fbb; */
 	}
 	div#controls, div#displays {
 		width: 17em; 
@@ -145,14 +139,17 @@ div#controls > div,  div#displays > div {
 button, span, input, select, #barView, 
 div#pendulumContainer, .pendulum {
 	display: inline-block; 
-	/* font: inherit; */ /* here everything em-based */
-	/* line-height: inherit; */
 	height: 2em; /* not select */
 	font-family: inherit;
 	font-size: 100%;
 	
-	vertical-align: middle;
+	vertical-align: middle; 
+	
+	line-height: 2em; /* inline-block spans ! */
+
+	/* outline: 1px solid red; */
 }
+
 
 #barView, div#pendulumContainer {
 	display: block;
@@ -251,4 +248,5 @@ div#pendulumContainer, #barView {
 #postView {
 	font-family: monospace;
 	font-size: 0.8em;
+	background-color: yellow;
 }
