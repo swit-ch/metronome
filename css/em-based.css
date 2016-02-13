@@ -1,186 +1,188 @@
+/*
+still em-based because convenient. landscape and portrait version, CSS query aspect ratio
+want one main container for measures, area, proportions. Centered. body itself here 
+(hmm, own cntnr acually better for more apps on big screen ==> iframe ? ).
+(ignore postView for now)
+
+no more div#controls div#displays
+*/
+
+
+/* div { outline: 0.5px solid cyan; } */
+div { padding: 0.2em 0; }
+
+div.wideDisplay, .pendulum {
+	padding: 0;
+}
+
+html {
+	height: 100%;
+	/* background-color: #543; */
+}
 
 body {
-	margin: 1em;
 	font-family: sans-serif;
-	font-size: 12pt;
-	line-height: 15pt;
+	font-size: 14pt;
+	position: absolute;
+	margin: auto;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	/* background-color: #9ad; */
+	/* outline: 0.5px solid silver; */
 }
 
-/* leave away small screen, but good for layout testing */
-div#controls, div#displays {
-	padding: 0.4em 1em ;
-	border-top: 0.5px solid #ddd;
-	border-left: 0.5px solid #ddd;
-}
-
-/* argh, em-based conditions were good webkit, but not Firefox */
-
-@media screen and (min-width: 43em) {
-	body {
-		/* background-color: #bfb; */
-		padding-top: 3em;
-		padding-left: 8em;
-	}
-} /* next condition also true  */
-
-@media screen and (min-width: 35em) {
-	body {
-		/* background-color: #bbf; */
-		
-	}
-	div#controls, div#displays {
-		width: 33em; 
-	}
-	input[type="range"] {
-		width: 18em;
-	}
-	.wideDisplay {
-		width: 32em;
-	}
-	
-	@keyframes swing {
-		from {
-			-moz-transform: translateX(0);
-			-webkit-transform: translateX(0);
-			transform: translateX(0);
-			-moz-animation-timing-function: linear;
-			-webkit-animation-timing-function: linear;
-			animation-timing-function: linear;
-		}
-		to {
-			-moz-transform: translateX(30em);
-			-webkit-transform: translateX(30em);
-			transform: translateX(30em);
-		}
-	}
-	@keyframes swingBack {
-		from {
-			-moz-transform: translateX(30em);
-			-webkit-transform: translateX(30em);
-			transform: translateX(30em);
-			-moz-animation-timing-function: linear;
-			-webkit-animation-timing-function: linear;
-			animation-timing-function: linear;
-		}
-		to {
-			-moz-transform: translateX(0);
-			-webkit-transform: translateX(0);
-			transform: translateX(0);
-		}
-	}
-	#pendulumHit2 {
-		left: 30em; 
-	}
-/* 
-	#displays::after {
-		content: "layout wide"
-	}
- */
-
-}
-@media screen and (max-width: 35em)
-{
-	body {
-		/* background-color: #fbb; */
-	}
-	div#controls, div#displays {
-		width: 17em; 
-	}
-	input[type="range"] {
-		width: 16em;
-	}
-	.wideDisplay {
-		width: 16em;
-	}
-	
-	@keyframes swing {
-		from {
-			-moz-transform: translateX(0);
-			-webkit-transform: translateX(0);
-			transform: translateX(0);
-			-moz-animation-timing-function: linear;
-			-webkit-animation-timing-function: linear;
-			animation-timing-function: linear;
-		}
-		to {
-			-moz-transform: translateX(14em);
-			-webkit-transform: translateX(14em);
-			transform: translateX(14em);
-		}
-	}
-	@keyframes swingBack {
-		from {
-			-moz-transform: translateX(14em);
-			-webkit-transform: translateX(14em);
-			transform: translateX(14em);
-			-moz-animation-timing-function: linear;
-			-webkit-animation-timing-function: linear;
-			animation-timing-function: linear;
-		}
-		to {
-			-moz-transform: translateX(0);
-			-webkit-transform: translateX(0);
-			transform: translateX(0);
-		}
-	}
-	#pendulumHit2 {
-		left: 14em; 
-	}
-
-/* 
-	#displays::after {
-		content: "layout narrow"
-	}
- */
-}
-
-
-/* lines */
-div#controls > div,  div#displays > div {
-	margin: 0.4em 0;
-	/* height: 2em; */ /* ah, no line break if set */
-	min-height: 2em;
-}
-
-button, span, input, select, #barView, 
-div#pendulumContainer, .pendulum {
-	display: inline-block; 
-	/* font: inherit; */ /* here everything em-based */
-	/* line-height: inherit; */
-	height: 2em; /* not select */
-	font-family: inherit;
-	font-size: 100%;
-	
-	vertical-align: middle;
-}
-
-#barView, div#pendulumContainer {
-	display: block;
-}
-
+/* input range still has margin ... ? */
 button, input, select {
-  -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
-     -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
+  -webkit-box-sizing: border-box; 
+     -moz-box-sizing: border-box; 
           box-sizing: border-box;
 }
 
-/* with this suddenly accepts other rules like height (found by concidence), Safari not white?, not text-align ... */
+
+
+@media screen and (min-width: 700px){
+	font-size: 15pt;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* landscape */
+@media screen and (min-aspect-ratio: 1/1) 
+{
+	body, div.wideDisplay { width: 35em }
+	body { height: 17em; }
+
+	input[type="range"] {
+		width: 18em;
+	}
+	#pendulumHit2 {
+		right: 0; 
+	}
+	@keyframes swing {
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(33em);
+			-webkit-transform: translateX(33em);
+			transform: translateX(33em);
+		}
+	}
+	@keyframes swingBack {
+		from {
+			-moz-transform: translateX(33em);
+			-webkit-transform: translateX(33em);
+			transform: translateX(33em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
+	}
+} /* landscape */
+
+/* portrait */
+@media screen and (max-aspect-ratio: 1/1) {
+	/* otherwise two w/ 7em break */
+	body, div.wideDisplay { width: 15em }
+	body { height: 23em; }
+
+	input[type="range"] {
+		width: 14.0em;
+		
+	}
+	#pendulumHit2 {
+		right: 0;
+	}
+	@keyframes swing {
+		from {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(13em);
+			-webkit-transform: translateX(13em);
+			transform: translateX(13em);
+		}
+	}
+	@keyframes swingBack {
+		from {
+			-moz-transform: translateX(13em);
+			-webkit-transform: translateX(13em);
+			transform: translateX(13em);
+			-moz-animation-timing-function: linear;
+			-webkit-animation-timing-function: linear;
+			animation-timing-function: linear;
+		}
+		to {
+			-moz-transform: translateX(0);
+			-webkit-transform: translateX(0);
+			transform: translateX(0);
+		}
+	}
+} /* portrait */
+
+span, button, select, input[type="number"] { width: 7em; }
+
+
+/* div > div > * { margin: 1em 0 } */
+
+/* with this suddenly accepts other rules like height (not text-align) (found by concidence) Safari _not_ white ! */
 /* actually Firefox nicer without */
 select {
 	background-color: transparent;
 }
 
-span, button {
-	width: 7em;
-}
-select, input[type="number"] {
-	width: 6em;
-	text-align: center; /* not select webkit, but Firefox */
+/* hmm, not select ! */
+/* non-text not on baseline */
+input, svg, select {
+	vertical-align: middle; 
+	text-align: center;
 }
 
-div#pendulumContainer, #barView {
-	position: relative; /* children */
-	/* outline: 0.5px solid gray; */ /* not visible Safari */
+button, span, input, select, .wideDisplay, .pendulum {
+	display: inline-block; 
+	height: 2em; /* not select */
+	font-family: inherit;
+	font-size: 100%;
+	line-height: 2em; /* inline-block spans ! */
+}
+
+span.label {
+	text-align: right;
+}
+
+
+
+
+
+div#pendulumContainer  {
+	position: relative; /* hits abs. pos. */
 }
 
 .barViewBeatBox, #pendulumSwing {
@@ -195,7 +197,6 @@ div#pendulumContainer, #barView {
 	stroke: none;
 	fill: magenta;
 }
-
 
 /* swing and hits */
 .pendulum {
@@ -241,7 +242,6 @@ div#pendulumContainer, #barView {
 	}
 }
 
-
 /* nextX changed */
 .notYet {
 	background-color: #cfc;
@@ -250,5 +250,10 @@ div#pendulumContainer, #barView {
 
 #postView {
 	font-family: monospace;
-	font-size: 0.8em;
+	font-size: 1em;
+	background-color: yellow;
+}
+
+span.em {
+	width: 1em;
 }

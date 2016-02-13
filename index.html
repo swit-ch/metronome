@@ -2,94 +2,82 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <!--  <meta name="viewport" content="width=device-width user-scalable=no"> -->
-    <!--  otherwise iOS pretends viewport much bigger : -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" >
     <title>Metronome swit-ch testing</title>
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
     <link rel="stylesheet" href="css/em-based.css">
   </head>
   <body>
-    <div id="controls">
-      <!-- class 'play' rules in main.css, not used currently -->
-      <div><button type="button" id="playCtl" autofocus="true" tabindex="0"> Hä? </button></div>
-      
-      <!-- is this a table ? A form? Class 'label' (was 'ctlLabel') not used ATM -->
-      <div>
-        <span class="label">Beats per bar: </span>
-        <select id="beatsPerBarCtl"></select>
-      </div>
-      <div>
-        <span class="label">Beat unit: </span>
-        <select id="beatUnitCtl"></select>
-      </div>
-      <div>
-        <span class="label">Tempo (1 / 4): </span>
-        <input type="number" id="tempoNumCtl"> 
-        <input type="range" id="tempoSliderCtl">
-      </div>      
-      <div>
-        <span class="label">Gain: </span>
-        <input type="number" id="gainNumCtl">
-        <input type="range" id="gainSliderCtl">
-      </div>
-    </div>
+    <div><button type="button" id="playCtl" autofocus tabindex="0"> Hä? </button></div>
+    <div>
+      <span class="label">Beats per bar&nbsp;</span>
+      <select id="beatsPerBarCtl"></select>
 
-    <div id="displays">
-      <div id="wideDisplaysContainer">
-        <div id="barView" class="wideDisplay">
-          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" 
-            width="100%" height="100%" viewBox="0 0 49 4" id="barViewBox" preserveAspectRatio="none"
-          >
-            <desc>How to style the current beat (as a 'use' ele) ? Don't know. </desc>
-            <defs>
-              <rect x="0" y="0" width="1" height="4" id="barViewBeatBox" />
-            </defs>
-            <g id="beatBoxGroup" transform="scale(1, 1)">
-              <g id="backgroundBeatBoxes">
-                <use x="0" y="0" xlink:href="#barViewBeatBox" />
-                <use x="2" y="0" xlink:href="#barViewBeatBox" />
-                <use x="4" y="0" xlink:href="#barViewBeatBox" />
-                <use x="6" y="0" xlink:href="#barViewBeatBox" />
-                <use x="8" y="0" xlink:href="#barViewBeatBox" />
-                <use x="10" y="0" xlink:href="#barViewBeatBox" />
-                <use x="12" y="0" xlink:href="#barViewBeatBox" />
-                <use x="14" y="0" xlink:href="#barViewBeatBox" />
-                <use x="16" y="0" xlink:href="#barViewBeatBox" />
-                <use x="18" y="0" xlink:href="#barViewBeatBox" />
-                <use x="20" y="0" xlink:href="#barViewBeatBox" />
-                <use x="22" y="0" xlink:href="#barViewBeatBox" />
-                <use x="24" y="0" xlink:href="#barViewBeatBox" />
-                <use x="26" y="0" xlink:href="#barViewBeatBox" />
-                <use x="28" y="0" xlink:href="#barViewBeatBox" />
-                <use x="30" y="0" xlink:href="#barViewBeatBox" />
-                <use x="32" y="0" xlink:href="#barViewBeatBox" />
-                <use x="34" y="0" xlink:href="#barViewBeatBox" />
-                <use x="36" y="0" xlink:href="#barViewBeatBox" />
-                <use x="38" y="0" xlink:href="#barViewBeatBox" />
-                <use x="40" y="0" xlink:href="#barViewBeatBox" />
-                <use x="42" y="0" xlink:href="#barViewBeatBox" />
-                <use x="44" y="0" xlink:href="#barViewBeatBox" />
-                <use x="46" y="0" xlink:href="#barViewBeatBox" />
-                <use x="48" y="0" xlink:href="#barViewBeatBox" />
-              </g>
-              <rect x="0" y="0" width="1" height="4" id="currentBeatInBarBox" />
-            </g>
-          </svg>
-        </div>
-        <div id="pendulumContainer" class="wideDisplay">
-          <span id="pendulumSwing" class="pendulum"></span>
-          <span id="pendulumHit" class="pendulum"></span>
-          <span id="pendulumHit2" class="pendulum"></span>  
-        </div>
-      </div>
-      <div>
-        <button id="barViewSwitch">BarView</button>
-        <button id="pendulumSwitch">Pendulum</button>
-      </div>
+      <span class="label">Beat unit&nbsp;</span>
+      <select id="beatUnitCtl"></select>
+    </div>
+    <div>
+      <span class="label">Tempo (1 / 4)&nbsp;</span>
+      <input type="number" id="tempoNumCtl"> 
+      <input type="range" id="tempoSliderCtl">
+    
+    </div>
+    <div>
+      <span class="label">Gain&nbsp;</span>
+      <input type="number" id="gainNumCtl">
+      <input type="range" id="gainSliderCtl">
+    </div>
+    <div id="barView" class="wideDisplay">
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" 
+        width="100%" height="100%" viewBox="0 0 49 4" id="barViewBox" preserveAspectRatio="none"
+      >
+        <desc>How to style the current beat (as a 'use' ele) ? Don't know. </desc>
+        <defs>
+          <rect x="0" y="0" width="1" height="4" id="barViewBeatBox" />
+        </defs>
+        <g id="beatBoxGroup" transform="scale(1, 1)">
+          <g id="backgroundBeatBoxes">
+            <use x="0" y="0" xlink:href="#barViewBeatBox" />
+            <use x="2" y="0" xlink:href="#barViewBeatBox" />
+            <use x="4" y="0" xlink:href="#barViewBeatBox" />
+            <use x="6" y="0" xlink:href="#barViewBeatBox" />
+            <use x="8" y="0" xlink:href="#barViewBeatBox" />
+            <use x="10" y="0" xlink:href="#barViewBeatBox" />
+            <use x="12" y="0" xlink:href="#barViewBeatBox" />
+            <use x="14" y="0" xlink:href="#barViewBeatBox" />
+            <use x="16" y="0" xlink:href="#barViewBeatBox" />
+            <use x="18" y="0" xlink:href="#barViewBeatBox" />
+            <use x="20" y="0" xlink:href="#barViewBeatBox" />
+            <use x="22" y="0" xlink:href="#barViewBeatBox" />
+            <use x="24" y="0" xlink:href="#barViewBeatBox" />
+            <use x="26" y="0" xlink:href="#barViewBeatBox" />
+            <use x="28" y="0" xlink:href="#barViewBeatBox" />
+            <use x="30" y="0" xlink:href="#barViewBeatBox" />
+            <use x="32" y="0" xlink:href="#barViewBeatBox" />
+            <use x="34" y="0" xlink:href="#barViewBeatBox" />
+            <use x="36" y="0" xlink:href="#barViewBeatBox" />
+            <use x="38" y="0" xlink:href="#barViewBeatBox" />
+            <use x="40" y="0" xlink:href="#barViewBeatBox" />
+            <use x="42" y="0" xlink:href="#barViewBeatBox" />
+            <use x="44" y="0" xlink:href="#barViewBeatBox" />
+            <use x="46" y="0" xlink:href="#barViewBeatBox" />
+            <use x="48" y="0" xlink:href="#barViewBeatBox" />
+          </g>
+          <rect x="0" y="0" width="1" height="4" id="currentBeatInBarBox" />
+        </g>
+      </svg>
+    </div>
+    <div id="pendulumContainer" class="wideDisplay">
+      <span id="pendulumSwing" class="pendulum"></span>
+      <span id="pendulumHit" class="pendulum"></span>
+      <span id="pendulumHit2" class="pendulum"></span> 
+    </div>
+    <div>
+      <button id="barViewSwitch">BarView</button>
+      <button id="pendulumSwitch">Pendulum</button>
     </div>
     
-    <div id="postView"></div>
+    <!-- <div id="postView"></div> -->
     
     <script src="js/AudioContextMonkeyPatch.js"></script> 
     <script src="js/pubsubz.js"></script> 
@@ -99,6 +87,20 @@
     <script src="js/ez-behaviour.js"></script>
     <script src="js/gui.js"></script>
     <script src="js/app.js"></script>
+    
+<!-- 
+    <script>
+    var frag = document.createDocumentFragment();
+    for (var i = 0, sp; i < 40; i++){
+      sp = document.createElement('span');
+      sp.textContent = i;
+      sp.classList.add('em');
+      frag.appendChild(sp);
+    }
+    var post = document.getElementById('postView');
+    post.appendChild(frag);
+    </script>
+ -->
 
   </body>
 </html>

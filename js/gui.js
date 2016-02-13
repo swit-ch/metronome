@@ -24,16 +24,17 @@ function MetroGUI () {
 	var beatUnitObj = {
 		labels: [ '1', '1 / 2', '1 / 4', '1 / 8', '1 / 16', '1 / 32'  ] 
 	};
-	// hmm, pattern useful for input type number newer iOS
+	// hmm, pattern useful for input type number newer iOS (need more testing, also stepUp() down ...)
 	var tempoSpec /* = { min: 10, max: 400, step: 1, pattern: "[0-9]*" } */ ;
 	var gainSpec /* = {  min: 0, max: 1, step: "any", numStep: 0.01 } */ ;
 	// minval, maxval, warp, step, defval, units
 	tempoSpec = new ControlSpec(10, 400, 'lin',  1);
-	tempoSpec.pattern = '[0-9]*'; // not used currently, find out ...
-	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj
+	tempoSpec.pattern = '[0-9]+'; // not sure
+	gainSpec = new ControlSpec(0, 1, 'amp', 0); // not numStep, set round on ez obj (also to spec?)
+	gainSpec.pattern = '[0-9\.,]+';
 	
-	gainSpec.pattern = '[0-9\\.]*';
 	
+	var metaAR = document.getElementById('metaAR');
 	// html elements ////////////////////////////////////////
 	var playCtl = document.getElementById('playCtl');
 	var beatsPerBarCtl = document.getElementById('beatsPerBarCtl');
@@ -47,9 +48,7 @@ function MetroGUI () {
 	
 	var beatBoxGroup = document.getElementById('beatBoxGroup'); // SVG
 	var currentBeatInBarBox = document.getElementById('currentBeatInBarBox'); // SVG
-	
-	var wideDisplaysContainer = document.getElementById('wideDisplaysContainer'); // parent
-	
+		
 	var pendulumContainer = document.getElementById('pendulumContainer');
 	var pendulumSwing = document.getElementById('pendulumSwing');
 	var pendulumHit = document.getElementById('pendulumHit');
@@ -206,16 +205,20 @@ function MetroGUI () {
 	}
 	
 	function hidePendulum(){
-		[ pendulumSwing, pendulumHit, pendulumHit2].forEach(function(item, i){
-			item.classList.add('hidden');
-		});
+// 		[ pendulumSwing, pendulumHit, pendulumHit2].forEach(function(item, i){
+// 			item.classList.add('hidden');
+// 		});
+		pendulumContainer.classList.add('hidden');
+		
 		pendulumSwitch.textContent = "show <-->";
 		pendulumHidden= true;
 	}
 	function showPendulum(){		
-		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
-			item.classList.remove('hidden');
-		});
+// 		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
+// 			item.classList.remove('hidden');
+// 		});
+		pendulumContainer.classList.remove('hidden');
+		
 		pendulumSwitch.textContent = "hide <-->";
 		pendulumHidden= false;
 	}
@@ -324,7 +327,40 @@ function MetroGUI () {
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 	};	
 	
+
+
+
+// console.log('screen.width :' + screen.width + ' screen.height : ' + screen.height);
+
+
+
+// 	if (screen.width >= screen.height){
+// 		metaAr.content = 'width=616 , user-scalable=no';
+// 	} else {
+// 		metaAr.content = 'width=269 , user-scalable=no';
+// 	}
+
+
+
+// Note that "orientationchange" and screen.orientation are unprefixed in the following
+// code although this API is still vendor-prefixed browsers implementing it.
+
+// screen.orientation undefined iOS
+// window.addEventListener("orientationchange", function() {
+//     alert("the orientation of the device is now " + screen.orientation);
 	
+// 	if (screen.width > screen.height){
+// 		metaAr.content = 'width=616 , user-scalable=no';
+// 	} else {
+// 		metaAr.content = 'width=269 , user-scalable=no';
+// 	}
+// });
+
+
+
+
+
+
 	
 	// now, with setState different
 // 	function init(){	
