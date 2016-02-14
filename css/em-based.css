@@ -1,18 +1,19 @@
+/* ATM computed body width: 653.333px, height: 302.4px ? */
 
 html {
 	height: 100%;
+	font-family: sans-serif;
+	font-size: 14pt;
+	background-color: white;
 }
 
 body {
-	font-family: sans-serif;
-	font-size: 14pt;
 	position: absolute;
-	margin: auto;
 	top: 0;
 	right: 0;
 	bottom: 0;
 	left: 0;
-	background-color: white;
+	margin: auto;
 }
 
 /* 
@@ -22,7 +23,7 @@ body {
 @media screen and (min-height: 29em) {
 	body { border: 0.1em solid #ddd; }
 }
- */
+*/
 
 
 div { padding: 0.2em 0; }
@@ -232,6 +233,7 @@ div#pendulumContainer  {
 }
 .hidden { visibility: hidden }
 
+/* not used ATM */
 #postView {
 	font-family: monospace;
 	font-size: 1em;

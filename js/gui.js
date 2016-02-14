@@ -119,9 +119,6 @@ function MetroGUI () {
 	}	
 	
 	
-	////// to next 5 (6) could be delegated my (not yet) own beatsPerBar etc. setters, take val as arg  //////////
-	// for manual gui-only testing as well as updating automatically from metro (status quo)
-	
 	// indexOf tests for strict equality
 	// hmm, beatsPerBar, beatUnit no setters b/c nextX preference !
 	function updBeatsPerBarGUI(){
@@ -205,20 +202,12 @@ function MetroGUI () {
 	}
 	
 	function hidePendulum(){
-// 		[ pendulumSwing, pendulumHit, pendulumHit2].forEach(function(item, i){
-// 			item.classList.add('hidden');
-// 		});
 		pendulumContainer.classList.add('hidden');
-		
 		pendulumSwitch.textContent = "show <-->";
 		pendulumHidden= true;
 	}
-	function showPendulum(){		
-// 		[ pendulumSwing, pendulumHit, pendulumHit2] .forEach(function(item, i){
-// 			item.classList.remove('hidden');
-// 		});
+	function showPendulum(){
 		pendulumContainer.classList.remove('hidden');
-		
 		pendulumSwitch.textContent = "hide <-->";
 		pendulumHidden= false;
 	}
@@ -264,40 +253,7 @@ function MetroGUI () {
 		metro.gain = gain;
 	}
 	
-// 	beatsPerBarCtl.addEventListener('change', function(ev){
-// 		var ix = this.selectedIndex;
-// 		var val = beatsPerBarObj.values[ix];
-// 		if (metro.isPlaying) { setNextBeatsPerBar(val); } else {
-// 			setBeatsPerBar(val);
-// 			updBarView();
-// 		};
-// 	}, false);
-// 
-// 	// Firefox special
-// 	beatsPerBarCtl.addEventListener('keyup', function(ev){
-// 		if (ev.key == "ArrowDown" || ev.key == "ArrowUp" || ev.key == "ArrowLeft" || ev.key == "ArrowRight" ) {
-// // 			console.log(ev.key);
-// 			var ix = this.selectedIndex;
-// 			var val = beatsPerBarObj.values[ix];
-// 			if (metro.isPlaying) { setNextBeatsPerBar(val); } else { setBeatsPerBar(val);  };
-// 		}
-// 	}, false);
-// 	
-// 	beatUnitCtl.addEventListener('change', function(ev){
-// 		var ix = this.selectedIndex;
-// 		var val = beatUnitObj.values[ix];
-// 		if (metro.isPlaying) { setNextBeatUnit(val); } else { setBeatUnit(val);  };
-// 	}, false);
-// 	
-// 	tempoEZ.action = function(ez){
-// 		metro.tempo = ez.value;
-// 	}
-// 	gainEZ.action = function(ez){
-// 		metro.gain = ez.value;
-// 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////
-	
+		
 	barViewSwitch.addEventListener('click', function(ev){
 		barViewHidden ? showBarView() : hideBarView();
 	}, false);
@@ -327,40 +283,6 @@ function MetroGUI () {
 		if (! pendulumHidden) { animatePendulum(currentBeats, beatDur); };
 	};	
 	
-
-
-
-// console.log('screen.width :' + screen.width + ' screen.height : ' + screen.height);
-
-
-
-// 	if (screen.width >= screen.height){
-// 		metaAr.content = 'width=616 , user-scalable=no';
-// 	} else {
-// 		metaAr.content = 'width=269 , user-scalable=no';
-// 	}
-
-
-
-// Note that "orientationchange" and screen.orientation are unprefixed in the following
-// code although this API is still vendor-prefixed browsers implementing it.
-
-// screen.orientation undefined iOS
-// window.addEventListener("orientationchange", function() {
-//     alert("the orientation of the device is now " + screen.orientation);
-	
-// 	if (screen.width > screen.height){
-// 		metaAr.content = 'width=616 , user-scalable=no';
-// 	} else {
-// 		metaAr.content = 'width=269 , user-scalable=no';
-// 	}
-// });
-
-
-
-
-
-
 	
 	// now, with setState different
 // 	function init(){	
