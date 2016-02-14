@@ -1,23 +1,6 @@
-/*
-still em-based because convenient. landscape and portrait version, CSS query aspect ratio
-want one main container for measures, area, proportions. Centered. body itself here 
-(hmm, own cntnr acually better for more apps on big screen ==> iframe ? ).
-(ignore postView for now)
-
-no more div#controls div#displays
-*/
-
-
-/* div { outline: 0.5px solid cyan; } */
-div { padding: 0.2em 0; }
-
-div.wideDisplay, .pendulum {
-	padding: 0;
-}
 
 html {
 	height: 100%;
-	/* background-color: #543; */
 }
 
 body {
@@ -29,43 +12,46 @@ body {
 	right: 0;
 	bottom: 0;
 	left: 0;
-	/* background-color: #9ad; */
-	/* outline: 0.5px solid silver; */
+	background-color: white;
 }
 
-/* input range still has margin ... ? */
+/* 
+@media screen and (min-width: 37em) {
+	body { border: 0.1em solid #ddd; }
+}
+@media screen and (min-height: 29em) {
+	body { border: 0.1em solid #ddd; }
+}
+ */
+
+
+div { padding: 0.2em 0; }
+
+div.wideDisplay, span.pendulum {
+	padding: 0;
+}
+
+/* margin zero for Firefox */
 button, input, select {
   -webkit-box-sizing: border-box; 
      -moz-box-sizing: border-box; 
           box-sizing: border-box;
+          
+  margin: 0;
 }
-
-
-
-@media screen and (min-width: 700px){
-	font-size: 15pt;
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* landscape */
 @media screen and (min-aspect-ratio: 1/1) 
 {
+	body {
+		height: 16.2em;
+		padding: 1em 1.2em;
+	}
 	body, div.wideDisplay { width: 35em }
-	body { height: 17em; }
-
+	
 	input[type="range"] {
-		width: 18em;
+		width: 20.4em;
 	}
 	#pendulumHit2 {
 		right: 0; 
@@ -105,11 +91,13 @@ button, input, select {
 /* portrait */
 @media screen and (max-aspect-ratio: 1/1) {
 	/* otherwise two w/ 7em break */
-	body, div.wideDisplay { width: 15em }
-	body { height: 23em; }
-
-	input[type="range"] {
-		width: 14.0em;
+	body {
+		height: 22.2em;
+		width: 14.3em; /* hmm, 7em + 7em on 1 line */
+		padding: 1em;
+	}
+	input[type="range"], div.wideDisplay  {
+		width: 14.3em;
 		
 	}
 	#pendulumHit2 {
@@ -201,7 +189,7 @@ div#pendulumContainer  {
 /* swing and hits */
 .pendulum {
 	width: 2em;
-	background-color: #0f0;
+	background-color: magenta;
 	position: absolute;
 	opacity: 0;
 } 
