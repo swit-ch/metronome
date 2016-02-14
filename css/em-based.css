@@ -93,11 +93,10 @@ button, input, select {
 	/* otherwise two w/ 7em break */
 	body {
 		height: 22.2em;
-		width: 14.3em; /* hmm, 7em + 7em on 1 line */
 		padding: 1em;
 	}
-	input[type="range"], div.wideDisplay  {
-		width: 14.3em;
+	body, input[type="range"], div.wideDisplay  {
+		width: 14.3em;  /* hmm, 7em + 7em on 1 line */
 		
 	}
 	#pendulumHit2 {
@@ -113,16 +112,16 @@ button, input, select {
 			animation-timing-function: linear;
 		}
 		to {
-			-moz-transform: translateX(13em);
-			-webkit-transform: translateX(13em);
-			transform: translateX(13em);
+			-moz-transform: translateX(12.3em);
+			-webkit-transform: translateX(12.3em);
+			transform: translateX(12.3em);
 		}
 	}
 	@keyframes swingBack {
 		from {
-			-moz-transform: translateX(13em);
-			-webkit-transform: translateX(13em);
-			transform: translateX(13em);
+			-moz-transform: translateX(12.3em);
+			-webkit-transform: translateX(12.3em);
+			transform: translateX(12.3em);
 			-moz-animation-timing-function: linear;
 			-webkit-animation-timing-function: linear;
 			animation-timing-function: linear;
@@ -136,9 +135,6 @@ button, input, select {
 } /* portrait */
 
 span, button, select, input[type="number"] { width: 7em; }
-
-
-/* div > div > * { margin: 1em 0 } */
 
 /* with this suddenly accepts other rules like height (not text-align) (found by concidence) Safari _not_ white ! */
 /* actually Firefox nicer without */
