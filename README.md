@@ -2,17 +2,20 @@
 Trying to understand git, GitHub and web technologies, playing around.
 
 ## Sooner or later maybe
-* selectable subdivisions of time signatures
+* tuning tone
+* pages, tabs for other settings
+* selectable subdivisions of time signatures 
+* pendulum animation per beat is almost useless with fast tempi, use subdivisions then 
+* widgets
+	* input type number bad for numeric input (min) (have passive numeric output element plus + - triggers?)
+	* sliders iOS bad too (selection, where to preventDefault() ?)
+	* <del>bigger thumb for input type range might help</del>
 * choose new meter at next beat or next bar (ATM on bar, but tempo on beat)
 * storage and presets (ATM last state per session saved)
 * sequences of stored states
-* tuplets per bar (currently the beat is the "quant")
-* tuplets per beat?
-* pendulum animation per beat is almost useless with fast tempi, use subdivisions then
+* Better than below: SC convertRhythm (Mikael Laurson RTM-notation)
+	* tuplets per beat, bar?
 * sonic variation
-* widgets
-	* input type number bad on iOS
-	* bigger thumb for input type range
 * behind the scenes
 	* modularity
 	* testing

@@ -27,10 +27,16 @@ function EZbehaviour (argControlSpec, argNumberView, argSliderView) {
 	// normalized now ... ==>
 	// actually for linear warps min, max, step from spec are fine, no mapping ...
 	function setValueDirect (ev){
+		
+// 		ev.preventDefault(); // input range IOS better ?
+		
 		ez.value = ev.target.value; // call value setter
 		ez.action(ez);
 	}
 	function setValueMapped (ev){
+		
+// 		ev.preventDefault(); // input range IOS better ?
+		
 		ez.value = ez.controlSpec.map(ev.target.value);  // call value setter
 		ez.action(ez);
 	}

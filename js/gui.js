@@ -212,6 +212,26 @@ function MetroGUI () {
 		pendulumHidden= false;
 	}
 	
+	
+	
+// 	
+// 	window.addEventListener('touchstart', function(ev) {
+// 		event.preventDefault();
+// 		console.log("touchstart preventDefault() ?")
+// 	}, true);	
+// 	window.addEventListener('touchmove', function(ev) {
+// 		event.preventDefault();
+// 		console.log("touchmove preventDefault() ?")
+// 	}, true);
+
+// document.body.addEventListener('touchmove', function(event) {
+//   event.preventDefault();
+// }, false);  	
+// document.body.addEventListener('touchstart', function(event) {
+//   event.preventDefault();
+// }, false); 
+	
+	
 	// gui controls actions (now not only to metro, but self too) ////
 	
 	// would be nice to have button w/ states like SC
