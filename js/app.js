@@ -49,6 +49,5 @@ if (storage) {
 };
 
 
-theMetro.init(); // audio, worker
 theGUI.metro = theMetro;
 

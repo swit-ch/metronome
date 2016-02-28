@@ -5,10 +5,8 @@
 
 function WebAudio_Metro () {
 	var THIS = this;
-	var inited = false;
 	
-// 	var beatsPerBar = 4, beatUnit = 1 / 4, tempo = 60, gain = 0.1; // tempo change active at next beat
-	var beatsPerBar, beatUnit, tempo, gain; // 'init' will need state eventually...
+	var beatsPerBar, beatUnit, tempo, gain; 
 	var nextBeatsPerBar, nextBeatUnit; // change at next bar line (or if not playing on next play() )
 	
 	// change emitted here, not any, but "sample and hold" on beat or bar
@@ -172,11 +170,7 @@ function WebAudio_Metro () {
 	}
 	
 	// always wanted 'stop' too ;-)
-	function play(){
-		if (! inited) {
-			console.log(THIS + " not inited");
-			return;
-		};		
+	function play(){		
 		if (isPlaying) { console.log(THIS + " _already_ playing" ); return };
 		
 			// iOS hack, otherwise audioContext suspended
@@ -198,50 +192,6 @@ function WebAudio_Metro () {
 		notify('stop');
 		isPlaying = false;
 	}
-	
-	
-/*
-	function togglePlay() {
-		
-		if (! inited) {
-			console.log(THIS + " not inited");
-			return;
-		};
-		
-		isPlaying = !isPlaying;
-	
-		if (isPlaying) { // start playing
-				// iOS hack, otherwise audioContext suspended
-			if (audioContext.state !== 'running'){ pseudoSound(); };
-		
-			beatInBar = 0;
-			beats = 0;
-			
-			nextBeatTime = audioContext.currentTime + 0.04; // now can hear first beat !
-			
-			notify('start');
-			
-			timerWorker.postMessage("start");
-			return "stop";
-		} else {
-			
-			notify('stop');
-			
-			timerWorker.postMessage("stop");
-			return "play";
-		}
-	}
-*/
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -284,7 +234,6 @@ function WebAudio_Metro () {
 	}
 
 	function init(){
-		if (! inited){
 		// NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
 		// Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
 		// TO WORK ON CURRENT CHROME!!  But this means our code can be properly
@@ -309,7 +258,7 @@ function WebAudio_Metro () {
 		// if we wanted to load audio files, etc., this is where we should do it.
 	
 		mainGainNode = audioContext.createGain();
-		setMainGain(gain); // init
+// 		setMainGain(gain); // init
 		mainGainNode.connect( audioContext.destination );
 	
 		requestAnimFrame(drawBeat);    // start the drawing loop.
@@ -325,9 +274,6 @@ function WebAudio_Metro () {
 			}
 		};
 		timerWorker.postMessage({"interval":lookahead});
-		
-		inited = true;
-		} else { console.log(THIS + " already inited"); }
 	}
 	
 	function getState() {
@@ -339,7 +285,8 @@ function WebAudio_Metro () {
 			if (obj.tempo) { tempo = obj.tempo; };
 			// if (obj.gain) { gain = obj.gain; }; // might be zero
 			
-			if (obj.gain >= 0) { gain = obj.gain; }; // not negative ?
+			// not negative ?
+			if (obj.gain >= 0) { setMainGain(obj.gain); }; // or "THIS.gain = "
 			
 			if (obj.beatsPerBar) { beatsPerBar = obj.beatsPerBar; };
 			if (obj.beatUnit) { beatUnit = obj.beatUnit; };
@@ -394,4 +341,6 @@ function WebAudio_Metro () {
 			enumerable: true
 		}
 	});
+	
+	THIS.init(); // audio, worker
 }
